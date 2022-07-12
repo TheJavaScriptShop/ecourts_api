@@ -6,8 +6,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.firefox.options import Options
 from webdriver_manager.firefox import GeckoDriverManager
 import base64
-from pytesseract import pytesseract
-from PIL import Image
 import os
 import re
 import json
@@ -15,6 +13,7 @@ import webbrowser
 import traceback
 import datetime
 import cv2
+import easyocr
 
 
 # get grayscale image
@@ -56,14 +55,10 @@ def get_table_data_as_list(driver, xpath):
 
 
 def get_text_from_captcha(driver, img_path):
-    img = cv2.imread(img_path)
-    # img_gray = get_grayscale(img)
-    # img = Image.open(img_gray)
-    img_noiseless = remove_noise(img)
-    custom_config = r'--oem 3 --psm 6'
-    text = pytesseract.image_to_string(img_noiseless, config=custom_config)
-    match = re.search(r'\(?([0-9A-Za-z]+)\)?', text)
-    print(text)
+    reader = easyocr.Reader(["en"])
+    result = reader.readtext(img_path)
+    match = re.search(r'\(?([0-9A-Za-z]+)\)?', result[0][1])
+    print(result[0][1])
     img_xpath = '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/span/div/div[1]/a/img'
     if match is None:
         selenium_click_xpath(driver, img_xpath)
