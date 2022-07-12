@@ -1,4 +1,3 @@
-import ipdb
 from selenium.webdriver.firefox.service import Service
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
@@ -15,6 +14,16 @@ import json
 import webbrowser
 import traceback
 import datetime
+import cv2
+
+
+# get grayscale image
+def get_grayscale(image):
+    return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+
+def remove_noise(image):
+    return cv2.medianBlur(image, 5)
 
 
 def selenium_click_xpath(driver, xpath):
@@ -47,8 +56,12 @@ def get_table_data_as_list(driver, xpath):
 
 
 def get_text_from_captcha(driver, img_path):
-    img = Image.open(img_path)
-    text = pytesseract.image_to_string(img)
+    img = cv2.imread(img_path)
+    # img_gray = get_grayscale(img)
+    # img = Image.open(img_gray)
+    img_noiseless = remove_noise(img)
+    custom_config = r'--oem 3 --psm 6'
+    text = pytesseract.image_to_string(img_noiseless, config=custom_config)
     match = re.search(r'\(?([0-9A-Za-z]+)\)?', text)
     print(text)
     img_xpath = '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/span/div/div[1]/a/img'
