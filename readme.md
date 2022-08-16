@@ -26,3 +26,6 @@ deactivate
 
 Important: Remember to add venv to your project's .gitignore file so you don't include all of that in your source code.
 
+
+## Run
+python sel.py
