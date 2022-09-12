@@ -1,11 +1,15 @@
-from selenium.webdriver.firefox.service import Service
+# from selenium.webdriver.firefox.service import Service
+import azure.functions as func
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.firefox.options import Options
-from webdriver_manager.firefox import GeckoDriverManager
+from selenium.webdriver.chrome.options import Options
+# from webdriver_manager.firefox import GeckoDriverManager
 from selenium.webdriver.support.ui import Select
+from webdriver_manager.chrome import ChromeDriverManager
+
 import base64
 import os
 import re
@@ -16,6 +20,7 @@ import datetime
 import cv2
 import easyocr
 import time
+
 
 
 # get grayscale image
@@ -113,12 +118,23 @@ def get_captcha(driver):
 
 
 
-def main():
-    options = Options()
-    options.add_argument("--headless")
-    options.headless = True
-    driver = webdriver.Firefox(service=Service(
-        GeckoDriverManager().install()), options=options)
+def main(req: func.HttpRequest) -> func.HttpResponse:
+    # options = Options()
+    options = webdriver.ChromeOptions()
+    options.add_argument('--headless')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    # options.add_argument("--headless")
+    # options.headless = True
+    # driver = webdriver.Chrome(service=Service(
+    #     GeckoDriverManager().install()), options=options)
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+    # driver = webdriver.Chrome('c:/Users/Diksha Singh/Downloads/chromedriver_win32/chromedriver.exe')
+    # driver = webdriver.Chrome()
+    # service = Service('c:/Users/Diksha Singh/Downloads/chromedriver_win32/chromedriver.exe')
+
+    # service.start()
+    # driver = webdriver.Remote(service.service_url)
     advoc_name='V Aneesh'
     sess_state_code='High Court for State of Telangana'
     court_complex_code='Principal Bench at Hyderabad'
@@ -134,16 +150,21 @@ def main():
         state_code= Select(selenium_get_element_id(driver ,'sess_state_code'))
         state_code.select_by_value('29')
         print("Values selected")
+        time.sleep(3)
         court_code=Select(selenium_get_element_id(driver ,'court_complex_code'))
         court_code.select_by_value('1')
+        print("court code selected")
         selenium_click_id(driver,'CSAdvName')
+        print("hypelink clicked")
         selenium_send_keys_xpath(driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[14]/div[2]/div[2]/input', advoc_name)
+        print("names sent")
         get_captcha(driver)
         text = get_text_from_captcha(driver, r"image.png")
         selenium_click_xpath(
         driver, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/span/div/div[2]/label")  
         selenium_send_keys_xpath(driver, '//*[@id="captcha"]', text)
         selenium_click_xpath(driver, '//*[@class="Gobtn"]')
+        print("executed upto go")
         is_failed_with_captach = False
         try:
             failure_text = selenium_get_text_xpath(
@@ -231,9 +252,7 @@ def main():
         
 
     }
-
     print(data)
-
     page = "scrape1.html"
     with open(page, "w+", newline="", encoding="UTF-8") as f:
         f.write("<html><body><pre id='json'></pre></body></html>")
