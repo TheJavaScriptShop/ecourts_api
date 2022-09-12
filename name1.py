@@ -1,14 +1,15 @@
 # from selenium.webdriver.firefox.service import Service
-import azure.functions as func
 from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
+
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.options import Options
+# from selenium.webdriver.chrome.options import Options
 # from webdriver_manager.firefox import GeckoDriverManager
 from selenium.webdriver.support.ui import Select
-from webdriver_manager.chrome import ChromeDriverManager
+
 
 import base64
 import os
@@ -118,23 +119,28 @@ def get_captcha(driver):
 
 
 
-def main(req: func.HttpRequest) -> func.HttpResponse:
+def main():
     # options = Options()
-    options = webdriver.ChromeOptions()
-    options.add_argument('--headless')
-    options.add_argument('--no-sandbox')
-    options.add_argument('--disable-dev-shm-usage')
     # options.add_argument("--headless")
     # options.headless = True
     # driver = webdriver.Chrome(service=Service(
     #     GeckoDriverManager().install()), options=options)
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
-    # driver = webdriver.Chrome('c:/Users/Diksha Singh/Downloads/chromedriver_win32/chromedriver.exe')
-    # driver = webdriver.Chrome()
-    # service = Service('c:/Users/Diksha Singh/Downloads/chromedriver_win32/chromedriver.exe')
+    # driver = webdriver.Chrome('')
+    # # driver = webdriver.Chrome()
 
     # service.start()
     # driver = webdriver.Remote(service.service_url)
+    options = webdriver.ChromeOptions()
+    options.add_argument('--headless')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+
+    driver = webdriver.Chrome(executable_path="/usr/bin/chromedriver", chrome_options=options)
+    # driver = webdriver.Chrome()
+    service = Service('/usr/bin/chromedriver')
+    service.start()
+    driver = webdriver.Remote(service.service_url)
+    
     advoc_name='V Aneesh'
     sess_state_code='High Court for State of Telangana'
     court_complex_code='Principal Bench at Hyderabad'
