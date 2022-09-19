@@ -19,7 +19,6 @@ import re
 import json
 import webbrowser
 import traceback
-import datetime
 import cv2
 import easyocr
 import time
@@ -86,7 +85,7 @@ def get_table_data_as_list(driver, xpath):
 
 
 def get_text_from_captcha(driver, img_path):
-    reader = easyocr.Reader(["en"])
+    reader = easyocr.Reader(["en"], gpu=False, model_storage_directory=os.path.join(os.getcwd()), download_enabled=False)
     result = reader.readtext(img_path)
     match = re.search(r'\(?([0-9A-Za-z]+)\)?', result[0][1])
     print(result[0][1])
@@ -119,6 +118,7 @@ def get_captcha(driver):
         f.write(base64.b64decode(img_base64))
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info(req)
     logging.info('Python HTTP trigger function processed a request.')
     logging.info(time.ctime())
 
@@ -144,7 +144,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         state_code= Select(selenium_get_element_id(driver ,'sess_state_code'))
         state_code.select_by_value('29')
         print("Values selected")
-        driver.implicitly_wait(3)
+        driver.implicitly_wait(7)
         court_code=Select(selenium_get_element_id(driver ,'court_complex_code'))
         court_code.select_by_value('1')
         print("court code selected")
@@ -152,10 +152,10 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         print("hypelink clicked")
         selenium_send_keys_xpath(driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[14]/div[2]/div[2]/input', advoc_name)
         print("names sent")
-        time.sleep(7)
+        driver.implicitly_wait(7)
 
-        get_captcha(driver)
         text = get_text_from_captcha(driver, r"image.png")
+        driver.implicitly_wait(7)
         selenium_click_xpath(
         driver, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/span/div/div[2]/label")
         selenium_send_keys_xpath(driver, '//*[@id="captcha"]', text)
@@ -182,70 +182,78 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             except:
                 pass
     # case details
-    number_of_establishments_in_court_complex= selenium_get_text_xpath(
-        driver, '//*[@id="showList2"]/div[1]/h3')
-    print(number_of_establishments_in_court_complex)
-    number_of_cases= selenium_get_text_xpath(
-        driver, '//*[@id="showList2"]/div[1]/h4')
-    print(number_of_cases)
-    #list of case
-    case_list= get_table_data_as_list(
-        driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table')
-    #click for the view hyperlink
-    selenium_click_class(driver,'someclass')
-    print("view clicked")
-    #details behind the hypelink
-    # case details
-    case_details_title = selenium_get_text_xpath(
-        driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[52]/div[2]/div[1]/div/table/tbody/tr[1]/td[2]')
-    case_details_registration_no = selenium_get_text_xpath(
-        driver, '//*[@id="caseBusinessDiv4"]/div/table/tbody/tr[2]/td[2]/label')
-    case_details_cnr_no = selenium_get_text_xpath(
-        driver, '//*[@id="caseBusinessDiv4"]/div/table/tbody/tr[3]/td[2]/strong')
-    case_details_filing_date = selenium_get_text_xpath(
-        driver, '//*[@id="caseBusinessDiv4"]/div/table/tbody/tr[1]/td[4]')
-    case_details_registration_date = selenium_get_text_xpath(
-        driver, '//*[@id="caseBusinessDiv4"]/div/table/tbody/tr[2]/td[4]/label')
-    # case status
-    case_status = get_table_data_as_list(
-        driver, '//*[@id="caseBusinessDiv4"]/table')
-    # paa = petitioned and advocate
-    case_paa = selenium_get_text_xpath(
-        driver, '//*[@id="caseHistoryDiv"]/div[2]/div[2]/span[1]')
-    # raa = respondent and advocate
-    case_raa = selenium_get_text_xpath(
-        driver, '//*[@id="caseHistoryDiv"]/div[2]/div[2]/span[2]')
-    # acts
-    case_acts = get_table_data_as_list(driver, '//*[@id="act_table"]')
-    # history
-    case_history = get_table_data_as_list(
-        driver, '//*[@id="caseHistoryDiv"]/div[2]/div[2]/table[2]')
-    # orders
-    case_orders = get_table_data_as_list(
-        driver, '//*[@id="caseHistoryDiv"]/div[2]/div[2]/table[4]')
-    # objections
-    case_objections = get_table_data_as_list(
-        driver, '//*[@id="caseHistoryDiv"]/div[3]/table')
-    data = {
-        "number_of_establishments_in_court_complex":number_of_establishments_in_court_complex,
-        "number_of_cases":number_of_cases,
-        "case_list":case_list,
-        "case_details":{
-        "title": case_details_title,
-        "registration_no": case_details_registration_no,
-        "cnr_no": case_details_cnr_no,
-        "filing_date": case_details_filing_date,
-        "registration_date": case_details_registration_date,
-        "status": case_status,
-        "paa": case_paa,
-        "raa": case_raa,
-        "acts": case_acts,
-        "history": case_history,
-        "orders": case_orders,
-        "objections": case_objections,
-        },
-    }
-    print(data)
+    try:
+        number_of_establishments_in_court_complex= selenium_get_text_xpath(
+            driver, '//*[@id="showList2"]/div[1]/h3')
+        print(number_of_establishments_in_court_complex)
+        number_of_cases= selenium_get_text_xpath(
+            driver, '//*[@id="showList2"]/div[1]/h4')
+        print(number_of_cases)
+        #list of case
+        case_list= get_table_data_as_list(
+            driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table')
+        driver.implicitly_wait(7)
+        #click for the view hyperlink
+        selenium_click_class(driver,'someclass')
+        print("view clicked")
+        #details behind the hypelink
+        # case details
+        case_details_title = selenium_get_text_xpath(
+            driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[52]/div[2]/div[1]/div/table/tbody/tr[1]/td[2]')
+        case_details_registration_no = selenium_get_text_xpath(
+            driver, '//*[@id="caseBusinessDiv4"]/div/table/tbody/tr[2]/td[2]/label')
+        case_details_cnr_no = selenium_get_text_xpath(
+            driver, '//*[@id="caseBusinessDiv4"]/div/table/tbody/tr[3]/td[2]/strong')
+        case_details_filing_date = selenium_get_text_xpath(
+            driver, '//*[@id="caseBusinessDiv4"]/div/table/tbody/tr[1]/td[4]')
+        case_details_registration_date = selenium_get_text_xpath(
+            driver, '//*[@id="caseBusinessDiv4"]/div/table/tbody/tr[2]/td[4]/label')
+        # case status
+        case_status = get_table_data_as_list(
+            driver, '//*[@id="caseBusinessDiv4"]/table')
+        # paa = petitioned and advocate
+        case_paa = selenium_get_text_xpath(
+            driver, '//*[@id="caseHistoryDiv"]/div[2]/div[2]/span[1]')
+        # raa = respondent and advocate
+        case_raa = selenium_get_text_xpath(
+            driver, '//*[@id="caseHistoryDiv"]/div[2]/div[2]/span[2]')
+        # acts
+        case_acts = get_table_data_as_list(driver, '//*[@id="act_table"]')
+        # history
+        case_history = get_table_data_as_list(
+            driver, '//*[@id="caseHistoryDiv"]/div[2]/div[2]/table[2]')
+        # orders
+        case_orders = get_table_data_as_list(
+            driver, '//*[@id="caseHistoryDiv"]/div[2]/div[2]/table[4]')
+        # objections
+        case_objections = get_table_data_as_list(
+            driver, '//*[@id="caseHistoryDiv"]/div[3]/table')
+        data = {
+            "number_of_establishments_in_court_complex":number_of_establishments_in_court_complex,
+            "number_of_cases":number_of_cases,
+            "case_list":case_list,
+            "case_details":{
+            "title": case_details_title,
+            "registration_no": case_details_registration_no,
+            "cnr_no": case_details_cnr_no,
+            "filing_date": case_details_filing_date,
+            "registration_date": case_details_registration_date,
+            "status": case_status,
+            "paa": case_paa,
+            "raa": case_raa,
+            "acts": case_acts,
+            "history": case_history,
+            "orders": case_orders,
+            "objections": case_objections,
+            },
+        }
+        print(data)
+    except Exception as e:
+        logging.info(e)
+        return func.HttpResponse(
+            {"error": "error in getting data"},
+            status_code=200
+        )
     return func.HttpResponse(
              data,
              status_code=200
