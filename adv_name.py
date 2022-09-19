@@ -154,6 +154,7 @@ def main():
         print("hypelink clicked")
         selenium_send_keys_xpath(driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[14]/div[2]/div[2]/input', advoc_name)
         print("names sent")
+        time.sleep(7)
         get_captcha(driver)
         text = get_text_from_captcha(driver, r"image.png")
         selenium_click_xpath(
