@@ -1,4 +1,3 @@
-# from selenium.webdriver.firefox.service import Service
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
@@ -119,21 +118,18 @@ def get_captcha(driver):
 
 def main():
     options = Options()
-    # options.add_argument("--headless")
-    # options.headless = True
-    # driver = webdriver.Chrome(service=Service(
-    #     GeckoDriverManager().install()), options=options)
     DRIVER_PATH = '/usr/local/bin/chromedriver'
-    driver = webdriver.Chrome(DRIVER_PATH)
-    # driver = webdriver.Chrome()
+    options.add_argument("--disable-extensions")
+    options.add_argument("--disable-infobars")
+    options.add_argument("--headless")
     service = Service(DRIVER_PATH)
-
-    service.start()
     driver = webdriver.Remote(service.service_url)
+
     advoc_name='V Aneesh'
-    sess_state_code='High Court for State of Telangana'
-    court_complex_code='Principal Bench at Hyderabad'
+    # sess_state_code='High Court for State of Telangana'
+    # court_complex_code='Principal Bench at Hyderabad'
     is_failed_with_captach = True
+
     while is_failed_with_captach:
         driver.get('https://hcservices.ecourts.gov.in/hcservices/main.php')
         selenium_click_id(driver,'leftPaneMenuCS')
