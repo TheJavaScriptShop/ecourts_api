@@ -2,12 +2,12 @@ from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
-from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from time import time
 from webdriver_manager.firefox import GeckoDriverManager
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 
 import base64
 import cv2
@@ -95,20 +95,29 @@ def get_captcha(driver):
 
 def main():
     options = Options()
-    # options.add_argument("--headless")
-    # options.headless = True
-    profile = FirefoxProfile()
-    profile.set_preference(
-        "browser.helperApps.neverAsk.saveToDisk", "application/octet-stream;application/vnd.ms-excel;text/html;application/pdf")
-    profile.set_preference('pdfjs.disabled', True)
-    profile.set_preference('print.always_print_silent', True)
-    profile.set_preference('print.show_print_progress', False)
-    profile.set_preference('browser.download.show_plugins_in_list', False)
-    profile.set_preference('browser.download.folderList', 2)
-    driver = webdriver.Firefox(service=Service(
-        GeckoDriverManager().install()), options=options, firefox_profile=profile)
-    actions = ActionChains(driver)
-    # case_no = 'HBHC010549632021'
+    DRIVER_PATH = '/usr/local/bin/chromedriver'
+    options.add_argument("--disable-extensions")
+    options.add_argument("--disable-infobars")
+    options.add_argument("--headless")
+
+    service = Service(DRIVER_PATH)
+    prefs = {
+        "browser.helperApps.neverAsk.saveToDisk" : "application/octet-stream;application/vnd.ms-excel;text/html;application/pdf",
+        "pdfjs.disabled" : True,
+        "print.always_print_silent" : True,
+        "network.proxy.autoconfig_url.include_path" : True,
+        "print.show_print_progress": False,
+        "browser.download.show_plugins_in_list": False,
+        "browser.download.folderList": 2
+    }
+
+    options.add_experimental_option("prefs", prefs)
+    driver = webdriver.Chrome(chrome_options=options)
+    service = Service(DRIVER_PATH)
+
+    service.start()
+    driver = webdriver.Remote(service.service_url)
+
     case_no = 'HBHC010557542021'
     is_failed_with_captach = True
     while is_failed_with_captach:
@@ -169,16 +178,9 @@ def main():
     # orders
     case_orders = get_table_data_as_list(
         driver, '//*[@id="caseHistoryDiv"]/div[2]/div[2]/table[4]')
-    print(case_orders)
     case_orders_element = driver.find_element(by="xpath",
                                             value='//*[@id="caseHistoryDiv"]/div[2]/div[2]/table[4]')
 
-    tmp_file = os.path.realpath('orderDetails.pdf')
-    print ("tmp_file=======", tmp_file)
-    driver.set_window_position(0, 0)
-    driver.set_window_size(1024, 768)
-    profile.set_preference('browser.download.dir', tmp_file)
-    time.sleep(2)
     driver.execute_script(
     "arguments[0].scrollIntoView();", case_orders_element)
     time.sleep(2)
