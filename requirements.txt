@@ -1,3 +1,7 @@
+azure-functions
+azure-storage-blob
+azure-identity
+selenium
 selenium===4.4.0
 opencv-python===4.6.0.66
 easyocr===1.5.0
