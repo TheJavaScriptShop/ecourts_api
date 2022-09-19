@@ -3,3 +3,4 @@ geckodriver.log
 image.png
 scrape.html
 scrape_nclt.html
+.DS_Store
