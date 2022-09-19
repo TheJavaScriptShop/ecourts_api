@@ -1,25 +1,25 @@
-from time import time
-from selenium.webdriver.firefox.service import Service
 from selenium import webdriver
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
-from webdriver_manager.firefox import GeckoDriverManager
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.by import By
+from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
+from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.firefox.service import Service
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from time import time
+from webdriver_manager.firefox import GeckoDriverManager
 
 import base64
+import cv2
+import datetime
+import easyocr
+import json
 import os
 import re
-import json
-import webbrowser
-import traceback
-import datetime
-import cv2
-import easyocr
+import tempfile
 import time
-
+import traceback
+import webbrowser
 
 # get grayscale image
 def get_grayscale(image):
@@ -95,8 +95,8 @@ def get_captcha(driver):
 
 def main():
     options = Options()
-    options.add_argument("--headless")
-    options.headless = True
+    # options.add_argument("--headless")
+    # options.headless = True
     profile = FirefoxProfile()
     profile.set_preference(
         "browser.helperApps.neverAsk.saveToDisk", "application/octet-stream;application/vnd.ms-excel;text/html;application/pdf")
@@ -105,8 +105,6 @@ def main():
     profile.set_preference('print.show_print_progress', False)
     profile.set_preference('browser.download.show_plugins_in_list', False)
     profile.set_preference('browser.download.folderList', 2)
-    profile.set_preference('browser.download.dir',
-                           '/Users/pp/Desktop/arbito/poc_scrap')
     driver = webdriver.Firefox(service=Service(
         GeckoDriverManager().install()), options=options, firefox_profile=profile)
     actions = ActionChains(driver)
@@ -173,12 +171,20 @@ def main():
         driver, '//*[@id="caseHistoryDiv"]/div[2]/div[2]/table[4]')
     print(case_orders)
     case_orders_element = driver.find_element(by="xpath",
-                                              value='//*[@id="caseHistoryDiv"]/div[2]/div[2]/table[4]')
+                                            value='//*[@id="caseHistoryDiv"]/div[2]/div[2]/table[4]')
+
+    tmp_file = os.path.realpath('orderDetails.pdf')
+    print ("tmp_file=======", tmp_file)
+    driver.set_window_position(0, 0)
+    driver.set_window_size(1024, 768)
+    profile.set_preference('browser.download.dir', tmp_file)
+    time.sleep(2)
     driver.execute_script(
-        "arguments[0].scrollIntoView();", case_orders_element)
-    time.sleep(1)
+    "arguments[0].scrollIntoView();", case_orders_element)
+    time.sleep(2)
     selenium_click_xpath(driver,
-                         '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[52]/div[2]/div[2]/table[4]/tbody/tr[2]/td[5]/a')
+                    '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[52]/div[2]/div[2]/table[4]/tbody/tr[2]/td[5]/a')
+
     # objections
     case_objections = get_table_data_as_list(
         driver, '//*[@id="caseHistoryDiv"]/div[3]/table')
@@ -208,6 +214,7 @@ def main():
 
     driver.close()
     driver.quit()
+
 
 
 if __name__ == "__main__":

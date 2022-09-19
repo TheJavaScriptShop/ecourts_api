@@ -1,11 +1,14 @@
-from selenium.webdriver.firefox.service import Service
+# from selenium.webdriver.firefox.service import Service
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.chrome.options import Options
 from webdriver_manager.firefox import GeckoDriverManager
 from selenium.webdriver.support.ui import Select
+
+
 import base64
 import os
 import re
@@ -16,6 +19,7 @@ import datetime
 import cv2
 import easyocr
 import time
+
 
 
 # get grayscale image
@@ -115,10 +119,17 @@ def get_captcha(driver):
 
 def main():
     options = Options()
-    options.add_argument("--headless")
-    options.headless = True
-    driver = webdriver.Firefox(service=Service(
-        GeckoDriverManager().install()), options=options)
+    # options.add_argument("--headless")
+    # options.headless = True
+    # driver = webdriver.Chrome(service=Service(
+    #     GeckoDriverManager().install()), options=options)
+    DRIVER_PATH = '/usr/local/bin/chromedriver'
+    driver = webdriver.Chrome(DRIVER_PATH)
+    # driver = webdriver.Chrome()
+    service = Service(DRIVER_PATH)
+
+    service.start()
+    driver = webdriver.Remote(service.service_url)
     advoc_name='V Aneesh'
     sess_state_code='High Court for State of Telangana'
     court_complex_code='Principal Bench at Hyderabad'
@@ -134,10 +145,14 @@ def main():
         state_code= Select(selenium_get_element_id(driver ,'sess_state_code'))
         state_code.select_by_value('29')
         print("Values selected")
+        time.sleep(3)
         court_code=Select(selenium_get_element_id(driver ,'court_complex_code'))
         court_code.select_by_value('1')
+        print("court code selected")
         selenium_click_id(driver,'CSAdvName')
+        print("hypelink clicked")
         selenium_send_keys_xpath(driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[14]/div[2]/div[2]/input', advoc_name)
+        print("names sent")
         get_captcha(driver)
         text = get_text_from_captcha(driver, r"image.png")
         selenium_click_xpath(
@@ -232,7 +247,6 @@ def main():
 
     }
     print(data)
-
     page = "scrape1.html"
     with open(page, "w+", newline="", encoding="UTF-8") as f:
         f.write("<html><body><pre id='json'></pre></body></html>")
