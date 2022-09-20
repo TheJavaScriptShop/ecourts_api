@@ -20,8 +20,7 @@ import easyocr
 import time
 import torch
 
-easyocr.utils.torch.device("cpu")
-easyocr.config.MODULE_PATH = os.path.join(os.getcwd())
+
 # get grayscale image
 def get_grayscale(image):
     return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -126,8 +125,7 @@ def main():
     DRIVER_PATH = '/usr/local/bin/chromedriver'
     options.add_argument("--disable-extensions")
     options.add_argument("--disable-infobars")
-    options.add_argument("--headless")
-    options.headless = False
+    # options.add_argument("--headless")
 
     driver = webdriver.Chrome(DRIVER_PATH,chrome_options=options)
 
@@ -193,14 +191,15 @@ def main():
     number_of_cases= selenium_get_text_xpath(
         driver, '//*[@id="showList2"]/div[1]/h4')
     print(number_of_cases)
-    #list of case
-    case_list= get_table_data_as_list(
-        driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table')
-
     view_element = selenium_get_element_id(driver, 'dispTable')
 
     driver.execute_script(
     "arguments[0].scrollIntoView();", view_element)
+
+    WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table")))
+    #list of case
+    case_list= get_table_data_as_list(
+        driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table')
 
     selenium_click_class(driver,'someclass')
     print("view clicked")
