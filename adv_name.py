@@ -59,6 +59,10 @@ def selenium_get_element_id(driver, id):
     return WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
         (By.ID, id)))
 
+def selenium_get_element_class(driver, classname):
+    WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
+        (By.CLASS_NAME, classname)))
+
 def selenium_find_element_css_selector(driver, selector):
     return WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
         (By.CSS_SELECTOR, selector)))
@@ -123,13 +127,9 @@ def main():
     options.add_argument("--disable-extensions")
     options.add_argument("--disable-infobars")
     options.add_argument("--headless")
+    options.headless = False
 
-    service = Service(DRIVER_PATH)
-    driver = webdriver.Chrome(chrome_options=options)
-    service = Service(DRIVER_PATH)
-
-    service.start()
-    driver = webdriver.Remote(service.service_url)
+    driver = webdriver.Chrome(DRIVER_PATH,chrome_options=options)
 
     advoc_name='V Aneesh'
     # sess_state_code='High Court for State of Telangana'
@@ -138,16 +138,16 @@ def main():
 
     while is_failed_with_captach:
         driver.get('https://hcservices.ecourts.gov.in/hcservices/main.php')
+        driver.maximize_window()
+
         selenium_click_id(driver,'leftPaneMenuCS')
         print("Successfully clicked")
-        driver.implicitly_wait(5)
         selenium_click_xpath(driver,'/html/body/div[2]/div/div/div[2]/button')
         print("ok clicked")
-        driver.implicitly_wait(5)
         state_code= Select(selenium_get_element_id(driver ,'sess_state_code'))
         state_code.select_by_value('29')
+        time.sleep(2)
         print("Values selected")
-        driver.implicitly_wait(7)
         court_code=Select(selenium_get_element_id(driver ,'court_complex_code'))
         court_code.select_by_value('1')
         print("court code selected")
@@ -155,11 +155,11 @@ def main():
         print("hypelink clicked")
         selenium_send_keys_xpath(driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[14]/div[2]/div[2]/input', advoc_name)
         print("names sent")
-        driver.implicitly_wait(7)
+        time.sleep(3)
 
         get_captcha(driver)
         text = get_text_from_captcha(driver, r"image.png")
-        driver.implicitly_wait(7)
+        time.sleep(3)
         selenium_click_xpath(
         driver, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/span/div/div[2]/label")  
         selenium_send_keys_xpath(driver, '//*[@id="captcha"]', text)
@@ -185,6 +185,7 @@ def main():
                     is_failed_with_captach = False
             except:
                 pass
+            
     # case details
     number_of_establishments_in_court_complex= selenium_get_text_xpath(
         driver, '//*[@id="showList2"]/div[1]/h3')
@@ -195,11 +196,15 @@ def main():
     #list of case
     case_list= get_table_data_as_list(
         driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table')
-    driver.implicitly_wait(7)
-    #click for the view hyperlink
+
+    view_element = selenium_get_element_id(driver, 'dispTable')
+
+    driver.execute_script(
+    "arguments[0].scrollIntoView();", view_element)
+
     selenium_click_class(driver,'someclass')
     print("view clicked")
-    #details behind the hypelink
+    #details behind the hyperlink
     # case details
     case_details_title = selenium_get_text_xpath(
         driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[52]/div[2]/div[1]/div/table/tbody/tr[1]/td[2]')
