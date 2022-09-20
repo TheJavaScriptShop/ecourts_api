@@ -125,7 +125,9 @@ def main():
     DRIVER_PATH = '/usr/local/bin/chromedriver'
     options.add_argument("--disable-extensions")
     options.add_argument("--disable-infobars")
-    # options.add_argument("--headless")
+    options.add_argument("--window-size=1700x800");
+
+    options.add_argument("--headless")
 
     driver = webdriver.Chrome(DRIVER_PATH,chrome_options=options)
 
@@ -183,7 +185,7 @@ def main():
                     is_failed_with_captach = False
             except:
                 pass
-            
+
     # case details
     number_of_establishments_in_court_complex= selenium_get_text_xpath(
         driver, '//*[@id="showList2"]/div[1]/h3')
