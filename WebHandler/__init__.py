@@ -251,10 +251,12 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     except Exception as e:
         logging.info(e)
         return func.HttpResponse(
-            {"error": "error in getting data"},
+            body=json.dumps({"error": "error in getting data"}),
+            mimetype="application/json",
             status_code=200
         )
     return func.HttpResponse(
-             data,
-             status_code=200
+        body=json.dumps(data),
+        mimetype="application/json",
+        status_code=200
     )
