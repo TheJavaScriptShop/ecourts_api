@@ -1,13 +1,11 @@
-from selenium.webdriver.firefox.service import Service
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.firefox.options import Options
-from webdriver_manager.firefox import GeckoDriverManager
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import Select
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+
 import base64
 import os
 import re
@@ -16,11 +14,10 @@ import webbrowser
 import traceback
 import datetime
 import cv2
-import easyocr
 import time
+from datetime import date
 
-
-# get grayscale image
+# # get grayscale image
 def get_grayscale(image):
     return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
@@ -81,11 +78,28 @@ def get_table_data_as_list(driver, xpath):
 
 def main():
     options = Options()
-    profile = webdriver.FirefoxProfile()
-    # options.add_argument("--headless")
-    # options.headless = True
-    driver = webdriver.Firefox(service=Service(
-        GeckoDriverManager().install()), options=options ,firefox_profile=profile)
+    DRIVER_PATH = '/usr/local/bin/chromedriver'
+    options.add_argument("--disable-extensions")
+    options.add_argument("--disable-infobars")
+    options.add_argument("--window-size=1700x800")
+
+    options.add_argument("--headless")
+    options.headless = True
+
+    today = date.today()
+    prefs = {
+        "browser.helperApps.neverAsk.saveToDisk" : "application/octet-stream;application/vnd.ms-excel;text/html;application/pdf",
+        "pdfjs.disabled" : True,
+        "print.always_print_silent" : True,
+        "network.proxy.autoconfig_url.include_path" : True,
+        "print.show_print_progress": False,
+        "browser.download.show_plugins_in_list": False,
+        "browser.download.folderList": 2
+    }
+
+    options.add_experimental_option("prefs", prefs)
+    
+    driver = webdriver.Chrome(DRIVER_PATH,chrome_options=options)
     profile.set_preference("print.always_print_silent", True)
     profile.update_preferences()
     adv_name='S Niranjan Reddy'
@@ -102,7 +116,7 @@ def main():
     time.sleep(5)
     # Cause list date
     cause_list_date= Select(selenium_get_element_id(driver ,'listdate'))
-    cause_list_date.select_by_value('2022-08-26')
+    cause_list_date.select_by_value(today.strftime("%Y-%m-%d"))
     print("Date selected")
     # Advocate wise button
     driver.get('https://tshc.gov.in/Hcdbs/searchdates.do')
@@ -125,12 +139,12 @@ def main():
     driver.get('https://tshc.gov.in/Hcdbs/cause_list.jsp')
     driver.execute_script('window.print();')
     time.sleep(10)
-    # driver.quit()
-    # selenium_click_xpath(driver,'/html/body/center/input')
-    # print('print button clicked')
-    # court_details_list= get_table_data_as_list(driver,'/html/body/table/tbody[2]')
-    # print("done fetching")
-    # print(court_details_list)
+    driver.quit()
+    selenium_click_xpath(driver,'/html/body/center/input')
+    print('print button clicked')
+    court_details_list= get_table_data_as_list(driver,'/html/body/table/tbody[2]')
+    print("done fetching")
+    print(court_details_list)
 
     # data = {
     #     "table data": court_details_list,
