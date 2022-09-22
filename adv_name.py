@@ -123,7 +123,7 @@ def get_captcha(driver):
 
 def main():
     options = Options()
-    DRIVER_PATH = '/Users/sarvani/Downloads/chromedriver'
+    DRIVER_PATH = '/usr/local/bin/chromedriver'
     options.add_argument("--disable-extensions")
     options.add_argument("--disable-infobars")
     options.add_argument("--window-size=1700x800")
