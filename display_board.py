@@ -67,23 +67,11 @@ def main():
                     print("No data for this case")
                 else:
                     selenium_click_xpath(driver,'/html/body/div[2]/form/center/table/tbody/tr['+str(idx)+']/td[5]/a')
-                    time.sleep(1)
+                    time.sleep(2)
                     print("Downloaded data for id", item[0])
                     
             except Exception as e:
                 print("Error for ID ", item, e )
-                if len(item) > 0 and item[2] == status_uploaded:
-                    print("Long pdf download")
-                    try:
-                        selenium_click_xpath(driver,'/html/body/div[2]/form/center/table/tbody/tr['+str(idx)+']/td[5]/a')
-                        time.sleep(5)
-                        print("Downloaded data for id", item[0] , "PDF too long")
-                        time.sleep(1)
-                    except:
-                        pass
-                    
-                else:
-                    print("Error")
 
         else :
             print("No data for this case")
