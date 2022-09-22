@@ -178,10 +178,9 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         except:
             try:
                 failure_text_other_page = selenium_get_text_xpath(
-                    driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[1]/ul/li[2]/div/p')
+                    driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[26]/p')
                 print(failure_text_other_page)
                 if "invalid" in failure_text_other_page.lower():
-                    selenium_click_xpath(driver, '//*[@id="bckbtn"]')
                     is_failed_with_captach = True
                 else:
                     print("in second")
@@ -205,46 +204,80 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         #list of case
         case_list= get_table_data_as_list(
             driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table')
+        # list of case details
+        case_details = []
+        for link in driver.find_elements(by="xpath", value='/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table/tbody/tr/td[5]'):
+            print('link', link)
+            time.sleep(2)
+            driver.execute_script(
+            "arguments[0].scrollIntoView();", link)
+            WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.CLASS_NAME, 'someclass')))
+            selenium_click_class(link,'someclass')
+            print("view clicked")
+            time.sleep(2)
+            # details behind the hyperlink
+            # case details
+            case_details_title = selenium_get_text_xpath(
+                driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[52]/div[2]/div[1]/div/table/tbody/tr[1]/td[2]')
+            case_details_registration_no = selenium_get_text_xpath(
+                driver, '//*[@id="caseBusinessDiv4"]/div/table/tbody/tr[2]/td[2]/label')
+            case_details_cnr_no = selenium_get_text_xpath(
+                driver, '//*[@id="caseBusinessDiv4"]/div/table/tbody/tr[3]/td[2]/strong')
+            case_details_filing_date = selenium_get_text_xpath(
+                driver, '//*[@id="caseBusinessDiv4"]/div/table/tbody/tr[1]/td[4]')
+            case_details_registration_date = selenium_get_text_xpath(
+                driver, '//*[@id="caseBusinessDiv4"]/div/table/tbody/tr[2]/td[4]/label')
+            # case status
+            try:
+                case_status_data = get_table_data_as_list(
+                    driver, '//*[@id="caseBusinessDiv4"]/table')
+                case_status = {'status': True, 'data': case_status_data}
+            except:
+                case_status = {'status': False, 'data': {}}
+            # paa = petitioned and advocate
+            try:
+                case_paa_data = selenium_get_text_xpath(
+                    driver, '//*[@id="caseHistoryDiv"]/div[2]/div[2]/span[1]')
+                case_paa = {'status': True, 'data': case_paa_data}
+            except:
+                case_paa = {'status': False, 'data': {}}
+            # raa = respondent and advocate
+            try:
+                case_raa_data = selenium_get_text_xpath(
+                    driver, '//*[@id="caseHistoryDiv"]/div[2]/div[2]/span[2]')
+                case_raa = {'status': True, 'data': case_raa_data}
+            except:
+                case_raa = {'status': False, 'data': {}}
+            # acts
+            try:
+                case_acts_data = get_table_data_as_list(driver, '//*[@id="act_table"]')
+                case_acts = {'status': True, 'data': case_acts_data}
+            except:
+                case_acts = {'status': False, 'data': {}}
+            # history
+            try:
+                case_history_data = get_table_data_as_list(
+                    driver, '//*[@id="caseHistoryDiv"]/div[2]/div[2]/table[2]')
+                case_history = {'status': True, 'data': case_history_data}
+            except:
+                case_history = {'status': False, 'data': {}}
+            # orders
+            try:
+                case_orders_data = get_table_data_as_list(
+                    driver, '//*[@id="caseHistoryDiv"]/div[2]/div[2]/table[4]')
+                case_orders = {'status': True, 'data': case_orders_data}
+            except:
+                case_orders = {'status': False, 'data': {}}
+            
+            # objections
+            try:
+                case_objections_data = get_table_data_as_list(
+                    driver, '//*[@id="caseHistoryDiv"]/div[3]/table')
+                case_objections = {'status': True, 'data': case_objections_data}
+            except:
+                case_objections = {'status': False, 'data': {}}
 
-        selenium_click_class(driver,'someclass')
-        print("view clicked")
-        #details behind the hyperlink
-        # case details
-        case_details_title = selenium_get_text_xpath(
-            driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[52]/div[2]/div[1]/div/table/tbody/tr[1]/td[2]')
-        case_details_registration_no = selenium_get_text_xpath(
-            driver, '//*[@id="caseBusinessDiv4"]/div/table/tbody/tr[2]/td[2]/label')
-        case_details_cnr_no = selenium_get_text_xpath(
-            driver, '//*[@id="caseBusinessDiv4"]/div/table/tbody/tr[3]/td[2]/strong')
-        case_details_filing_date = selenium_get_text_xpath(
-            driver, '//*[@id="caseBusinessDiv4"]/div/table/tbody/tr[1]/td[4]')
-        case_details_registration_date = selenium_get_text_xpath(
-            driver, '//*[@id="caseBusinessDiv4"]/div/table/tbody/tr[2]/td[4]/label')
-        # case status
-        case_status = get_table_data_as_list(
-            driver, '//*[@id="caseBusinessDiv4"]/table')
-        # paa = petitioned and advocate
-        case_paa = selenium_get_text_xpath(
-            driver, '//*[@id="caseHistoryDiv"]/div[2]/div[2]/span[1]')
-        # raa = respondent and advocate
-        case_raa = selenium_get_text_xpath(
-            driver, '//*[@id="caseHistoryDiv"]/div[2]/div[2]/span[2]')
-        # acts
-        case_acts = get_table_data_as_list(driver, '//*[@id="act_table"]')
-        # history
-        case_history = get_table_data_as_list(
-            driver, '//*[@id="caseHistoryDiv"]/div[2]/div[2]/table[2]')
-        # orders
-        case_orders = get_table_data_as_list(
-            driver, '//*[@id="caseHistoryDiv"]/div[2]/div[2]/table[4]')
-        # objections
-        case_objections = get_table_data_as_list(
-            driver, '//*[@id="caseHistoryDiv"]/div[3]/table')
-        data = {
-            "number_of_establishments_in_court_complex":number_of_establishments_in_court_complex,
-            "number_of_cases":number_of_cases,
-            "case_list":case_list,
-            "case_details":{
+            details = {case_details_title: {
             "title": case_details_title,
             "registration_no": case_details_registration_no,
             "cnr_no": case_details_cnr_no,
@@ -257,7 +290,25 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             "history": case_history,
             "orders": case_orders,
             "objections": case_objections,
-            },
+            }}
+            case_details.append(details)
+            print(case_details)
+            selenium_click_xpath(driver, "/html/body/div[1]/div/p/a")
+            time.sleep(2)
+            selenium_click_xpath(driver, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[48]/input")
+            view_link = selenium_get_element_id(driver, 'dispTable')
+
+            driver.execute_script(
+            "arguments[0].scrollIntoView();", view_link)
+
+            WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table")))        
+
+
+        data = {
+            "number_of_establishments_in_court_complex":number_of_establishments_in_court_complex,
+            "number_of_cases":number_of_cases,
+            "case_list":case_list,
+            "case_details":{case_details
         }
         print(data)
     except Exception as e:
