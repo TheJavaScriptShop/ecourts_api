@@ -128,7 +128,7 @@ def main():
     options.add_argument("--disable-infobars")
     options.add_argument("--window-size=1700x800")
 
-    # options.add_argument("--headless")
+    options.add_argument("--headless")
 
     driver = webdriver.Chrome(DRIVER_PATH,chrome_options=options)
 
@@ -179,7 +179,6 @@ def main():
                     driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[26]/p')
                 print(failure_text_other_page)
                 if "invalid" in failure_text_other_page.lower():
-                    # selenium_click_xpath(driver, '//*[@id="bckbtn"]')
                     is_failed_with_captach = True
                 else:
                     print("in second")
@@ -208,14 +207,12 @@ def main():
     for link in driver.find_elements(by="xpath", value='/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table/tbody/tr/td[5]'):
         print('link', link)
         time.sleep(2)
-        # ipdb.set_trace()
         driver.execute_script(
         "arguments[0].scrollIntoView();", link)
         WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.CLASS_NAME, 'someclass')))
         selenium_click_class(link,'someclass')
         print("view clicked")
         time.sleep(2)
-        # ipdb.set_trace()
         # details behind the hyperlink
         # case details
         case_details_title = selenium_get_text_xpath(
@@ -320,17 +317,17 @@ def main():
 
 
 
-    # page = "scrape1.html"
-    # with open(page, "w+", newline="", encoding="UTF-8") as f:
-    #     f.write("<html><body><pre id='json'></pre></body></html>")
-    #     f.write("<script>")
-    #     f.write(
-    #         f"document.getElementById('json').textContent = JSON.stringify({json.dumps(data)}, undefined, 2);")
-    #     f.write("</script>")
-    # webbrowser.open('file://' + os.path.realpath(page), new=2)
+    page = "scrape1.html"
+    with open(page, "w+", newline="", encoding="UTF-8") as f:
+        f.write("<html><body><pre id='json'></pre></body></html>")
+        f.write("<script>")
+        f.write(
+            f"document.getElementById('json').textContent = JSON.stringify({json.dumps(data)}, undefined, 2);")
+        f.write("</script>")
+    webbrowser.open('file://' + os.path.realpath(page), new=2)
     
-    # driver.close()
-    # driver.quit()
+    driver.close()
+    driver.quit()
 
 
 if __name__ == "__main__":
