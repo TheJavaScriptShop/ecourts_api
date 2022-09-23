@@ -57,26 +57,30 @@ def selenium_get_element_xpath(driver, xpath):
     return WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
         (By.XPATH, xpath)))
 
+
 def selenium_get_element_id(driver, id):
     return WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
         (By.ID, id)))
+
 
 def selenium_get_element_class(driver, classname):
     WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
         (By.CLASS_NAME, classname)))
 
+
 def selenium_find_element_css_selector(driver, selector):
     return WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
         (By.CSS_SELECTOR, selector)))
+
 
 def selenium_click_id(driver, id):
     WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
         (By.ID, id))).click()
 
+
 def selenium_click_class(driver, classname):
     WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
         (By.CLASS_NAME, classname))).click()
-
 
 
 def get_table_data_as_list(driver, xpath):
@@ -89,7 +93,8 @@ def get_table_data_as_list(driver, xpath):
 
 
 def get_text_from_captcha(driver, img_path):
-    reader = easyocr.Reader(["en"], gpu=False, model_storage_directory=os.path.join(os.getcwd()), download_enabled=False)
+    reader = easyocr.Reader(["en"], gpu=False, model_storage_directory=os.path.join(
+        os.getcwd()), download_enabled=False)
     result = reader.readtext(img_path)
     match = re.search(r'\(?([0-9A-Za-z]+)\)?', result[0][1])
     print(result[0][1])
@@ -121,6 +126,7 @@ def get_captcha(driver):
     with open(r"image.png", 'wb') as f:
         f.write(base64.b64decode(img_base64))
 
+
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info(req)
     logging.info('Python HTTP trigger function processed a request.')
@@ -130,11 +136,12 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--disable-dev-shm-usage')
     chrome_options.add_argument('--headless')
-    chrome_options.add_argument("--window-size=1700x800");
+    chrome_options.add_argument("--window-size=1700x800")
 
-    driver = webdriver.Chrome("/usr/local/bin/chromedriver", chrome_options=chrome_options)
+    driver = webdriver.Chrome(
+        "/usr/local/bin/chromedriver", chrome_options=chrome_options)
 
-    advoc_name='V Aneesh'
+    advoc_name = 'V Aneesh'
     # sess_state_code='High Court for State of Telangana'
     # court_complex_code='Principal Bench at Hyderabad'
     is_failed_with_captach = True
@@ -143,20 +150,22 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         driver.get('https://hcservices.ecourts.gov.in/hcservices/main.php')
         driver.maximize_window()
 
-        selenium_click_id(driver,'leftPaneMenuCS')
+        selenium_click_id(driver, 'leftPaneMenuCS')
         print("Successfully clicked")
-        selenium_click_xpath(driver,'/html/body/div[2]/div/div/div[2]/button')
+        selenium_click_xpath(driver, '/html/body/div[2]/div/div/div[2]/button')
         print("ok clicked")
-        state_code= Select(selenium_get_element_id(driver ,'sess_state_code'))
+        state_code = Select(selenium_get_element_id(driver, 'sess_state_code'))
         state_code.select_by_value('29')
         time.sleep(2)
         print("Values selected")
-        court_code=Select(selenium_get_element_id(driver ,'court_complex_code'))
+        court_code = Select(selenium_get_element_id(
+            driver, 'court_complex_code'))
         court_code.select_by_value('1')
         print("court code selected")
-        selenium_click_id(driver,'CSAdvName')
+        selenium_click_id(driver, 'CSAdvName')
         print("hypelink clicked")
-        selenium_send_keys_xpath(driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[14]/div[2]/div[2]/input', advoc_name)
+        selenium_send_keys_xpath(
+            driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[14]/div[2]/div[2]/input', advoc_name)
         print("names sent")
         time.sleep(3)
 
@@ -164,7 +173,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         text = get_text_from_captcha(driver, r"image.png")
         time.sleep(3)
         selenium_click_xpath(
-        driver, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/span/div/div[2]/label")  
+            driver, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/span/div/div[2]/label")
         selenium_send_keys_xpath(driver, '//*[@id="captcha"]', text)
         selenium_click_xpath(driver, '//*[@class="Gobtn"]')
         is_failed_with_captach = False
@@ -189,20 +198,21 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 pass
     try:
         # case details
-        number_of_establishments_in_court_complex= selenium_get_text_xpath(
+        number_of_establishments_in_court_complex = selenium_get_text_xpath(
             driver, '//*[@id="showList2"]/div[1]/h3')
         print(number_of_establishments_in_court_complex)
-        number_of_cases= selenium_get_text_xpath(
+        number_of_cases = selenium_get_text_xpath(
             driver, '//*[@id="showList2"]/div[1]/h4')
         print(number_of_cases)
         view_element = selenium_get_element_id(driver, 'dispTable')
 
         driver.execute_script(
-        "arguments[0].scrollIntoView();", view_element)
+            "arguments[0].scrollIntoView();", view_element)
 
-        WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table")))
-        #list of case
-        case_list= get_table_data_as_list(
+        WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
+            (By.XPATH, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table")))
+        # list of case
+        case_list = get_table_data_as_list(
             driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table')
         # list of case details
         case_details = []
@@ -210,9 +220,10 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             print('link', link)
             time.sleep(2)
             driver.execute_script(
-            "arguments[0].scrollIntoView();", link)
-            WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.CLASS_NAME, 'someclass')))
-            selenium_click_class(link,'someclass')
+                "arguments[0].scrollIntoView();", link)
+            WebDriverWait(driver, 20).until(
+                EC.element_to_be_clickable((By.CLASS_NAME, 'someclass')))
+            selenium_click_class(link, 'someclass')
             print("view clicked")
             time.sleep(2)
             # details behind the hyperlink
@@ -250,7 +261,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 case_raa = {'status': False, 'data': {}}
             # acts
             try:
-                case_acts_data = get_table_data_as_list(driver, '//*[@id="act_table"]')
+                case_acts_data = get_table_data_as_list(
+                    driver, '//*[@id="act_table"]')
                 case_acts = {'status': True, 'data': case_acts_data}
             except:
                 case_acts = {'status': False, 'data': {}}
@@ -268,47 +280,49 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 case_orders = {'status': True, 'data': case_orders_data}
             except:
                 case_orders = {'status': False, 'data': {}}
-            
+
             # objections
             try:
                 case_objections_data = get_table_data_as_list(
                     driver, '//*[@id="caseHistoryDiv"]/div[3]/table')
-                case_objections = {'status': True, 'data': case_objections_data}
+                case_objections = {'status': True,
+                                   'data': case_objections_data}
             except:
                 case_objections = {'status': False, 'data': {}}
 
-            details = {case_details_title: {
-            "title": case_details_title,
-            "registration_no": case_details_registration_no,
-            "cnr_no": case_details_cnr_no,
-            "filing_date": case_details_filing_date,
-            "registration_date": case_details_registration_date,
-            "status": case_status,
-            "paa": case_paa,
-            "raa": case_raa,
-            "acts": case_acts,
-            "history": case_history,
-            "orders": case_orders,
-            "objections": case_objections,
-            }}
+            details = {
+                "title": case_details_title,
+                "registration_no": case_details_registration_no,
+                "cnr_no": case_details_cnr_no,
+                "filing_date": case_details_filing_date,
+                "registration_date": case_details_registration_date,
+                "status": case_status,
+                "paa": case_paa,
+                "raa": case_raa,
+                "acts": case_acts,
+                "history": case_history,
+                "orders": case_orders,
+                "objections": case_objections,
+            }
             case_details.append(details)
             print(case_details)
             selenium_click_xpath(driver, "/html/body/div[1]/div/p/a")
             time.sleep(2)
-            selenium_click_xpath(driver, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[48]/input")
+            selenium_click_xpath(
+                driver, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[48]/input")
             view_link = selenium_get_element_id(driver, 'dispTable')
 
             driver.execute_script(
-            "arguments[0].scrollIntoView();", view_link)
+                "arguments[0].scrollIntoView();", view_link)
 
-            WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table")))        
-
+            WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
+                (By.XPATH, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table")))
 
         data = {
-            "number_of_establishments_in_court_complex":number_of_establishments_in_court_complex,
-            "number_of_cases":number_of_cases,
-            "case_list":case_list,
-            "case_details":{case_details
+            "number_of_establishments_in_court_complex": number_of_establishments_in_court_complex,
+            "number_of_cases": number_of_cases,
+            "case_list": case_list,
+            "case_details": {case_details}
         }
         print(data)
     except Exception as e:

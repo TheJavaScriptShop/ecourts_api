@@ -47,34 +47,38 @@ def selenium_send_keys_id(driver, id, text):
 
 
 def selenium_get_text_xpath(driver, xpath):
-        return WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
-            (By.XPATH, xpath))).text
+    return WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
+        (By.XPATH, xpath))).text
 
 
 def selenium_get_element_xpath(driver, xpath):
     return WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
         (By.XPATH, xpath)))
 
+
 def selenium_get_element_id(driver, id):
     return WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
         (By.ID, id)))
+
 
 def selenium_get_element_class(driver, classname):
     WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
         (By.CLASS_NAME, classname)))
 
+
 def selenium_find_element_css_selector(driver, selector):
     return WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
         (By.CSS_SELECTOR, selector)))
 
+
 def selenium_click_id(driver, id):
     WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
         (By.ID, id))).click()
-    
+
+
 def selenium_click_class(driver, classname):
     WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
         (By.CLASS_NAME, classname))).click()
-
 
 
 def get_table_data_as_list(driver, xpath):
@@ -87,7 +91,8 @@ def get_table_data_as_list(driver, xpath):
 
 
 def get_text_from_captcha(driver, img_path):
-    reader = easyocr.Reader(["en"], gpu=False, model_storage_directory=os.path.join(os.getcwd()), download_enabled=False)
+    reader = easyocr.Reader(["en"], gpu=False, model_storage_directory=os.path.join(
+        os.getcwd()), download_enabled=False)
     result = reader.readtext(img_path)
     match = re.search(r'\(?([0-9A-Za-z]+)\)?', result[0][1])
     print(result[0][1])
@@ -106,7 +111,6 @@ def get_text_from_captcha(driver, img_path):
 
 
 def get_captcha(driver):
-
     img_base64 = driver.execute_script("""
     var ele = arguments[0];
     var cnv = document.createElement('canvas');
@@ -120,7 +124,6 @@ def get_captcha(driver):
         f.write(base64.b64decode(img_base64))
 
 
-
 def main(advoc_name, high_court_id, bench_id):
     options = Options()
     DRIVER_PATH = '/usr/local/bin/chromedriver'
@@ -130,29 +133,31 @@ def main(advoc_name, high_court_id, bench_id):
 
     options.add_argument("--headless")
 
-    driver = webdriver.Chrome(DRIVER_PATH,chrome_options=options)
+    driver = webdriver.Chrome(DRIVER_PATH, chrome_options=options)
 
     is_failed_with_captach = True
-    fetched_data  = False
+    fetched_data = False
 
     while is_failed_with_captach:
         driver.get('https://hcservices.ecourts.gov.in/hcservices/main.php')
         driver.maximize_window()
 
-        selenium_click_id(driver,'leftPaneMenuCS')
+        selenium_click_id(driver, 'leftPaneMenuCS')
         print("Successfully clicked")
-        selenium_click_xpath(driver,'/html/body/div[2]/div/div/div[2]/button')
+        selenium_click_xpath(driver, '/html/body/div[2]/div/div/div[2]/button')
         print("ok clicked")
-        state_code= Select(selenium_get_element_id(driver ,'sess_state_code'))
+        state_code = Select(selenium_get_element_id(driver, 'sess_state_code'))
         state_code.select_by_value(high_court_id)
         time.sleep(2)
         print("Values selected")
-        court_code=Select(selenium_get_element_id(driver ,'court_complex_code'))
+        court_code = Select(selenium_get_element_id(
+            driver, 'court_complex_code'))
         court_code.select_by_value(bench_id)
         print("court code selected")
-        selenium_click_id(driver,'CSAdvName')
+        selenium_click_id(driver, 'CSAdvName')
         print("hypelink clicked")
-        selenium_send_keys_xpath(driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[14]/div[2]/div[2]/input', advoc_name)
+        selenium_send_keys_xpath(
+            driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[14]/div[2]/div[2]/input', advoc_name)
         print("names sent")
         time.sleep(3)
 
@@ -160,14 +165,14 @@ def main(advoc_name, high_court_id, bench_id):
         text = get_text_from_captcha(driver, r"image.png")
         time.sleep(3)
         selenium_click_xpath(
-        driver, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/span/div/div[2]/label")  
+            driver, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/span/div/div[2]/label")
         selenium_send_keys_xpath(driver, '//*[@id="captcha"]', text)
         selenium_click_xpath(driver, '//*[@class="Gobtn"]')
         is_failed_with_captach = False
         try:
             failure_text = selenium_get_text_xpath(
                 driver, '//*[@id="errSpan1"]')
-            
+
             if 'THERE IS AN ERROR' in failure_text:
                 print("in first")
                 is_failed_with_captach = False
@@ -176,11 +181,11 @@ def main(advoc_name, high_court_id, bench_id):
                 failure_text_other_page = selenium_get_text_xpath(
                     driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[26]/p')
                 print(failure_text_other_page)
-                if 'Record Not Found' in failure_text_other_page: 
+                if 'Record Not Found' in failure_text_other_page:
                     data = {
-                        "number_of_establishments_in_court_complex":0,
-                        "number_of_cases":0,
-                        "case_list":[],
+                        "number_of_establishments_in_court_complex": 0,
+                        "number_of_cases": 0,
+                        "case_list": [],
                         'case_details': [],
                     }
                     fetched_data = True
@@ -192,52 +197,53 @@ def main(advoc_name, high_court_id, bench_id):
                     is_failed_with_captach = False
             except:
                 pass
-    
 
     if not fetched_data:
         try:
             # case details
-            number_of_establishments_in_court_complex= selenium_get_text_xpath(
+            number_of_establishments_in_court_complex = selenium_get_text_xpath(
                 driver, '//*[@id="showList2"]/div[1]/h3')
             print(number_of_establishments_in_court_complex)
             data = {
-                        "number_of_establishments_in_court_complex":number_of_establishments_in_court_complex,
-                        "number_of_cases":0,
-                        "case_list":[],
-                        'case_details': [],
-                    }
-            number_of_cases= selenium_get_text_xpath(
+                "number_of_establishments_in_court_complex": number_of_establishments_in_court_complex,
+                "number_of_cases": 0,
+                "case_list": [],
+                'case_details': [],
+            }
+            number_of_cases = selenium_get_text_xpath(
                 driver, '//*[@id="showList2"]/div[1]/h4')
             print(number_of_cases)
             data = {
-                        "number_of_establishments_in_court_complex":number_of_establishments_in_court_complex,
-                        "number_of_cases":number_of_cases,
-                        "case_list":[],
-                        'case_details': [],
-                    }
+                "number_of_establishments_in_court_complex": number_of_establishments_in_court_complex,
+                "number_of_cases": number_of_cases,
+                "case_list": [],
+                'case_details': [],
+            }
             view_element = selenium_get_element_id(driver, 'dispTable')
 
             driver.execute_script(
-            "arguments[0].scrollIntoView();", view_element)
+                "arguments[0].scrollIntoView();", view_element)
 
-            WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table")))
-            #list of case
-            case_list= get_table_data_as_list(
+            WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
+                (By.XPATH, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table")))
+            # list of case
+            case_list = get_table_data_as_list(
                 driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table')
             data = {
-                        "number_of_establishments_in_court_complex":number_of_establishments_in_court_complex,
-                        "number_of_cases":number_of_cases,
-                        "case_list":case_list,
-                        'case_details': [],
-                    }
+                "number_of_establishments_in_court_complex": number_of_establishments_in_court_complex,
+                "number_of_cases": number_of_cases,
+                "case_list": case_list,
+                'case_details': [],
+            }
             case_details = []
             for link in driver.find_elements(by="xpath", value='/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table/tbody/tr/td[5]'):
                 print('link', link)
                 time.sleep(2)
                 driver.execute_script(
-                "arguments[0].scrollIntoView();", link)
-                WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.CLASS_NAME, 'someclass')))
-                selenium_click_class(link,'someclass')
+                    "arguments[0].scrollIntoView();", link)
+                WebDriverWait(driver, 20).until(
+                    EC.element_to_be_clickable((By.CLASS_NAME, 'someclass')))
+                selenium_click_class(link, 'someclass')
                 print("view clicked")
                 time.sleep(2)
                 # details behind the hyperlink
@@ -275,7 +281,8 @@ def main(advoc_name, high_court_id, bench_id):
                     case_raa = {'status': False, 'data': {}}
                 # acts
                 try:
-                    case_acts_data = get_table_data_as_list(driver, '//*[@id="act_table"]')
+                    case_acts_data = get_table_data_as_list(
+                        driver, '//*[@id="act_table"]')
                     case_acts = {'status': True, 'data': case_acts_data}
                 except:
                     case_acts = {'status': False, 'data': {}}
@@ -293,47 +300,48 @@ def main(advoc_name, high_court_id, bench_id):
                     case_orders = {'status': True, 'data': case_orders_data}
                 except:
                     case_orders = {'status': False, 'data': {}}
-                
+
                 # objections
                 try:
                     case_objections_data = get_table_data_as_list(
                         driver, '//*[@id="caseHistoryDiv"]/div[3]/table')
-                    case_objections = {'status': True, 'data': case_objections_data}
+                    case_objections = {'status': True,
+                                       'data': case_objections_data}
                 except:
                     case_objections = {'status': False, 'data': {}}
 
-                details = {case_details_title: {
-                "title": case_details_title,
-                "registration_no": case_details_registration_no,
-                "cnr_no": case_details_cnr_no,
-                "filing_date": case_details_filing_date,
-                "registration_date": case_details_registration_date,
-                "status": case_status,
-                "paa": case_paa,
-                "raa": case_raa,
-                "acts": case_acts,
-                "history": case_history,
-                "orders": case_orders,
-                "objections": case_objections,
-                }}
+                details = {
+                    "title": case_details_title,
+                    "registration_no": case_details_registration_no,
+                    "cnr_no": case_details_cnr_no,
+                    "filing_date": case_details_filing_date,
+                    "registration_date": case_details_registration_date,
+                    "status": case_status,
+                    "paa": case_paa,
+                    "raa": case_raa,
+                    "acts": case_acts,
+                    "history": case_history,
+                    "orders": case_orders,
+                    "objections": case_objections,
+                }
                 case_details.append(details)
                 print(case_details)
                 selenium_click_xpath(driver, "/html/body/div[1]/div/p/a")
                 time.sleep(2)
-                selenium_click_xpath(driver, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[48]/input")
+                selenium_click_xpath(
+                    driver, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[48]/input")
                 view_link = selenium_get_element_id(driver, 'dispTable')
 
                 driver.execute_script(
-                "arguments[0].scrollIntoView();", view_link)
+                    "arguments[0].scrollIntoView();", view_link)
 
-                WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table")))
-                
-            
+                WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
+                    (By.XPATH, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table")))
 
             data = {
-                "number_of_establishments_in_court_complex":number_of_establishments_in_court_complex,
-                "number_of_cases":number_of_cases,
-                "case_list":case_list,
+                "number_of_establishments_in_court_complex": number_of_establishments_in_court_complex,
+                "number_of_cases": number_of_cases,
+                "case_list": case_list,
                 'case_details': case_details,
             }
         except:
@@ -345,8 +353,6 @@ def main(advoc_name, high_court_id, bench_id):
     with open(page, "w+", newline="", encoding="UTF-8") as file:
         file.write(json_data)
 
-
-
     page = "scrape1.html"
     with open(page, "w+", newline="", encoding="UTF-8") as f:
         f.write("<html><body><pre id='json'></pre></body></html>")
@@ -355,7 +361,7 @@ def main(advoc_name, high_court_id, bench_id):
             f"document.getElementById('json').textContent = JSON.stringify({json.dumps(data)}, undefined, 2);")
         f.write("</script>")
     webbrowser.open('file://' + os.path.realpath(page), new=2)
-    
+
     driver.close()
     driver.quit()
 
@@ -364,7 +370,7 @@ if __name__ == "__main__":
     try:
         start = datetime.datetime.now()
 
-        advoc_name='test'
+        advoc_name = 'test'
         # sess_state_code='High Court for State of Telangana'
         # court_complex_code='Principal Bench at Hyderabad'
         high_court_id = '29'
