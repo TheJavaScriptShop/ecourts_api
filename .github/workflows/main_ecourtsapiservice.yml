@@ -30,7 +30,7 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         push: true
-        tags: ecourtsscrapper.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_adfc802c8bda4f6397a80bc5f2fb563b }}/ecourtsapidockerimage:${{ github.sha }}
+        tags: ecourtsscrapper.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_adfc802c8bda4f6397a80bc5f2fb563b }}/ecourtsapidockerimage:latest
         file: ./Dockerfile
 
   deploy:
@@ -48,4 +48,4 @@ jobs:
         app-name: 'ecourtsapiservice'
         slot-name: 'production'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_7d82e7ba6c0f4e16a33b730881b0d75f }}
-        images: 'ecourtsscrapper.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_adfc802c8bda4f6397a80bc5f2fb563b }}/ecourtsapidockerimage:${{ github.sha }}'
+        images: 'ecourtsscrapper.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_adfc802c8bda4f6397a80bc5f2fb563b }}/ecourtsapidockerimage:latest'
