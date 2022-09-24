@@ -6,7 +6,7 @@ name: Build and deploy container app to Azure Web App - ecourtsapiservice
 on:
   push:
     branches:
-      - main
+      - dev
   workflow_dispatch:
 
 jobs:
