@@ -322,7 +322,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             "number_of_establishments_in_court_complex": number_of_establishments_in_court_complex,
             "number_of_cases": number_of_cases,
             "case_list": case_list,
-            "case_details": {case_details}
+            "case_details": case_details
         }
         print(data)
     except Exception as e:

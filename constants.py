@@ -9,7 +9,7 @@ state_codes = [
             }
         ]
     },
-      {
+    {
         'id': '2',
         'name': 'High Court of Andhra Pradesh',
         'bench': [
