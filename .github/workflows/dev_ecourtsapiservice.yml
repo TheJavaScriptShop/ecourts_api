@@ -64,5 +64,4 @@ jobs:
       with:
         azcliversion: 2.0.72
         inlineScript: |
-          az account list
           az functionapp restart --resource-group ecourts_api --name ecourtsapiservice-dev
