@@ -13,19 +13,7 @@ __location__ = os.path.realpath(os.path.join(
     os.getcwd(), os.path.dirname(__file__)))
 
 
-def main(req: func.HttpRequest) -> func.HttpResponse:
-    """ Main function for Azure Function """
-    try:
-        main_handler(req)
-    except Exception as e_exception:
-        return func.HttpResponse(
-            body=json.dumps(
-                {"status": False, "debugMessage": str(e_exception)}),
-            status_code=200
-        )
-
-
-def main_handler(req: func.HttpRequest) -> func.HttpResponse:
+def main_handler(req):
     logging.info(req)
     logging.info('Called ECourts Service.')
     logging.info(time.ctime())
@@ -89,3 +77,15 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
             {"status": False, "debugMessage": "Method not supported"}),
         status_code=200
     )
+
+
+def main(req: func.HttpRequest) -> func.HttpResponse:
+    """ Main function for Azure Function """
+    try:
+        main_handler(req)
+    except Exception as e_exception:
+        return func.HttpResponse(
+            body=json.dumps(
+                {"status": False, "debugMessage": str(e_exception)}),
+            status_code=200
+        )
