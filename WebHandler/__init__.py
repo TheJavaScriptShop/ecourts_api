@@ -20,7 +20,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info(time.ctime())
     if (req.method.lower() != "post"):
         return func.HttpResponse(
-            body={"status": False, "debugMessage": "Method not supported"},
+            body=json.dumps(
+                {"status": False, "debugMessage": "Method not supported"}),
             status_code=200
         )
 
@@ -39,13 +40,15 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             is_valid_request = False
     else:
         return func.HttpResponse(
-            body={"status": False, "debugMessage": "Method not supported"},
+            body=json.dumps(
+                {"status": False, "debugMessage": "Method not supported"}),
             status_code=200
         )
 
     if not is_valid_request:
         return func.HttpResponse(
-            body={"status": False, "debugMessage": "Insufficient parameters"},
+            body=json.dumps(
+                {"status": False, "debugMessage": "Insufficient parameters"}),
             status_code=200
         )
 
@@ -63,6 +66,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             "advoc_name"), req_body.get("state_code"), req_body.get("bench_code"))
         return func.HttpResponse(json.dumps(data))
     return func.HttpResponse(
-        body={"status": False, "debugMessage": "Method not supported"},
+        body=json.dumps(
+            {"status": False, "debugMessage": "Method not supported"}),
         status_code=200
     )
