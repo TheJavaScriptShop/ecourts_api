@@ -13,7 +13,7 @@ __location__ = os.path.realpath(os.path.join(
     os.getcwd(), os.path.dirname(__file__)))
 
 
-def main_handler(req):
+def main_handler(req: func.HttpRequest) -> func.HttpResponse:
     logging.info(req)
     logging.info('Called ECourts Service.')
     logging.info(time.ctime())
@@ -82,7 +82,7 @@ def main_handler(req):
 def main(req: func.HttpRequest) -> func.HttpResponse:
     """ Main function for Azure Function """
     try:
-        main_handler(req)
+        return main_handler(req)
     except Exception as e_exception:
         return func.HttpResponse(
             body=json.dumps(
