@@ -62,6 +62,5 @@ jobs:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
     - uses: azure/CLI@v1
       with:
-        azcliversion: 2.0.72
         inlineScript: |
           az functionapp restart --resource-group ecourts_api --name ecourtsapiservice-dev
