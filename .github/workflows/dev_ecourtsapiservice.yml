@@ -50,4 +50,4 @@ jobs:
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_7d82e7ba6c0f4e16a33b730881b0d75f }}
         images: 'ecourtsscrapper.azurecr.io/ecourtsapidockerimage:dev'
     - name: Restart App
-      run: az functionapp restart ecourtsapiservice-dev
+      run: az functionapp restart --name ecourtsapiservice-dev
