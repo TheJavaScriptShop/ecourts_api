@@ -49,10 +49,20 @@ jobs:
         slot-name: 'production'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_7d82e7ba6c0f4e16a33b730881b0d75f }}
         images: 'ecourtsscrapper.azurecr.io/ecourtsapidockerimage:dev'
-    - name: Login To AZ
-      uses: azure/login@v1
+    - name: Install Azure cli
+      run: |
+        sudo apt-get install ca-certificates curl apt-transport-https lsb-release gnupg
+        curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/microsoft.gpg > /dev/null
+        AZ_REPO=$(lsb_release -cs)
+        echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" | sudo tee /etc/apt/sources.list.d/azure-cli.list
+        sudo apt-get update
+        sudo apt-get install azure-cli
+    - uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
-    - name: Restart App
-      run: |
-        az functionapp restart --resource-group ecourts_api --name ecourtsapiservice-dev
+    - uses: azure/CLI@v1
+      with:
+        azcliversion: 2.0.72
+        inlineScript: |
+          az account list
+          az functionapp restart --resource-group ecourts_api --name ecourtsapiservice-dev
