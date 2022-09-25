@@ -41,8 +41,6 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
             is_valid_request = False
         if not req_body.get("highCourtId"):
             is_valid_request = False
-        if not req_body.get("stateCode"):
-            is_valid_request = False
         if not req_body.get("benchCode"):
             is_valid_request = False
     else:
@@ -70,7 +68,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
 
     if req_params.get("method") == "advocatecasesbyname":
         data = get_highcourt_cases_by_name(driver, req_body.get(
-            "advoc_name"), req_body.get("state_code"), req_body.get("bench_code"))
+            "advocateName"), req_body.get("highCourtId"), req_body.get("benchCode"))
         return func.HttpResponse(json.dumps(data))
     return func.HttpResponse(
         body=json.dumps(
