@@ -17,13 +17,6 @@ RUN apt-get update \
     wget \
     unzip \
     unixodbc-dev \
-    libpq-dev \
-    libssl-dev \
-    gcc \
-    python3-dev \
-    musl-dev \
-    python-yq \
-    postgresql-dev \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt /
