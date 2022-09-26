@@ -25,7 +25,7 @@ RUN apt-get update; \
 RUN apt-get remove libpq5
 RUN apt-get update; \
     apt-get -y upgrade; \
-    apt-get install -y libpq-dev postgresql-dev
+    apt-get install -y libpq-dev
 
 COPY requirements.txt /
 RUN pip install -r /requirements.txt
