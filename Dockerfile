@@ -17,6 +17,8 @@ RUN apt-get update \
     wget \
     unzip \
     unixodbc-dev \
+    libpq-dev \
+    libssl-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # 1. Install Chrome (root image is debian)
