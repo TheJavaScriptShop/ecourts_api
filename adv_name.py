@@ -1,11 +1,18 @@
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
+# from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.options import Options
-from webdriver_manager.firefox import GeckoDriverManager
+# from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import Select
+
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
+from webdriver_manager.firefox import GeckoDriverManager
+from selenium.webdriver.firefox.service import Service
+
+
 
 
 import base64
@@ -125,16 +132,48 @@ def get_captcha(driver):
 
 
 def main(advoc_name, high_court_id, bench_id):
+    # options = Options()
+    # DRIVER_PATH = '/Users/sarvani/Downloads/chromedriver'
+    # options.add_argument("--disable-extensions")
+    # options.add_argument("--disable-infobars")
+    # options.add_argument("--window-size=1700x800")
+
+    # # options.add_argument("--headless")
+
+    # prefs = {
+    #     "browser.helperApps.neverAsk.saveToDisk" : "application/octet-stream;application/vnd.ms-excel;text/html;application/pdf",
+    #     "pdfjs.disabled" : True,
+    #     "print.always_print_silent" : True,
+    #     # "network.proxy.autoconfig_url.include_path" : True,
+    #     "print.show_print_progress": False,
+    #     "browser.download.show_plugins_in_list": False,
+    #     "browser.download.folderList": 2,
+    #     "download.default_directory": '/Users/sarvani/Desktop/arbito' 
+    # }
+    
+    # options.add_experimental_option("prefs", prefs)
+
+    # driver = webdriver.Chrome(DRIVER_PATH, chrome_options=options)
+
     options = Options()
-    DRIVER_PATH = '/usr/local/bin/chromedriver'
-    options.add_argument("--disable-extensions")
-    options.add_argument("--disable-infobars")
-    options.add_argument("--window-size=1700x800")
+    # options.add_argument("--headless")
+    # options.headless = True
+    profile = FirefoxProfile()
+    profile.set_preference(
+        "browser.helperApps.neverAsk.saveToDisk", "application/octet-stream;application/vnd.ms-excel;text/html;application/pdf")
+    profile.set_preference('pdfjs.disabled', True)
+    profile.set_preference('print.always_print_silent', True)
+    profile.set_preference('print.show_print_progress', False)
+    profile.set_preference('browser.download.show_plugins_in_list', False)
+    profile.set_preference('browser.download.folderList', 2)
+    profile.set_preference('browser.download.dir',
+                           '/Users/sarvani/Desktop/arbito')
+    driver = webdriver.Firefox(service=Service(
+        GeckoDriverManager().install()), options=options, firefox_profile=profile)
+    
 
-    options.add_argument("--headless")
 
-    driver = webdriver.Chrome(DRIVER_PATH, chrome_options=options)
-
+    actions = ActionChains(driver)
     is_failed_with_captach = True
     fetched_data = False
 
@@ -145,6 +184,7 @@ def main(advoc_name, high_court_id, bench_id):
         selenium_click_id(driver, 'leftPaneMenuCS')
         print("Successfully clicked")
         selenium_click_xpath(driver, '/html/body/div[2]/div/div/div[2]/button')
+        time.sleep(2)
         print("ok clicked")
         state_code = Select(selenium_get_element_id(driver, 'sess_state_code'))
         state_code.select_by_value(high_court_id)
@@ -296,8 +336,29 @@ def main(advoc_name, high_court_id, bench_id):
                 # orders
                 try:
                     case_orders_data = get_table_data_as_list(
-                        driver, '//*[@id="caseHistoryDiv"]/div[2]/div[2]/table[4]')
+                        driver, '//table[@class="order_table"]')
                     case_orders = {'status': True, 'data': case_orders_data}
+                    print('orders available')
+                    # selenium_click_xpath(driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[52]/div[2]/div[2]/table[4]/tbody/tr[2]/td[5]/a')
+                    selenium_click_xpath(driver,
+                         '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[52]/div[2]/div[2]/table[4]/tbody/tr[2]/td[5]/a')
+    
+                    print('cliked')
+                    for pdf_link in driver.find_elements(by='xpath', value='//table[@class="order_table"]/tbody/tr/td[5]'):
+                        print('entered for loop')
+                        driver.execute_script(
+                        "arguments[0].scrollIntoView();", pdf_link)
+                        # ipdb.set_trace()
+                        print('scrolled')
+                        time.sleep(1)
+
+                        # driver.switch_to.new_window('tab')
+
+                        # driver.switch_to.window(original_window)
+                        print('about to click')
+                        selenium_click_xpath(pdf_link, ".//a")
+                        time.sleep(2)
+                        print('clicked')
                 except:
                     case_orders = {'status': False, 'data': {}}
 
@@ -370,7 +431,7 @@ if __name__ == "__main__":
     try:
         start = datetime.datetime.now()
 
-        advoc_name = 'test'
+        advoc_name = 'V Aneesh'
         # sess_state_code='High Court for State of Telangana'
         # court_complex_code='Principal Bench at Hyderabad'
         high_court_id = '29'
