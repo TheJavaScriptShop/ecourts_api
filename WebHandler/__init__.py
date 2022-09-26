@@ -89,6 +89,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
     if req_params.get("method") == "advocatecasesbyname":
         @fire_and_forget
         def get_highcourt_cases_by_name_wrapper():
+            sentry_sdk.capture_message("get_highcourt_cases_by_name_wrapper")
             try:
                 data = get_highcourt_cases_by_name(driver, req_body.get(
                     "advocateName"), req_body.get("highCourtId"), req_body.get("benchCode"))
@@ -98,6 +99,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
             except Exception as e:
                 sentry_sdk.capture_exception(e)
         get_highcourt_cases_by_name_wrapper()
+        sentry_sdk.capture_message("return")
         return func.HttpResponse(
             body=json.dumps(
                 {"status": True, "debugMessage": "Request Received and processing", "request": {"body": req_body, "params": req_params}}),
