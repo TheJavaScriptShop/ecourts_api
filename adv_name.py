@@ -1,16 +1,13 @@
 from selenium import webdriver
-# from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-# from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import Select
 
 from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
-from webdriver_manager.firefox import GeckoDriverManager
-from selenium.webdriver.firefox.service import Service
+
 
 
 
@@ -132,44 +129,35 @@ def get_captcha(driver):
 
 
 def main(advoc_name, high_court_id, bench_id):
-    # options = Options()
-    # DRIVER_PATH = '/Users/sarvani/Downloads/chromedriver'
-    # options.add_argument("--disable-extensions")
-    # options.add_argument("--disable-infobars")
-    # options.add_argument("--window-size=1700x800")
-
-    # # options.add_argument("--headless")
-
-    # prefs = {
-    #     "browser.helperApps.neverAsk.saveToDisk" : "application/octet-stream;application/vnd.ms-excel;text/html;application/pdf",
-    #     "pdfjs.disabled" : True,
-    #     "print.always_print_silent" : True,
-    #     # "network.proxy.autoconfig_url.include_path" : True,
-    #     "print.show_print_progress": False,
-    #     "browser.download.show_plugins_in_list": False,
-    #     "browser.download.folderList": 2,
-    #     "download.default_directory": '/Users/sarvani/Desktop/arbito' 
-    # }
-    
-    # options.add_experimental_option("prefs", prefs)
-
-    # driver = webdriver.Chrome(DRIVER_PATH, chrome_options=options)
-
     options = Options()
+    DRIVER_PATH = '/Users/sarvani/Downloads/chromedriver'
+    options.add_argument("--disable-extensions")
+    options.add_argument("--disable-infobars")
+    options.add_argument("--window-size=1700x800")
+
     # options.add_argument("--headless")
-    # options.headless = True
-    profile = FirefoxProfile()
-    profile.set_preference(
-        "browser.helperApps.neverAsk.saveToDisk", "application/octet-stream;application/vnd.ms-excel;text/html;application/pdf")
-    profile.set_preference('pdfjs.disabled', True)
-    profile.set_preference('print.always_print_silent', True)
-    profile.set_preference('print.show_print_progress', False)
-    profile.set_preference('browser.download.show_plugins_in_list', False)
-    profile.set_preference('browser.download.folderList', 2)
-    profile.set_preference('browser.download.dir',
-                           '/Users/sarvani/Desktop/arbito')
-    driver = webdriver.Firefox(service=Service(
-        GeckoDriverManager().install()), options=options, firefox_profile=profile)
+
+    prefs = {
+        "browser.helperApps.neverAsk.saveToDisk" : "application/octet-stream;application/vnd.ms-excel;text/html;application/pdf",
+        "pdfjs.disabled" : True,
+        "print.always_print_silent" : True,
+        # "network.proxy.autoconfig_url.include_path" : True,
+        "print.show_print_progress": False,
+        "browser.download.show_plugins_in_list": False,
+        "browser.download.folderList": 2,
+        "browser.download.dir": '/Users/sarvani/Desktop/arbito',
+        "download.default_directory": '/Users/sarvani/Desktop/arbito', #Change default directory for downloads
+        "download.prompt_for_download": False, #To auto download the file
+        "download.directory_upgrade": True,
+        "plugins.always_open_pdf_externally": True #It will not show PDF directly in chrome
+
+    }
+    
+    options.add_experimental_option("prefs", prefs)
+
+
+    driver = webdriver.Chrome(DRIVER_PATH, chrome_options=options)
+
     
 
 
@@ -339,26 +327,16 @@ def main(advoc_name, high_court_id, bench_id):
                         driver, '//table[@class="order_table"]')
                     case_orders = {'status': True, 'data': case_orders_data}
                     print('orders available')
-                    # selenium_click_xpath(driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[52]/div[2]/div[2]/table[4]/tbody/tr[2]/td[5]/a')
-                    selenium_click_xpath(driver,
-                         '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[52]/div[2]/div[2]/table[4]/tbody/tr[2]/td[5]/a')
-    
-                    print('cliked')
-                    for pdf_link in driver.find_elements(by='xpath', value='//table[@class="order_table"]/tbody/tr/td[5]'):
-                        print('entered for loop')
+                    
+                    for pdf_link in driver.find_elements(by='xpath', value='//table[@class="order_table"]/tbody/tr/td[5]/a'):
+                        ipdb.set_trace()
+                        table = selenium_get_element_id(driver, '//table[@class="order_table"]')
                         driver.execute_script(
-                        "arguments[0].scrollIntoView();", pdf_link)
-                        # ipdb.set_trace()
-                        print('scrolled')
+                        "arguments[0].scrollIntoView();", table)
                         time.sleep(1)
-
-                        # driver.switch_to.new_window('tab')
-
-                        # driver.switch_to.window(original_window)
-                        print('about to click')
-                        selenium_click_xpath(pdf_link, ".//a")
+                        pdf_link.click()
                         time.sleep(2)
-                        print('clicked')
+                        
                 except:
                     case_orders = {'status': False, 'data': {}}
 
