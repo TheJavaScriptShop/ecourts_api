@@ -26,7 +26,7 @@ RUN apt-get update \
 
 RUN apt-get update; \
     apt-get -y upgrade; \
-    apt-get install -y nocache gnupg2 wget lsb-release apt-transport-https
+    apt-get install -y nocache gnupg2 wget lsb-release apt-transport-https curl pkg-config
 RUN apt-get remove libpq5
 RUN apt-get update; \
     apt-get -y upgrade; \
