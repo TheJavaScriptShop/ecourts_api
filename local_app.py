@@ -6,7 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.firefox import GeckoDriverManager
 from selenium.webdriver.support.ui import Select
-
+from flask import Flask, jsonify
 
 import base64
 import os
@@ -76,3 +76,14 @@ if __name__ == "__main__":
         end = datetime.datetime.now()
         total = end - start
         print(total.seconds)
+
+app = Flask(__name__)
+
+
+@app.route("/", methods=["POST"])
+def main():
+    return jsonify({"status": True, "debugMessage": "Received"})
+
+
+if __name__ == "__main__":
+    app.run(debug=True, port=4000)

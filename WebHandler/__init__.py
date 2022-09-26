@@ -7,9 +7,18 @@ import threading
 
 import azure.functions as func
 from selenium import webdriver
+import sentry_sdk
 
 from .scrappers.highcourts import get_highcourt_cases_by_name
 
+sentry_sdk.init(
+    dsn="https://7818402c6eff4a99a87db4ceaf0ce3e5@o1183470.ingest.sentry.io/6776130",
+
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for performance monitoring.
+    # We recommend adjusting this value in production.
+    traces_sample_rate=1.0
+)
 
 __location__ = os.path.realpath(os.path.join(
     os.getcwd(), os.path.dirname(__file__)))
@@ -80,12 +89,13 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
     if req_params.get("method") == "advocatecasesbyname":
         @fire_and_forget
         def get_highcourt_cases_by_name_wrapper():
-            data = get_highcourt_cases_by_name(driver, req_body.get(
-                "advocateName"), req_body.get("highCourtId"), req_body.get("benchCode"))
             try:
+                data = get_highcourt_cases_by_name(driver, req_body.get(
+                    "advocateName"), req_body.get("highCourtId"), req_body.get("benchCode"))
                 requests.post(url=req_body.get("callBackUrl"), timeout=10, json=json.dumps(
                     {"status": data["status"], "data": data["data"], "request": {"body": req_body, "params": req_params}}))
-            except:
+            except Exception as e:
+                sentry_sdk.capture_exception(e)
                 pass
         get_highcourt_cases_by_name_wrapper()
         return func.HttpResponse(
