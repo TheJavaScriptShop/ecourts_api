@@ -30,7 +30,7 @@ RUN apt-get update; \
 RUN apt-get remove libpq5
 RUN apt-get update; \
     apt-get -y upgrade; \
-    apt-get install -y libpq-dev postgresql-server-dev-all gcc python3.10-dev musl-dev python3-psycopg2 build-essential libssl-dev libffi-dev libc-dev openssl cargo xmlsec1 libxmlsec1-dev
+    apt-get install -y libpq-dev postgresql-server-dev-all gcc musl-dev python3-psycopg2 build-essential libssl-dev libffi-dev libc-dev openssl cargo xmlsec1 libxmlsec1-dev
 RUN apt-get update; \
     apt-get -y upgrade; \
     apt-get install -y python3-sentry-sdk
