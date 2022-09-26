@@ -5,6 +5,10 @@ FROM mcr.microsoft.com/azure-functions/python:4-python3.9
 ENV AzureWebJobsScriptRoot=/home/site/wwwroot \
     AzureFunctionsJobHost__Logging__Console__IsEnabled=true
 
+# set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
 RUN pip install --upgrade pip
 RUN pip install --upgrade setuptools
 
@@ -25,7 +29,7 @@ RUN apt-get update; \
 RUN apt-get remove libpq5
 RUN apt-get update; \
     apt-get -y upgrade; \
-    apt-get install -y libpq-dev
+    apt-get install -y libpq-dev postgresql-server-dev-all gcc python3-dev musl-dev
 
 COPY requirements.txt /
 RUN pip install -r /requirements.txt
