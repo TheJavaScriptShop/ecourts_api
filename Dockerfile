@@ -11,6 +11,7 @@ ENV PYTHONUNBUFFERED 1
 
 RUN pip3 install --upgrade pip
 RUN pip3 install --upgrade setuptools
+RUN pip3 install --upgrade wheel
 
 # 0. Install essential packages
 RUN apt-get update \
