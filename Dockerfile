@@ -25,6 +25,7 @@ RUN apt-get update \
     python3-dev \
     musl-dev \
     python-yq \
+    postgresql-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # 1. Install Chrome (root image is debian)
