@@ -22,6 +22,7 @@ RUN apt-get update \
 RUN apt-get update; \
     apt-get -y upgrade; \
     apt-get install -y gnupg2 wget lsb-release
+RUN apt-get remove libpq5
 RUN apt-get install libpq-dev
 RUN apt-get install postgresql-dev
 
