@@ -6,6 +6,7 @@ ENV AzureWebJobsScriptRoot=/home/site/wwwroot \
     AzureFunctionsJobHost__Logging__Console__IsEnabled=true
 
 RUN pip install --upgrade pip
+RUN pip install --upgrade setuptools
 COPY requirements.txt /
 RUN pip install -r /requirements.txt
 
