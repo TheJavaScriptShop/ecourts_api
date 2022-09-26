@@ -20,11 +20,6 @@ RUN apt-get update \
     unixodbc-dev \
     && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update; \
-    apt-get -y upgrade; \
-    apt-get install -y python3-sentry-sdk
-RUN apt-get install --fix-broken
-
 COPY requirements.txt /
 RUN pip3 install -r /requirements.txt
 
