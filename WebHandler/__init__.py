@@ -114,6 +114,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     try:
         return main_handler(req)
     except Exception as e_exception:
+        sentry_sdk.capture_exception(e_exception)
         return func.HttpResponse(
             body=json.dumps(
                 {"status": False, "debugMessage": str(e_exception)}),

@@ -6,12 +6,8 @@ ENV AzureWebJobsScriptRoot=/home/site/wwwroot \
     AzureFunctionsJobHost__Logging__Console__IsEnabled=true
 
 # set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
 
 RUN pip3 install --upgrade pip
-RUN pip3 install --upgrade setuptools
-RUN pip3 install --upgrade wheel
 
 # 0. Install essential packages
 RUN apt-get update \
@@ -24,13 +20,6 @@ RUN apt-get update \
     unixodbc-dev \
     && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update; \
-    apt-get -y upgrade; \
-    apt-get install -y nocache gnupg2 wget lsb-release apt-transport-https curl pkg-config
-RUN apt-get remove libpq5
-RUN apt-get update; \
-    apt-get -y upgrade; \
-    apt-get install -y libpq-dev postgresql-server-dev-all gcc musl-dev python3-psycopg2 build-essential libssl-dev libffi-dev libc-dev openssl cargo xmlsec1 libxmlsec1-dev
 RUN apt-get update; \
     apt-get -y upgrade; \
     apt-get install -y python3-sentry-sdk
