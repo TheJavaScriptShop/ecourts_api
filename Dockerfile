@@ -29,7 +29,7 @@ RUN apt-get update; \
 RUN apt-get remove libpq5
 RUN apt-get update; \
     apt-get -y upgrade; \
-    apt-get install -y libpq-dev postgresql-server-dev-all gcc python3-dev musl-dev python3-psycopg2 build-essential
+    apt-get install -y libpq-dev postgresql-server-dev-all gcc python3.9-dev musl-dev python3-psycopg2 build-essential
 
 COPY requirements.txt /
 RUN pip3 install -r /requirements.txt
