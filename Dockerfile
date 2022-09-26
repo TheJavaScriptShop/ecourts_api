@@ -19,6 +19,8 @@ RUN apt-get update \
     unixodbc-dev \
     && rm -rf /var/lib/apt/lists/*
 
+RUN apt-get install libpq-dev
+
 COPY requirements.txt /
 RUN pip install -r /requirements.txt
 
