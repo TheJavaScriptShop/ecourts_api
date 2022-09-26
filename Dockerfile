@@ -7,8 +7,6 @@ ENV AzureWebJobsScriptRoot=/home/site/wwwroot \
 
 RUN pip install --upgrade pip
 RUN pip install --upgrade setuptools
-COPY requirements.txt /
-RUN pip install -r /requirements.txt
 
 # 0. Install essential packages
 RUN apt-get update \
@@ -27,6 +25,9 @@ RUN apt-get update \
     python-yq \
     postgresql-dev \
     && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt /
+RUN pip install -r /requirements.txt
 
 # 1. Install Chrome (root image is debian)
 # See https://stackoverflow.com/questions/49132615/installing-chrome-in-docker-file
