@@ -92,11 +92,11 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
             try:
                 data = get_highcourt_cases_by_name(driver, req_body.get(
                     "advocateName"), req_body.get("highCourtId"), req_body.get("benchCode"))
+                sentry_sdk.capture_message(json.dumps(data))
                 requests.post(url=req_body.get("callBackUrl"), timeout=10, json=json.dumps(
                     {"status": data["status"], "data": data["data"], "request": {"body": req_body, "params": req_params}}))
             except Exception as e:
                 sentry_sdk.capture_exception(e)
-                pass
         get_highcourt_cases_by_name_wrapper()
         return func.HttpResponse(
             body=json.dumps(
