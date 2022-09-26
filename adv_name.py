@@ -126,7 +126,7 @@ def get_captcha(driver):
 
 def main(advoc_name, high_court_id, bench_id):
     options = Options()
-    DRIVER_PATH = '/usr/local/bin/chromedriver'
+    DRIVER_PATH = '/Users/pp/Downloads/chromedriver'
     options.add_argument("--disable-extensions")
     options.add_argument("--disable-infobars")
     options.add_argument("--window-size=1700x800")
@@ -370,7 +370,7 @@ if __name__ == "__main__":
     try:
         start = datetime.datetime.now()
 
-        advoc_name = 'test'
+        advoc_name = 'V Aneesh'
         # sess_state_code='High Court for State of Telangana'
         # court_complex_code='Principal Bench at Hyderabad'
         high_court_id = '29'

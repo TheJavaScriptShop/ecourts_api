@@ -27,20 +27,22 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code):
     is_failed_with_captach = True
 
     while is_failed_with_captach:
-        driver.get('https://hcservices.ecourts.gov.in/hcservices/main.php')
         driver.maximize_window()
+        driver.get('https://hcservices.ecourts.gov.in/hcservices/main.php')
 
         selenium_click_id(driver, 'leftPaneMenuCS')
         logging.info("Successfully clicked")
         selenium_click_xpath(driver, '/html/body/div[2]/div/div/div[2]/button')
         logging.info("ok clicked")
-        state_code = Select(selenium_get_element_id(driver, 'sess_state_code'))
-        state_code.select_by_value(state_code)
-        time.sleep(2)
+        time.sleep(3)
+        state_select = Select(
+            selenium_get_element_id(driver, 'sess_state_code'))
+        state_select.select_by_value(state_code)
+        time.sleep(3)
         logging.info("Values selected")
-        court_code = Select(selenium_get_element_id(
+        court_select = Select(selenium_get_element_id(
             driver, 'court_complex_code'))
-        court_code.select_by_value(bench_code)
+        court_select.select_by_value(bench_code)
         logging.info("court code selected")
         selenium_click_id(driver, 'CSAdvName')
         logging.info("hypelink clicked")
@@ -206,7 +208,7 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code):
             "case_details": case_details
         }
         logging.info({"status": True, "data": data})
-        return data
+        return {"status": True, "data": data}
     except Exception as e_exception:
         logging.error(e_exception)
         return {'status': False, 'data': {}, "debugMessage": str(e_exception)}
