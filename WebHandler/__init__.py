@@ -69,10 +69,10 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
     if req_params.get("method") == "advocatecasesbyname":
         data = get_highcourt_cases_by_name(driver, req_body.get(
             "advocateName"), req_body.get("highCourtId"), req_body.get("benchCode"))
-        return func.HttpResponse(json.dumps(data))
+        return func.HttpResponse(json.dumps({"status": data["status"], "data": data["data"], "request": {"body": req_body, "params": req_params}}))
     return func.HttpResponse(
         body=json.dumps(
-            {"status": False, "debugMessage": "Method not supported"}),
+            {"status": False, "debugMessage": "Method not supported", "request": {"body": req_body, "params": req_params}}),
         status_code=200
     )
 

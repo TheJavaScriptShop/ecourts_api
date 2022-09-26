@@ -27,7 +27,6 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code):
     is_failed_with_captach = True
 
     while is_failed_with_captach:
-        driver.maximize_window()
         driver.get('https://hcservices.ecourts.gov.in/hcservices/main.php')
 
         selenium_click_id(driver, 'leftPaneMenuCS')

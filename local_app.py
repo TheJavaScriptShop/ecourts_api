@@ -31,7 +31,7 @@ def main(advoc_name, high_court_id, bench_id):
     options.add_argument("--disable-extensions")
     options.add_argument("--disable-infobars")
     options.add_argument("--window-size=1700x800")
-    # options.add_argument("--headless")
+    options.add_argument("--headless")
 
     driver = webdriver.Chrome(DRIVER_PATH, chrome_options=options)
     driver.maximize_window()
@@ -64,7 +64,6 @@ def main(advoc_name, high_court_id, bench_id):
 if __name__ == "__main__":
     start = datetime.datetime.now()
     try:
-
         advoc_name = 'V Aneesh'
         high_court_id = '29'
         bench_id = '1'
