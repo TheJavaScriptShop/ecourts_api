@@ -96,10 +96,8 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                 data = get_highcourt_cases_by_name(driver, req_body.get(
                     "advocateName"), req_body.get("highCourtId"), req_body.get("benchCode"))
                 logger.info(json.dumps(data))
-                logger.info(json.dumps(json.dumps(
-                    {"status": data["status"], "data": data["data"], "request": {"body": req_body, "params": req_params}})))
-                requests.post(url=req_body.get("callBackUrl"), timeout=10, json=json.dumps(
-                    {"status": data["status"], "data": data["data"], "request": {"body": req_body, "params": req_params}}))
+                requests.post(url=req_body.get("callBackUrl"), timeout=10, json={
+                              "data": data, "request": {"body": req_body, "params": req_params}})
             except Exception as e:
                 logger.info(e)
         get_highcourt_cases_by_name_wrapper()
