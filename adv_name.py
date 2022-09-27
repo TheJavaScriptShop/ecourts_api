@@ -366,7 +366,6 @@ def main(advoc_name, high_court_id, bench_id):
                     
                     case_orders_data = get_table_data_as_list(
                         driver, '//table[@class="order_table"]')
-                    case_orders = {'status': True, 'data': case_orders_data}
                     print('orders available')
                     i=1
                     for pdf_link in driver.find_elements(by='xpath', value='//table[@class="order_table"]/tbody/tr/td[5]/a'):
@@ -389,9 +388,10 @@ def main(advoc_name, high_court_id, bench_id):
                             i=i+1
                         except Exception as e:
                             print(str(e))
+                    case_orders = {'status': True, 'data': case_orders_data, 'number_of_downloaded_files': i-1}
                         
                 except:
-                    case_orders = {'status': False, 'data': {}}
+                    case_orders = {'status': False, 'data': {}, 'number_of_downloaded_files': 0}
 
                 # objections
                 try:
