@@ -16,6 +16,12 @@ from .scrappers.highcourts import get_highcourt_cases_by_name
 #     traces_sample_rate=1.0
 # )
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+sh = logging.StreamHandler()
+sh.setLevel(logging.DEBUG)
+logger.addHandler(sh)
+
 __location__ = os.path.realpath(os.path.join(
     os.getcwd(), os.path.dirname(__file__)))
 
@@ -28,9 +34,9 @@ def fire_and_forget(f):
 
 
 def main_handler(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info(req)
-    logging.info('Called ECourts Service.')
-    logging.info(time.ctime())
+    logger.info(req)
+    logger.info('Called ECourts Service.')
+    logger.info(time.ctime())
     if (req.method.lower() != "post"):
         return func.HttpResponse(
             body=json.dumps(
@@ -85,17 +91,17 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
     if req_params.get("method") == "advocatecasesbyname":
         @fire_and_forget
         def get_highcourt_cases_by_name_wrapper():
-            logging.info("get_highcourt_cases_by_name_wrapper")
+            logger.info("get_highcourt_cases_by_name_wrapper")
             try:
                 data = get_highcourt_cases_by_name(driver, req_body.get(
                     "advocateName"), req_body.get("highCourtId"), req_body.get("benchCode"))
-                logging.info(json.dumps(data))
-                logging.info(json.dumps(json.dumps(
+                logger.info(json.dumps(data))
+                logger.info(json.dumps(json.dumps(
                     {"status": data["status"], "data": data["data"], "request": {"body": req_body, "params": req_params}})))
                 requests.post(url=req_body.get("callBackUrl"), timeout=10, json=json.dumps(
                     {"status": data["status"], "data": data["data"], "request": {"body": req_body, "params": req_params}}))
             except Exception as e:
-                logging.info(e)
+                logger.info(e)
         get_highcourt_cases_by_name_wrapper()
         # sentry_sdk.capture_message("return")
         return func.HttpResponse(
