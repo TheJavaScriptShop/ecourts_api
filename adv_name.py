@@ -24,6 +24,8 @@ import easyocr
 import time
 import torch
 import ipdb
+import os
+import shutil
 
 
 # get grayscale image
@@ -136,17 +138,15 @@ def main(advoc_name, high_court_id, bench_id):
     options.add_argument("--window-size=1700x800")
 
     # options.add_argument("--headless")
-
+    file_path = '/Users/sarvani/Downloads/arbito'
     prefs = {
         "browser.helperApps.neverAsk.saveToDisk" : "application/octet-stream;application/vnd.ms-excel;text/html;application/pdf",
         "pdfjs.disabled" : True,
         "print.always_print_silent" : True,
-        # "network.proxy.autoconfig_url.include_path" : True,
         "print.show_print_progress": False,
         "browser.download.show_plugins_in_list": False,
         "browser.download.folderList": 2,
-        "browser.download.dir": '/Users/sarvani/Desktop/arbito',
-        "download.default_directory": '/Users/sarvani/Desktop/arbito', #Change default directory for downloads
+        "download.default_directory": file_path, #Change default directory for downloads
         "download.prompt_for_download": False, #To auto download the file
         "download.directory_upgrade": True,
         "plugins.always_open_pdf_externally": True #It will not show PDF directly in chrome
@@ -164,6 +164,40 @@ def main(advoc_name, high_court_id, bench_id):
     actions = ActionChains(driver)
     is_failed_with_captach = True
     fetched_data = False
+
+    def wait_for_download_and_rename(newFilename):
+        # function to wait for all chrome downloads to finish
+        def chrome_downloads(drv):
+            if not "chrome://downloads" in drv.current_url: # if 'chrome downloads' is not current tab
+                drv.execute_script("window.open('');") # open a new tab
+                drv.switch_to.window(driver.window_handles[1]) # switch to the new tab
+                drv.get("chrome://downloads/") # navigate to chrome downloads
+            return drv.execute_script("""
+                return document.querySelector('downloads-manager')
+                .shadowRoot.querySelector('#downloadsList')
+                .items.filter(e => e.state === 'COMPLETE')
+                .map(e => e.filePath || e.file_path || e.fileUrl || e.file_url);
+                """)
+        # wait for all the downloads to be completed
+        dld_file_paths = WebDriverWait(driver, 120, 1).until(chrome_downloads) # returns list of downloaded file paths
+        # Close the current tab (chrome downloads)
+        if "chrome://downloads" in driver.current_url:
+            driver.close()
+        # Switch back to original tab
+        driver.switch_to.window(driver.window_handles[0]) 
+        # get latest downloaded file name and path
+        dlFilename = dld_file_paths[0] # latest downloaded file from the list
+        # wait till downloaded file appears in download directory
+        time_to_wait = 20 # adjust timeout as per your needs
+        time_counter = 0
+        while not os.path.isfile(dlFilename):
+            time.sleep(1)
+            time_counter += 1
+            if time_counter > time_to_wait:
+                break
+        # rename the downloaded file
+        shutil.move(dlFilename, os.path.join(file_path,newFilename))
+        return
 
     while is_failed_with_captach:
         driver.get('https://hcservices.ecourts.gov.in/hcservices/main.php')
@@ -334,7 +368,7 @@ def main(advoc_name, high_court_id, bench_id):
                         driver, '//table[@class="order_table"]')
                     case_orders = {'status': True, 'data': case_orders_data}
                     print('orders available')
-                    
+                    i=1
                     for pdf_link in driver.find_elements(by='xpath', value='//table[@class="order_table"]/tbody/tr/td[5]/a'):
                         driver.implicitly_wait(5)
                         print('1')
@@ -342,11 +376,19 @@ def main(advoc_name, high_court_id, bench_id):
                         driver.execute_script(
                             "arguments[0].scrollIntoView();", pdf_link)
                         print('2')
-                        driver.implicitly_wait(5)
+                        # driver.implicitly_wait(5)
+                        time.sleep(2)
                         print('3')
                         pdf_link.click()
                         print('4')
                         time.sleep(2)
+                        pdfname = case_details_title.replace("/", "-")
+                        newfilename = f'{pdfname}-{1}.pdf'
+                        try:
+                            wait_for_download_and_rename(newfilename)
+                            i=i+1
+                        except Exception as e:
+                            print(str(e))
                         
                 except:
                     case_orders = {'status': False, 'data': {}}
