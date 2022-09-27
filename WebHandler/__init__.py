@@ -87,6 +87,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
 
     driver = webdriver.Chrome(
         "/usr/local/bin/chromedriver", chrome_options=chrome_options)
+    driver.maximize_window()
 
     if req_params.get("method") == "advocatecasesbyname":
         @fire_and_forget
