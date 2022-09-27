@@ -361,25 +361,29 @@ def main(advoc_name, high_court_id, bench_id):
                         var element = arguments[0];
                         element.parentNode.removeChild(element);
                         """, navbar_2)
+                    
+                    case_orders_data = get_table_data_as_list(
+                        driver, '//table[@class="order_table"]')
+                    no_of_orders = len(case_orders_data) - 1
                     orders = selenium_get_element_xpath(driver,'//table[@class="order_table"]')
                     print(orders)
                     driver.implicitly_wait(5)
                     driver.execute_script(
                         "arguments[0].scrollIntoView();", orders)
                     driver.implicitly_wait(2)
-                    case_orders_data = get_table_data_as_list(
-                        driver, '//table[@class="order_table"]')
-
                     i=1
-                    for pdf_link in orders.find_elements(by='xpath', value='.//tbody/tr/td[5]/a'):
-                      
-
-                         
+                    print(no_of_orders)
+                    for n in range(0,no_of_orders):
+                        print(n)
+                        pdf_xpath = f'//table[@class="order_table"]/tbody/tr[{(n+2)}]/td[5]/a'
+                        # ipdb.set_trace()
+                        pdf_element = selenium_get_element_xpath(driver, pdf_xpath)
                         driver.implicitly_wait(5)
-                        # driver.execute_script(
-                        #     "arguments[0].scrollIntoView();", pdf_link)
-                        # driver.implicitly_wait(5)
-                        pdf_link.click()
+                        driver.execute_script(
+                            "arguments[0].scrollIntoView();", pdf_element)
+                        WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
+                            (By.XPATH, pdf_xpath)))
+                        pdf_element.click()
                         driver.implicitly_wait(2)
                         pdfname = case_details_title.replace("/", "-")
                         newfilename = f'{pdfname}-{i}.pdf'
