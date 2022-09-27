@@ -22,6 +22,12 @@ from ..utils.ocr import (
     get_captcha
 )
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+sh = logging.StreamHandler()
+sh.setLevel(logging.DEBUG)
+logger.addHandler(sh)
+
 
 def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code):
     is_failed_with_captach = True
@@ -30,24 +36,24 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code):
         driver.get('https://hcservices.ecourts.gov.in/hcservices/main.php')
 
         selenium_click_id(driver, 'leftPaneMenuCS')
-        logging.info("Successfully clicked")
+        logger.info("Successfully clicked")
         selenium_click_xpath(driver, '/html/body/div[2]/div/div/div[2]/button')
-        logging.info("ok clicked")
+        logger.info("ok clicked")
         time.sleep(3)
         state_select = Select(
             selenium_get_element_id(driver, 'sess_state_code'))
         state_select.select_by_value(state_code)
         time.sleep(3)
-        logging.info("Values selected")
+        logger.info("Values selected")
         court_select = Select(selenium_get_element_id(
             driver, 'court_complex_code'))
         court_select.select_by_value(bench_code)
-        logging.info("court code selected")
+        logger.info("court code selected")
         selenium_click_id(driver, 'CSAdvName')
-        logging.info("hypelink clicked")
+        logger.info("hypelink clicked")
         selenium_send_keys_xpath(
             driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[14]/div[2]/div[2]/input', advoc_name)
-        logging.info("names sent")
+        logger.info("names sent")
         time.sleep(3)
 
         img_path = r"image.png"
@@ -64,14 +70,14 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code):
         try:
             failure_text = selenium_get_text_xpath(
                 driver, '//*[@id="errSpan1"]')
-            logging.info(failure_text)
+            logger.info(failure_text)
             if 'THERE IS AN ERROR' in failure_text:
                 is_failed_with_captach = False
         except:
             try:
                 failure_text_other_page = selenium_get_text_xpath(
                     driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[26]/p')
-                logging.info(failure_text_other_page)
+                logger.info(failure_text_other_page)
                 if "invalid" in failure_text_other_page.lower():
                     is_failed_with_captach = True
                 else:
@@ -82,10 +88,10 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code):
         # case details
         number_of_establishments_in_court_complex = selenium_get_text_xpath(
             driver, '//*[@id="showList2"]/div[1]/h3')
-        logging.info(number_of_establishments_in_court_complex)
+        logger.info(number_of_establishments_in_court_complex)
         number_of_cases = selenium_get_text_xpath(
             driver, '//*[@id="showList2"]/div[1]/h4')
-        logging.info(number_of_cases)
+        logger.info(number_of_cases)
         view_element = selenium_get_element_id(driver, 'dispTable')
 
         driver.execute_script(
@@ -99,14 +105,14 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code):
         # list of case details
         case_details = []
         for link in driver.find_elements(by="xpath", value='/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table/tbody/tr/td[5]'):
-            logging.info(link)
+            logger.info(link)
             time.sleep(3)
             driver.execute_script(
                 "arguments[0].scrollIntoView();", link)
             WebDriverWait(driver, 20).until(
                 EC.element_to_be_clickable((By.CLASS_NAME, 'someclass')))
             selenium_click_class(link, 'someclass')
-            logging.info("view clicked")
+            logger.info("view clicked")
             time.sleep(3)
             # details behind the hyperlink
             # case details
@@ -187,7 +193,7 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code):
                 "objections": case_objections,
             }
             case_details.append(details)
-            logging.info(case_details)
+            logger.info(case_details)
             selenium_click_xpath(driver, "/html/body/div[1]/div/p/a")
             time.sleep(3)
             selenium_click_xpath(
@@ -206,8 +212,8 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code):
             "case_list": case_list,
             "case_details": case_details
         }
-        logging.info({"status": True, "data": data})
+        logger.info({"status": True, "data": data})
         return {"status": True, "data": data}
     except Exception as e_exception:
-        logging.error(e_exception)
+        logger.error(e_exception)
         return {'status': False, 'data': {}, "debugMessage": str(e_exception)}
