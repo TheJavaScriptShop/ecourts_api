@@ -7,14 +7,14 @@ import threading
 
 import azure.functions as func
 from selenium import webdriver
-# import sentry_sdk
+import sentry_sdk
 
 from .scrappers.highcourts import get_highcourt_cases_by_name
 
-# sentry_sdk.init(
-#     dsn="https://7818402c6eff4a99a87db4ceaf0ce3e5@o1183470.ingest.sentry.io/6776130",
-#     traces_sample_rate=1.0
-# )
+sentry_sdk.init(
+    dsn="https://7818402c6eff4a99a87db4ceaf0ce3e5@o1183470.ingest.sentry.io/6776130",
+    traces_sample_rate=1.0
+)
 
 __location__ = os.path.realpath(os.path.join(
     os.getcwd(), os.path.dirname(__file__)))
@@ -85,18 +85,18 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
     if req_params.get("method") == "advocatecasesbyname":
         @fire_and_forget
         def get_highcourt_cases_by_name_wrapper():
-            # sentry_sdk.capture_message("get_highcourt_cases_by_name_wrapper")
+            sentry_sdk.capture_message("get_highcourt_cases_by_name_wrapper")
             try:
                 data = get_highcourt_cases_by_name(driver, req_body.get(
                     "advocateName"), req_body.get("highCourtId"), req_body.get("benchCode"))
-                # sentry_sdk.capture_message(json.dumps(data))
+                sentry_sdk.capture_message(json.dumps(data))
                 requests.post(url=req_body.get("callBackUrl"), timeout=10, json=json.dumps(
                     {"status": data["status"], "data": data["data"], "request": {"body": req_body, "params": req_params}}))
             except Exception as e:
-                # sentry_sdk.capture_exception(e)
+                sentry_sdk.capture_exception(e)
                 pass
         get_highcourt_cases_by_name_wrapper()
-        # sentry_sdk.capture_message("return")
+        sentry_sdk.capture_message("return")
         return func.HttpResponse(
             body=json.dumps(
                 {"status": True, "debugMessage": "Request Received and processing", "request": {"body": req_body, "params": req_params}}),
@@ -113,7 +113,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     try:
         return main_handler(req)
     except Exception as e_exception:
-        # sentry_sdk.capture_exception(e_exception)
+        sentry_sdk.capture_exception(e_exception)
         return func.HttpResponse(
             body=json.dumps(
                 {"status": False, "debugMessage": str(e_exception)}),
