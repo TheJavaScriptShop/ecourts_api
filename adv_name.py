@@ -323,18 +323,29 @@ def main(advoc_name, high_court_id, bench_id):
                     case_history = {'status': False, 'data': {}}
                 # orders
                 try:
+                    
+                    # orders = selenium_get_element_xpath(driver,'//table[@class="order_table"]')
+                    # driver.implicitly_wait(5)
+                    # driver.execute_script(
+                    #     "arguments[0].scrollIntoView();", orders)
+                    # time.sleep(2)
+                    
                     case_orders_data = get_table_data_as_list(
                         driver, '//table[@class="order_table"]')
                     case_orders = {'status': True, 'data': case_orders_data}
                     print('orders available')
                     
                     for pdf_link in driver.find_elements(by='xpath', value='//table[@class="order_table"]/tbody/tr/td[5]/a'):
-                        ipdb.set_trace()
-                        table = selenium_get_element_id(driver, '//table[@class="order_table"]')
+                        driver.implicitly_wait(5)
+                        print('1')
+                        # ipdb.set_trace()
                         driver.execute_script(
-                        "arguments[0].scrollIntoView();", table)
-                        time.sleep(1)
+                            "arguments[0].scrollIntoView();", pdf_link)
+                        print('2')
+                        driver.implicitly_wait(5)
+                        print('3')
                         pdf_link.click()
+                        print('4')
                         time.sleep(2)
                         
                 except:
