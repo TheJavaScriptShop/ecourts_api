@@ -161,7 +161,7 @@ def main(advoc_name, high_court_id, bench_id):
     
 
 
-    actions = ActionChains(driver)
+    action = ActionChains(driver)
     is_failed_with_captach = True
     fetched_data = False
 
@@ -291,7 +291,7 @@ def main(advoc_name, high_court_id, bench_id):
                 'case_details': [],
             }
             case_details = []
-            for link in driver.find_elements(by="xpath", value='/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table/tbody/tr/td[5]'):
+            for link in driver.find_elements(by="xpath", value='/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table/tbody/tr/td[5]')[0:2]:
                 print('link', link)
                 time.sleep(2)
                 driver.execute_script(
@@ -350,40 +350,49 @@ def main(advoc_name, high_court_id, bench_id):
                     case_history = {'status': False, 'data': {}}
                 # orders
                 try:
-                    
-                    # orders = selenium_get_element_xpath(driver,'//table[@class="order_table"]')
-                    # driver.implicitly_wait(5)
-                    # driver.execute_script(
-                    #     "arguments[0].scrollIntoView();", orders)
-                    # time.sleep(2)
-                    
+                    navbar_1 = selenium_get_element_xpath(driver, '/html/body/div[1]/div/nav[1]')
+                    navbar_2 = selenium_get_element_xpath(driver, '/html/body/div[1]/div/nav[2]')
+                    driver.execute_script("""
+                        var element = arguments[0];
+                        element.parentNode.removeChild(element);
+                        """, navbar_1)
+
+                    driver.execute_script("""
+                        var element = arguments[0];
+                        element.parentNode.removeChild(element);
+                        """, navbar_2)
+                    orders = selenium_get_element_xpath(driver,'//table[@class="order_table"]')
+                    print(orders)
+                    driver.implicitly_wait(5)
+                    driver.execute_script(
+                        "arguments[0].scrollIntoView();", orders)
+                    driver.implicitly_wait(2)
                     case_orders_data = get_table_data_as_list(
                         driver, '//table[@class="order_table"]')
-                    print('orders available')
+
                     i=1
-                    for pdf_link in driver.find_elements(by='xpath', value='//table[@class="order_table"]/tbody/tr/td[5]/a'):
+                    for pdf_link in orders.find_elements(by='xpath', value='.//tbody/tr/td[5]/a'):
+                      
+
+                         
                         driver.implicitly_wait(5)
-                        print('1')
-                        # ipdb.set_trace()
-                        driver.execute_script(
-                            "arguments[0].scrollIntoView();", pdf_link)
-                        print('2')
+                        # driver.execute_script(
+                        #     "arguments[0].scrollIntoView();", pdf_link)
                         # driver.implicitly_wait(5)
-                        time.sleep(2)
-                        print('3')
                         pdf_link.click()
-                        print('4')
-                        time.sleep(2)
+                        driver.implicitly_wait(2)
                         pdfname = case_details_title.replace("/", "-")
-                        newfilename = f'{pdfname}-{1}.pdf'
+                        newfilename = f'{pdfname}-{i}.pdf'
                         try:
                             wait_for_download_and_rename(newfilename)
                             i=i+1
                         except Exception as e:
                             print(str(e))
+
                     case_orders = {'status': True, 'data': case_orders_data, 'number_of_downloaded_files': i-1}
                         
-                except:
+                except Exception as e:
+                    print("error", str(e))
                     case_orders = {'status': False, 'data': {}, 'number_of_downloaded_files': 0}
 
                 # objections
