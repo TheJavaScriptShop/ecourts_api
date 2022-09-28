@@ -137,7 +137,7 @@ def main(advoc_name, high_court_id, bench_id):
     options.add_argument("--disable-infobars")
     options.add_argument("--window-size=1700x800")
 
-    # options.add_argument("--headless")
+    options.add_argument("--headless")
     file_path = '/Users/sarvani/Downloads/arbito'
     prefs = {
         "browser.helperApps.neverAsk.saveToDisk" : "application/octet-stream;application/vnd.ms-excel;text/html;application/pdf",
@@ -170,7 +170,7 @@ def main(advoc_name, high_court_id, bench_id):
             if not "chrome://downloads" in drv.current_url: 
                 drv.execute_script("window.open('');") 
                 drv.switch_to.window(driver.window_handles[1]) 
-                drv.get("chrome://downloads/") 
+                drv.get("chrome://downloads/")
             return drv.execute_script("""
                 return document.querySelector('downloads-manager')
                 .shadowRoot.querySelector('#downloadsList')
@@ -290,8 +290,21 @@ def main(advoc_name, high_court_id, bench_id):
                 "case_list": case_list,
                 'case_details': [],
             }
+            navbar_1 = selenium_get_element_xpath(driver, '/html/body/div[1]/div/nav[1]')
+            navbar_2 = selenium_get_element_xpath(driver, '/html/body/div[1]/div/nav[2]')
+            driver.execute_script("""
+                var element = arguments[0];
+                element.parentNode.removeChild(element);
+                """, navbar_1)
+
+            driver.execute_script("""
+                var element = arguments[0];
+                element.parentNode.removeChild(element);
+                """, navbar_2)
             case_details = []
-            for link in driver.find_elements(by="xpath", value='/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table/tbody/tr/td[5]')[0:2]:
+            j=1
+            for link in driver.find_elements(by="xpath", value='/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table/tbody/tr/td[5]'):
+                print(f'case no {j}')
                 print('link', link)
                 time.sleep(2)
                 driver.execute_script(
@@ -313,11 +326,14 @@ def main(advoc_name, high_court_id, bench_id):
                     driver, '//*[@id="caseBusinessDiv4"]/div/table/tbody/tr[1]/td[4]')
                 case_details_registration_date = selenium_get_text_xpath(
                     driver, '//*[@id="caseBusinessDiv4"]/div/table/tbody/tr[2]/td[4]/label')
+                print('case details')
                 # case status
                 try:
                     case_status_data = get_table_data_as_list(
                         driver, '//*[@id="caseBusinessDiv4"]/table')
                     case_status = {'status': True, 'data': case_status_data}
+                    print('case status')
+
                 except:
                     case_status = {'status': False, 'data': {}}
                 # paa = petitioned and advocate
@@ -325,6 +341,8 @@ def main(advoc_name, high_court_id, bench_id):
                     case_paa_data = selenium_get_text_xpath(
                         driver, '//*[@id="caseHistoryDiv"]/div[2]/div[2]/span[1]')
                     case_paa = {'status': True, 'data': case_paa_data}
+                    print('paa')
+
                 except:
                     case_paa = {'status': False, 'data': {}}
                 # raa = respondent and advocate
@@ -332,6 +350,8 @@ def main(advoc_name, high_court_id, bench_id):
                     case_raa_data = selenium_get_text_xpath(
                         driver, '//*[@id="caseHistoryDiv"]/div[2]/div[2]/span[2]')
                     case_raa = {'status': True, 'data': case_raa_data}
+                    print('raa')
+
                 except:
                     case_raa = {'status': False, 'data': {}}
                 # acts
@@ -339,6 +359,8 @@ def main(advoc_name, high_court_id, bench_id):
                     case_acts_data = get_table_data_as_list(
                         driver, '//*[@id="act_table"]')
                     case_acts = {'status': True, 'data': case_acts_data}
+                    print('case acts')
+
                 except:
                     case_acts = {'status': False, 'data': {}}
                 # history
@@ -346,55 +368,49 @@ def main(advoc_name, high_court_id, bench_id):
                     case_history_data = get_table_data_as_list(
                         driver, '//*[@id="caseHistoryDiv"]/div[2]/div[2]/table[2]')
                     case_history = {'status': True, 'data': case_history_data}
+                    print('case history')
+
                 except:
                     case_history = {'status': False, 'data': {}}
                 # orders
                 try:
-                    navbar_1 = selenium_get_element_xpath(driver, '/html/body/div[1]/div/nav[1]')
-                    navbar_2 = selenium_get_element_xpath(driver, '/html/body/div[1]/div/nav[2]')
-                    driver.execute_script("""
-                        var element = arguments[0];
-                        element.parentNode.removeChild(element);
-                        """, navbar_1)
-
-                    driver.execute_script("""
-                        var element = arguments[0];
-                        element.parentNode.removeChild(element);
-                        """, navbar_2)
-                    
                     case_orders_data = get_table_data_as_list(
                         driver, '//table[@class="order_table"]')
                     no_of_orders = len(case_orders_data) - 1
                     orders = selenium_get_element_xpath(driver,'//table[@class="order_table"]')
-                    print(orders)
                     driver.implicitly_wait(5)
                     driver.execute_script(
                         "arguments[0].scrollIntoView();", orders)
                     driver.implicitly_wait(2)
+                    print('first scroll')
+                
                     i=1
-                    print(no_of_orders)
                     for n in range(0,no_of_orders):
-                        print(n)
                         pdf_xpath = f'//table[@class="order_table"]/tbody/tr[{(n+2)}]/td[5]/a'
-                        # ipdb.set_trace()
                         pdf_element = selenium_get_element_xpath(driver, pdf_xpath)
                         driver.implicitly_wait(5)
                         driver.execute_script(
                             "arguments[0].scrollIntoView();", pdf_element)
                         WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
                             (By.XPATH, pdf_xpath)))
-                        pdf_element.click()
+                        print('second scroll')
+                        
+                        driver.execute_script("arguments[0].click();", pdf_element)
+                        print('clicked')
+
                         driver.implicitly_wait(2)
                         pdfname = case_details_title.replace("/", "-")
                         newfilename = f'{pdfname}-{i}.pdf'
                         try:
                             wait_for_download_and_rename(newfilename)
+                            print(f'downloaded {i}')
                             i=i+1
+
                         except Exception as e:
                             print(str(e))
 
                     case_orders = {'status': True, 'data': case_orders_data, 'number_of_downloaded_files': i-1}
-                        
+                    print("case orders")  
                 except Exception as e:
                     print("error", str(e))
                     case_orders = {'status': False, 'data': {}, 'number_of_downloaded_files': 0}
@@ -405,6 +421,8 @@ def main(advoc_name, high_court_id, bench_id):
                         driver, '//*[@id="caseHistoryDiv"]/div[3]/table')
                     case_objections = {'status': True,
                                        'data': case_objections_data}
+                    print('case details')
+            
                 except:
                     case_objections = {'status': False, 'data': {}}
 
@@ -435,6 +453,8 @@ def main(advoc_name, high_court_id, bench_id):
 
                 WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
                     (By.XPATH, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table")))
+                j = j+1
+
 
             data = {
                 "number_of_establishments_in_court_complex": number_of_establishments_in_court_complex,
