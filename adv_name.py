@@ -138,7 +138,7 @@ def main(advoc_name, high_court_id, bench_id):
     options.add_argument("--window-size=1700x800")
 
     options.add_argument("--headless")
-    file_path = '/Users/sarvani/Downloads/arbito'
+    file_path = '/Users/sarvani/Desktop/arbito'
     prefs = {
         "browser.helperApps.neverAsk.saveToDisk" : "application/octet-stream;application/vnd.ms-excel;text/html;application/pdf",
         "pdfjs.disabled" : True,
@@ -166,22 +166,9 @@ def main(advoc_name, high_court_id, bench_id):
     fetched_data = False
 
     def wait_for_download_and_rename(newFilename):
-        def chrome_downloads(drv):
-            if not "chrome://downloads" in drv.current_url: 
-                drv.execute_script("window.open('');") 
-                drv.switch_to.window(driver.window_handles[1]) 
-                drv.get("chrome://downloads/")
-            return drv.execute_script("""
-                return document.querySelector('downloads-manager')
-                .shadowRoot.querySelector('#downloadsList')
-                .items.filter(e => e.state === 'COMPLETE')
-                .map(e => e.filePath || e.file_path || e.fileUrl || e.file_url);
-                """)
-        dld_file_paths = WebDriverWait(driver, 120, 1).until(chrome_downloads) 
-        if "chrome://downloads" in driver.current_url:
-            driver.close()
-        driver.switch_to.window(driver.window_handles[0]) 
-        dlFilename = dld_file_paths[0] 
+        driver.implicitly_wait(8)
+
+        dlFilename = f'{file_path}/display_pdf.pdf'
         time_to_wait = 20 
         time_counter = 0
         while not os.path.isfile(dlFilename):
