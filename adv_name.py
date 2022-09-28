@@ -5,11 +5,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import Select
-
-from selenium.webdriver.common.action_chains import ActionChains
-
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 
 
+from datetime import date
 
 
 import base64
@@ -92,7 +91,7 @@ def get_table_data_as_list(driver, xpath):
     table = driver.find_element(by="xpath", value=xpath)
     for row in table.find_elements(by="xpath", value='.//tr'):
         rows.append(
-            [td.text for td in row.find_elements(by="xpath", value=".//td")])
+            {"data": [td.text for td in row.find_elements(by="xpath", value=".//td")]})
     return rows
 
 
@@ -138,7 +137,8 @@ def main(advoc_name, high_court_id, bench_id):
     options.add_argument("--window-size=1700x800")
 
     options.add_argument("--headless")
-    file_path = '/Users/sarvani/Desktop/arbito'
+    __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+    print(__location__)
     prefs = {
         "browser.helperApps.neverAsk.saveToDisk" : "application/octet-stream;application/vnd.ms-excel;text/html;application/pdf",
         "pdfjs.disabled" : True,
@@ -146,10 +146,10 @@ def main(advoc_name, high_court_id, bench_id):
         "print.show_print_progress": False,
         "browser.download.show_plugins_in_list": False,
         "browser.download.folderList": 2,
-        "download.default_directory": file_path, #Change default directory for downloads
+        "download.default_directory": __location__, #Change default directory for downloads
         "download.prompt_for_download": False, #To auto download the file
         "download.directory_upgrade": True,
-        "plugins.always_open_pdf_externally": True #It will not show PDF directly in chrome
+        "plugins.always_open_pdf_externally": True 
 
     }
     
@@ -161,23 +161,15 @@ def main(advoc_name, high_court_id, bench_id):
     
 
 
-    action = ActionChains(driver)
     is_failed_with_captach = True
     fetched_data = False
 
-    def wait_for_download_and_rename(newFilename):
-        driver.implicitly_wait(8)
-
-        dlFilename = f'{file_path}/display_pdf.pdf'
-        time_to_wait = 20 
-        time_counter = 0
-        while not os.path.isfile(dlFilename):
-            time.sleep(1)
-            time_counter += 1
-            if time_counter > time_to_wait:
-                break
-        shutil.move(dlFilename, os.path.join(file_path,newFilename))
-        return
+    def wait_for_download_and_rename(case_no, i):
+        
+        blob_service_client = BlobServiceClient.from_connection_string('DefaultEndpointsProtocol=https;AccountName=ecourts;AccountKey=EsHzeZLy2mv3MZFI9bB48z4NMlx64Tnfnol18wECETLzLaFRF3KZhVk/bIi6fPFP30CyPJCfFDAl+AStPFQTfw==;EndpointSuffix=core.windows.net')
+        blob_client = blob_service_client.get_blob_client(container="ecourtsapiservicebucketdev", blob=f"{advoc_name}/{case_no}/{date.today().month}/{date.today().day}/{i}.pdf")
+        with open(os.path.join(__location__, "display_pdf.pdf"), "rb") as data:
+            blob_client.upload_blob(data, overwrite=True )
 
     while is_failed_with_captach:
         driver.get('https://hcservices.ecourts.gov.in/hcservices/main.php')
@@ -326,7 +318,7 @@ def main(advoc_name, high_court_id, bench_id):
                 # paa = petitioned and advocate
                 try:
                     case_paa_data = selenium_get_text_xpath(
-                        driver, '//*[@id="caseHistoryDiv"]/div[2]/div[2]/span[1]')
+                        driver, '//span[@class="Petitioner_Advocate_table"]')
                     case_paa = {'status': True, 'data': case_paa_data}
                     print('paa')
 
@@ -335,7 +327,7 @@ def main(advoc_name, high_court_id, bench_id):
                 # raa = respondent and advocate
                 try:
                     case_raa_data = selenium_get_text_xpath(
-                        driver, '//*[@id="caseHistoryDiv"]/div[2]/div[2]/span[2]')
+                        driver, '//span[@class="Respondent_Advocate_table"]')
                     case_raa = {'status': True, 'data': case_raa_data}
                     print('raa')
 
@@ -344,12 +336,48 @@ def main(advoc_name, high_court_id, bench_id):
                 # acts
                 try:
                     case_acts_data = get_table_data_as_list(
-                        driver, '//*[@id="act_table"]')
+                        driver, '//table[@id="act_table"]')
                     case_acts = {'status': True, 'data': case_acts_data}
-                    print('case acts')
+                    print('acts')
 
                 except:
                     case_acts = {'status': False, 'data': {}}
+
+                # Category Details
+                try:
+                    category_details_data = get_table_data_as_list(
+                        driver, '//table[@id="subject_table"]')
+                    category_details = {'status': True, 'data': category_details_data}
+                    print('category details')
+
+                except:
+                    category_details = {'status': False, 'data': {}}
+
+                # Subordinate Court Information
+                try:
+                    sci_element = selenium_get_element_xpath(driver, '//span[@class="Lower_court_table"]')
+                    court_number_and_name = selenium_get_text_xpath(sci_element, ".//label[1]")
+                    case_number_and_year = selenium_get_text_xpath(sci_element, ".//label[2]")
+                    case_decision_date = selenium_get_text_xpath(sci_element, ".//label[3]")
+                    sci_data = {
+                        'court_number_and_name': court_number_and_name,
+                        'case_number_and_year': case_number_and_year,
+                        'case_decision_date': case_decision_date
+                    }
+                    sci = {'status':True, "data": sci_data} 
+
+                except:
+                     sci = {'status':False, "data": {}} 
+
+                # IA Details 
+                try:
+                    ia_details_data = get_table_data_as_list(
+                        driver, '//table[@class="IAheading"]')
+                    ia_details = {'status': True, 'data': ia_details_data}
+                    print('IA details')
+
+                except:
+                    ia_details = {'status': False, 'data': {}}
                 # history
                 try:
                     case_history_data = get_table_data_as_list(
@@ -375,27 +403,24 @@ def main(advoc_name, high_court_id, bench_id):
                     for n in range(0,no_of_orders):
                         pdf_xpath = f'//table[@class="order_table"]/tbody/tr[{(n+2)}]/td[5]/a'
                         pdf_element = selenium_get_element_xpath(driver, pdf_xpath)
-                        driver.implicitly_wait(5)
-                        driver.execute_script(
-                            "arguments[0].scrollIntoView();", pdf_element)
-                        WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
-                            (By.XPATH, pdf_xpath)))
-                        print('second scroll')
+                        
                         
                         driver.execute_script("arguments[0].click();", pdf_element)
                         print('clicked')
 
-                        driver.implicitly_wait(2)
-                        pdfname = case_details_title.replace("/", "-")
-                        newfilename = f'{pdfname}-{i}.pdf'
+                        case_no = case_details_title.replace("/", "-")
                         try:
-                            wait_for_download_and_rename(newfilename)
+                            wait_for_download_and_rename(case_no, i)
+                            order = case_orders_data[i]
+                            order["file"] = f"{advoc_name}/{case_no}/{date.today().month}/{date.today().day}/{i}.pdf"
+                            print(order)
+                            case_orders_data[i] = order
                             print(f'downloaded {i}')
                             i=i+1
 
                         except Exception as e:
                             print(str(e))
-
+                    print("orders----->", case_orders_data)
                     case_orders = {'status': True, 'data': case_orders_data, 'number_of_downloaded_files': i-1}
                     print("case orders")  
                 except Exception as e:
