@@ -136,7 +136,7 @@ def main(advoc_name, high_court_id, bench_id):
     options.add_argument("--disable-infobars")
     options.add_argument("--window-size=1700x800")
 
-    options.add_argument("--headless")
+    # options.add_argument("--headless")
     __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
     print(__location__)
     prefs = {
@@ -335,23 +335,23 @@ def main(advoc_name, high_court_id, bench_id):
                     case_raa = {'status': False, 'data': {}}
                 # acts
                 try:
-                    case_acts_data = get_table_data_as_list(
+                    acts_data = get_table_data_as_list(
                         driver, '//table[@id="act_table"]')
-                    case_acts = {'status': True, 'data': case_acts_data}
+                    acts = {'status': True, 'data': acts_data}
                     print('acts')
 
                 except:
-                    case_acts = {'status': False, 'data': {}}
+                    acts = {'status': False, 'data': {}}
 
                 # Category Details
                 try:
-                    category_details_data = get_table_data_as_list(
+                    cd_data = get_table_data_as_list(
                         driver, '//table[@id="subject_table"]')
-                    category_details = {'status': True, 'data': category_details_data}
+                    cd = {'status': True, 'data': cd_data}
                     print('category details')
 
                 except:
-                    category_details = {'status': False, 'data': {}}
+                    cd = {'status': False, 'data': {}}
 
                 # Subordinate Court Information
                 try:
@@ -371,17 +371,17 @@ def main(advoc_name, high_court_id, bench_id):
 
                 # IA Details 
                 try:
-                    ia_details_data = get_table_data_as_list(
+                    iad_data = get_table_data_as_list(
                         driver, '//table[@class="IAheading"]')
-                    ia_details = {'status': True, 'data': ia_details_data}
+                    iad = {'status': True, 'data': iad_data}
                     print('IA details')
 
                 except:
-                    ia_details = {'status': False, 'data': {}}
+                    iad = {'status': False, 'data': {}}
                 # history
                 try:
                     case_history_data = get_table_data_as_list(
-                        driver, '//*[@id="caseHistoryDiv"]/div[2]/div[2]/table[2]')
+                        driver, '//table[@class="history_table"]')
                     case_history = {'status': True, 'data': case_history_data}
                     print('case history')
 
@@ -427,13 +427,24 @@ def main(advoc_name, high_court_id, bench_id):
                     print("error", str(e))
                     case_orders = {'status': False, 'data': {}, 'number_of_downloaded_files': 0}
 
+
+                #  Document details
+                try:
+                    dd_data = get_table_data_as_list(
+                        driver, '//table[@class="transfer_table"]')
+                    dd = {'status': True, 'data': dd_data}
+                    print('dd')
+
+                except:
+                    dd = {'status': False, 'data': {}}
+
                 # objections
                 try:
                     case_objections_data = get_table_data_as_list(
-                        driver, '//*[@id="caseHistoryDiv"]/div[3]/table')
+                        driver, '//table[@class="obj_table"]')
                     case_objections = {'status': True,
                                        'data': case_objections_data}
-                    print('case details')
+                    print('case objections')
             
                 except:
                     case_objections = {'status': False, 'data': {}}
@@ -447,9 +458,13 @@ def main(advoc_name, high_court_id, bench_id):
                     "status": case_status,
                     "paa": case_paa,
                     "raa": case_raa,
-                    "acts": case_acts,
+                    "acts": acts,
+                    "cd": cd,
+                    "iad": iad,
+                    "sci": sci,
                     "history": case_history,
                     "orders": case_orders,
+                    "dd": dd,
                     "objections": case_objections,
                 }
                 case_details.append(details)
