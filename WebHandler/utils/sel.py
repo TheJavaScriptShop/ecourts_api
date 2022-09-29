@@ -64,5 +64,5 @@ def get_table_data_as_list(driver, xpath):
     table = driver.find_element(by="xpath", value=xpath)
     for row in table.find_elements(by="xpath", value='.//tr'):
         rows.append(
-            [td.text for td in row.find_elements(by="xpath", value=".//td")])
+            {"data": [td.text for td in row.find_elements(by="xpath", value=".//td")]})
     return rows

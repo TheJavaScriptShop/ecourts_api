@@ -84,7 +84,20 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
     chrome_options.add_argument('--disable-dev-shm-usage')
     chrome_options.add_argument('--headless')
     chrome_options.add_argument("--window-size=1700x800")
-
+    prefs = {
+        "browser.helperApps.neverAsk.saveToDisk" : "application/octet-stream;application/vnd.ms-excel;text/html;application/pdf",
+        "pdfjs.disabled" : True,
+        "print.always_print_silent" : True,
+        "print.show_print_progress": False,
+        "browser.download.show_plugins_in_list": False,
+        "browser.download.folderList": 2,
+        "download.default_directory": __location__,
+        "download.prompt_for_download": False, 
+        "download.directory_upgrade": True,
+        "plugins.always_open_pdf_externally": True 
+    }
+    
+    chrome_options.add_experimental_option("prefs", prefs)
     driver = webdriver.Chrome(
         "/usr/local/bin/chromedriver", chrome_options=chrome_options)
     driver.maximize_window()
@@ -95,7 +108,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
             logger.info("get_highcourt_cases_by_name_wrapper")
             try:
                 data = get_highcourt_cases_by_name(driver, req_body.get(
-                    "advocateName"), req_body.get("highCourtId"), req_body.get("benchCode"))
+                    "advocateName"), req_body.get("highCourtId"), req_body.get("benchCode"), __location__)
                 logger.info(json.dumps(data))
                 requests.post(url=req_body.get("callBackUrl"), timeout=10, json={
                               "data": data, "request": {"body": req_body, "params": req_params}})
