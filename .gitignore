@@ -6,6 +6,7 @@ scrape1.html
 scrape.json
 scrape_nclt.html
 .DS_Store
+.env
 
 
 bin

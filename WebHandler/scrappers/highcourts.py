@@ -11,6 +11,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import Select
 from azure.storage.blob import BlobServiceClient
 from datetime import date
+from dotenv import load_dotenv
 
 from ..utils.sel import (
     selenium_click_xpath, selenium_send_keys_xpath,
@@ -25,6 +26,8 @@ from ..utils.ocr import (
     get_captcha
 )
 
+load_dotenv()
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 sh = logging.StreamHandler()
@@ -37,7 +40,7 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code, __lo
 
     def wait_for_download_and_rename(case_no, order_no):
         
-        blob_service_client = BlobServiceClient.from_connection_string('DefaultEndpointsProtocol=https;AccountName=ecourts;AccountKey=EsHzeZLy2mv3MZFI9bB48z4NMlx64Tnfnol18wECETLzLaFRF3KZhVk/bIi6fPFP30CyPJCfFDAl+AStPFQTfw==;EndpointSuffix=core.windows.net')
+        blob_service_client = BlobServiceClient.from_connection_string(os.environ.get('BLOB_STORAGE_CONTAINER'))
         blob_client = blob_service_client.get_blob_client(container="ecourtsapiservicebucketdev", blob=f"{advoc_name}/{case_no}/{date.today().month}/{date.today().day}/{order_no}.pdf")
         with open(os.path.join(__location__, "display_pdf.pdf"), "rb") as data:
             blob_client.upload_blob(data, overwrite=True )
