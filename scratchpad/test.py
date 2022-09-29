@@ -18,6 +18,7 @@ import easyocr
 import time
 import numpy as np
 
+
 def selenium_click_xpath(driver, xpath):
     WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
         (By.XPATH, xpath))).click()
@@ -30,6 +31,7 @@ def get_table_data_as_list(driver, xpath):
         rows.append(
             [td.text for td in row.find_elements(by="xpath", value=".//td")])
     return rows
+
 
 def main():
     # options = Options()
@@ -56,10 +58,10 @@ def main():
     options.add_argument("--headless")
 
     prefs = {
-        "browser.helperApps.neverAsk.saveToDisk" : "application/octet-stream;application/vnd.ms-excel;text/html;application/pdf",
-        "pdfjs.disabled" : True,
-        "print.always_print_silent" : True,
-        "network.proxy.autoconfig_url.include_path" : True,
+        "browser.helperApps.neverAsk.saveToDisk": "application/octet-stream;application/vnd.ms-excel;text/html;application/pdf",
+        "pdfjs.disabled": True,
+        "print.always_print_silent": True,
+        "network.proxy.autoconfig_url.include_path": True,
         "print.show_print_progress": False,
         "browser.download.show_plugins_in_list": False,
         "browser.download.folderList": 2,
@@ -67,37 +69,40 @@ def main():
     }
 
     options.add_experimental_option("prefs", prefs)
-    driver = webdriver.Chrome(executable_path=DRIVER_PATH,chrome_options=options)
+    driver = webdriver.Chrome(
+        executable_path=DRIVER_PATH, chrome_options=options)
 
     driver.get('https://tshc.gov.in/')
     print("accessed website")
     # Cause list
-    selenium_click_xpath(driver,'/html/body/header/div[2]/div/div/div/div/div[2]/ul/li[2]/a')
+    selenium_click_xpath(
+        driver, '/html/body/header/div[2]/div/div/div/div/div[2]/ul/li[2]/a')
     print("hypelink clicked")
     print("Entered next page")
-    # Live Status of Cause list 
-    selenium_click_xpath(driver,'/html/body/form/center/div/div/div[1]/div/input[6]')
+    # Live Status of Cause list
+    selenium_click_xpath(
+        driver, '/html/body/form/center/div/div/div[1]/div/input[6]')
     print("live status of cause list button clicked")
 
     time.sleep(3)
     status_on_leave = 'ON LEAVE'
-    for item in  get_table_data_as_list(driver,"/html/body/div[2]/form/center/table"):
+    for item in get_table_data_as_list(driver, "/html/body/div[2]/form/center/table"):
         print("item==", item)
         try:
             print("item[2]", item[2])
             if item[2] == status_on_leave:
                 print("No data for this case")
             else:
-                selenium_click_xpath(driver,'/html/body/div[2]/form/center/table/tbody/tr['+item[0]+']/td[5]/a')
+                selenium_click_xpath(
+                    driver, '/html/body/div[2]/form/center/table/tbody/tr['+item[0]+']/td[5]/a')
                 time.sleep(1)
                 print("Downloaded data for id", item[0])
-                
 
         except:
             print("Error for ID ", item)
 
     print("done")
-    
+
     driver.close()
     driver.quit()
 

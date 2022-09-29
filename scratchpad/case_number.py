@@ -22,6 +22,8 @@ import traceback
 import webbrowser
 
 # get grayscale image
+
+
 def get_grayscale(image):
     return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
@@ -102,10 +104,10 @@ def main():
 
     service = Service(DRIVER_PATH)
     prefs = {
-        "browser.helperApps.neverAsk.saveToDisk" : "application/octet-stream;application/vnd.ms-excel;text/html;application/pdf",
-        "pdfjs.disabled" : True,
-        "print.always_print_silent" : True,
-        "network.proxy.autoconfig_url.include_path" : True,
+        "browser.helperApps.neverAsk.saveToDisk": "application/octet-stream;application/vnd.ms-excel;text/html;application/pdf",
+        "pdfjs.disabled": True,
+        "print.always_print_silent": True,
+        "network.proxy.autoconfig_url.include_path": True,
         "print.show_print_progress": False,
         "browser.download.show_plugins_in_list": False,
         "browser.download.folderList": 2
@@ -179,13 +181,13 @@ def main():
     case_orders = get_table_data_as_list(
         driver, '//*[@id="caseHistoryDiv"]/div[2]/div[2]/table[4]')
     case_orders_element = driver.find_element(by="xpath",
-                                            value='//*[@id="caseHistoryDiv"]/div[2]/div[2]/table[4]')
+                                              value='//*[@id="caseHistoryDiv"]/div[2]/div[2]/table[4]')
 
     driver.execute_script(
-    "arguments[0].scrollIntoView();", case_orders_element)
+        "arguments[0].scrollIntoView();", case_orders_element)
     time.sleep(2)
     selenium_click_xpath(driver,
-                    '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[52]/div[2]/div[2]/table[4]/tbody/tr[2]/td[5]/a')
+                         '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[52]/div[2]/div[2]/table[4]/tbody/tr[2]/td[5]/a')
 
     # objections
     case_objections = get_table_data_as_list(
@@ -216,7 +218,6 @@ def main():
 
     driver.close()
     driver.quit()
-
 
 
 if __name__ == "__main__":
