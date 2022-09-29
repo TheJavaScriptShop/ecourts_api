@@ -26,7 +26,8 @@ from ..utils.ocr import (
     get_captcha
 )
 
-load_dotenv()
+if os.environ.get("APP_ENV") == "local":
+    load_dotenv()
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -39,12 +40,13 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code, __lo
     is_failed_with_captach = True
 
     def wait_for_download_and_rename(case_no, order_no):
-        
-        blob_service_client = BlobServiceClient.from_connection_string(os.environ.get('BLOB_STORAGE_CONTAINER'))
-        blob_client = blob_service_client.get_blob_client(container="ecourtsapiservicebucketdev", blob=f"{advoc_name}/{case_no}/{date.today().month}/{date.today().day}/{order_no}.pdf")
-        with open(os.path.join(__location__, "display_pdf.pdf"), "rb") as data:
-            blob_client.upload_blob(data, overwrite=True )
 
+        blob_service_client = BlobServiceClient.from_connection_string(
+            os.environ.get('BLOB_STORAGE_CONTAINER'))
+        blob_client = blob_service_client.get_blob_client(
+            container="ecourtsapiservicebucketdev", blob=f"{advoc_name}/{case_no}/{date.today().month}/{date.today().day}/{order_no}.pdf")
+        with open(os.path.join(__location__, "display_pdf.pdf"), "rb") as data:
+            blob_client.upload_blob(data, overwrite=True)
 
     while is_failed_with_captach:
         driver.get('https://hcservices.ecourts.gov.in/hcservices/main.php')
@@ -68,14 +70,14 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code, __lo
         selenium_send_keys_xpath(
             driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[14]/div[2]/div[2]/input', advoc_name)
         logger.info("names sent")
-        driver.implicitly_wait(3)
+        time.sleep(3)
 
         img_path = r"image.png"
         captcha_xpath = '//*[@id="captcha_image"]'
         get_captcha(driver, img_path, captcha_xpath)
         text = get_text_from_captcha(
             driver, img_path, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/span/div/div[1]/div[1]/img', captcha_xpath)
-        driver.implicitly_wait(3)
+        time.sleep(3)
         selenium_click_xpath(
             driver, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/span/div/div[2]/label")
         selenium_send_keys_xpath(driver, '//*[@id="captcha"]', text)
@@ -107,6 +109,7 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code, __lo
                     is_failed_with_captach = False
             except:
                 pass
+    logger.info("starting scraping highcases")
     try:
         # case details
         number_of_establishments_in_court_complex = selenium_get_text_xpath(
@@ -138,8 +141,10 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code, __lo
             'case_details': [],
         }
         # remove nav bar elemts
-        navbar_1 = selenium_get_element_xpath(driver, '/html/body/div[1]/div/nav[1]')
-        navbar_2 = selenium_get_element_xpath(driver, '/html/body/div[1]/div/nav[2]')
+        navbar_1 = selenium_get_element_xpath(
+            driver, '/html/body/div[1]/div/nav[1]')
+        navbar_2 = selenium_get_element_xpath(
+            driver, '/html/body/div[1]/div/nav[2]')
         driver.execute_script("""
             var element = arguments[0];
             element.parentNode.removeChild(element);
@@ -225,21 +230,25 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code, __lo
 
             # Subordinate Court Information
             try:
-                sci_element = selenium_get_element_xpath(driver, '//span[@class="Lower_court_table"]')
-                court_number_and_name = selenium_get_text_xpath(sci_element, ".//label[1]")
-                case_number_and_year = selenium_get_text_xpath(sci_element, ".//label[2]")
-                case_decision_date = selenium_get_text_xpath(sci_element, ".//label[3]")
+                sci_element = selenium_get_element_xpath(
+                    driver, '//span[@class="Lower_court_table"]')
+                court_number_and_name = selenium_get_text_xpath(
+                    sci_element, ".//label[1]")
+                case_number_and_year = selenium_get_text_xpath(
+                    sci_element, ".//label[2]")
+                case_decision_date = selenium_get_text_xpath(
+                    sci_element, ".//label[3]")
                 sci_data = {
                     'court_number_and_name': court_number_and_name,
                     'case_number_and_year': case_number_and_year,
                     'case_decision_date': case_decision_date
                 }
-                sci = {'status':True, "data": sci_data} 
+                sci = {'status': True, "data": sci_data}
 
             except:
-                sci = {'status':False, "data": {}} 
+                sci = {'status': False, "data": {}}
 
-            # IA Details 
+            # IA Details
             try:
                 iad_data = get_table_data_as_list(
                     driver, '//table[@class="IAheading"]')
@@ -262,15 +271,16 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code, __lo
                 case_orders_data = get_table_data_as_list(
                     driver, '//table[@class="order_table"]')
                 no_of_orders = len(case_orders_data) - 1
-                orders = selenium_get_element_xpath(driver,'//table[@class="order_table"]')
+                orders = selenium_get_element_xpath(
+                    driver, '//table[@class="order_table"]')
                 driver.implicitly_wait(5)
                 driver.execute_script(
                     "arguments[0].scrollIntoView();", orders)
                 driver.implicitly_wait(2)
                 logger.info('first scroll')
-            
-                order_no=1
-                for n in range(0,no_of_orders):
+
+                order_no = 1
+                for n in range(0, no_of_orders):
                     pdf_xpath = f'//table[@class="order_table"]/tbody/tr[{(n+2)}]/td[5]/a'
                     pdf_element = selenium_get_element_xpath(driver, pdf_xpath)
                     driver.execute_script("arguments[0].click();", pdf_element)
@@ -281,16 +291,17 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code, __lo
                         order["file"] = f"{advoc_name}/{case_no}/{date.today().month}/{date.today().day}/{order_no}.pdf"
                         case_orders_data[order_no] = order
                         logger.info(f'downloaded {order_no}')
-                        order_no=order_no+1
+                        order_no = order_no+1
 
                     except Exception as e:
                         logger.info(str(e))
-                case_orders = {'status': True, 'data': case_orders_data, 'number_of_downloaded_files': order_no-1}
-                logger.info("case orders")  
+                case_orders = {'status': True, 'data': case_orders_data,
+                               'number_of_downloaded_files': order_no-1}
+                logger.info("case orders")
             except Exception as e:
                 logger.info("error", str(e))
-                case_orders = {'status': False, 'data': {}, 'number_of_downloaded_files': 0}
-
+                case_orders = {'status': False, 'data': {},
+                               'number_of_downloaded_files': 0}
 
             #  Document details
             try:
@@ -307,9 +318,9 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code, __lo
                 case_objections_data = get_table_data_as_list(
                     driver, '//table[@class="obj_table"]')
                 case_objections = {'status': True,
-                                    'data': case_objections_data}
+                                   'data': case_objections_data}
                 logger.info('case objections')
-        
+
             except:
                 case_objections = {'status': False, 'data': {}}
 
