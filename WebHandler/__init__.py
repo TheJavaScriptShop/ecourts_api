@@ -85,18 +85,18 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
     chrome_options.add_argument('--headless')
     chrome_options.add_argument("--window-size=1700x800")
     prefs = {
-        "browser.helperApps.neverAsk.saveToDisk" : "application/octet-stream;application/vnd.ms-excel;text/html;application/pdf",
-        "pdfjs.disabled" : True,
-        "print.always_print_silent" : True,
+        "browser.helperApps.neverAsk.saveToDisk": "application/octet-stream;application/vnd.ms-excel;text/html;application/pdf",
+        "pdfjs.disabled": True,
+        "print.always_print_silent": True,
         "print.show_print_progress": False,
         "browser.download.show_plugins_in_list": False,
         "browser.download.folderList": 2,
         "download.default_directory": __location__,
-        "download.prompt_for_download": False, 
+        "download.prompt_for_download": False,
         "download.directory_upgrade": True,
-        "plugins.always_open_pdf_externally": True 
+        "plugins.always_open_pdf_externally": True
     }
-    
+
     chrome_options.add_experimental_option("prefs", prefs)
     driver = webdriver.Chrome(
         "/usr/local/bin/chromedriver", chrome_options=chrome_options)
