@@ -4,8 +4,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
-from webdriver_manager.firefox import GeckoDriverManager
 from selenium.webdriver.support.ui import Select
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
+
+
+from datetime import date
 
 
 import base64
@@ -20,6 +23,8 @@ import easyocr
 import time
 import torch
 import ipdb
+import os
+import shutil
 
 
 # get grayscale image
@@ -86,7 +91,7 @@ def get_table_data_as_list(driver, xpath):
     table = driver.find_element(by="xpath", value=xpath)
     for row in table.find_elements(by="xpath", value='.//tr'):
         rows.append(
-            [td.text for td in row.find_elements(by="xpath", value=".//td")])
+            {"data": [td.text for td in row.find_elements(by="xpath", value=".//td")]})
     return rows
 
 
@@ -126,17 +131,45 @@ def get_captcha(driver):
 
 def main(advoc_name, high_court_id, bench_id):
     options = Options()
-    DRIVER_PATH = '/Users/pp/Downloads/chromedriver'
+    DRIVER_PATH = '/Users/sarvani/Downloads/chromedriver'
     options.add_argument("--disable-extensions")
     options.add_argument("--disable-infobars")
     options.add_argument("--window-size=1700x800")
 
     options.add_argument("--headless")
+    __location__ = os.path.realpath(os.path.join(
+        os.getcwd(), os.path.dirname(__file__)))
+    print(__location__)
+    prefs = {
+        "browser.helperApps.neverAsk.saveToDisk": "application/octet-stream;application/vnd.ms-excel;text/html;application/pdf",
+        "pdfjs.disabled": True,
+        "print.always_print_silent": True,
+        "print.show_print_progress": False,
+        "browser.download.show_plugins_in_list": False,
+        "browser.download.folderList": 2,
+        # Change default directory for downloads
+        "download.default_directory": __location__,
+        "download.prompt_for_download": False,  # To auto download the file
+        "download.directory_upgrade": True,
+        "plugins.always_open_pdf_externally": True
+
+    }
+
+    options.add_experimental_option("prefs", prefs)
 
     driver = webdriver.Chrome(DRIVER_PATH, chrome_options=options)
 
     is_failed_with_captach = True
     fetched_data = False
+
+    def wait_for_download_and_rename(case_no, i):
+
+        blob_service_client = BlobServiceClient.from_connection_string(
+            'DefaultEndpointsProtocol=https;AccountName=ecourts;AccountKey=EsHzeZLy2mv3MZFI9bB48z4NMlx64Tnfnol18wECETLzLaFRF3KZhVk/bIi6fPFP30CyPJCfFDAl+AStPFQTfw==;EndpointSuffix=core.windows.net')
+        blob_client = blob_service_client.get_blob_client(
+            container="ecourtsapiservicebucketdev", blob=f"{advoc_name}/{case_no}/{date.today().month}/{date.today().day}/{i}.pdf")
+        with open(os.path.join(__location__, "display_pdf.pdf"), "rb") as data:
+            blob_client.upload_blob(data, overwrite=True)
 
     while is_failed_with_captach:
         driver.get('https://hcservices.ecourts.gov.in/hcservices/main.php')
@@ -145,6 +178,7 @@ def main(advoc_name, high_court_id, bench_id):
         selenium_click_id(driver, 'leftPaneMenuCS')
         print("Successfully clicked")
         selenium_click_xpath(driver, '/html/body/div[2]/div/div/div[2]/button')
+        time.sleep(2)
         print("ok clicked")
         state_code = Select(selenium_get_element_id(driver, 'sess_state_code'))
         state_code.select_by_value(high_court_id)
@@ -152,6 +186,7 @@ def main(advoc_name, high_court_id, bench_id):
         print("Values selected")
         court_code = Select(selenium_get_element_id(
             driver, 'court_complex_code'))
+        time.sleep(2)
         court_code.select_by_value(bench_id)
         print("court code selected")
         selenium_click_id(driver, 'CSAdvName')
@@ -160,7 +195,6 @@ def main(advoc_name, high_court_id, bench_id):
             driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[14]/div[2]/div[2]/input', advoc_name)
         print("names sent")
         time.sleep(3)
-
         get_captcha(driver)
         text = get_text_from_captcha(driver, r"image.png")
         time.sleep(3)
@@ -235,8 +269,23 @@ def main(advoc_name, high_court_id, bench_id):
                 "case_list": case_list,
                 'case_details': [],
             }
+            navbar_1 = selenium_get_element_xpath(
+                driver, '/html/body/div[1]/div/nav[1]')
+            navbar_2 = selenium_get_element_xpath(
+                driver, '/html/body/div[1]/div/nav[2]')
+            driver.execute_script("""
+                var element = arguments[0];
+                element.parentNode.removeChild(element);
+                """, navbar_1)
+
+            driver.execute_script("""
+                var element = arguments[0];
+                element.parentNode.removeChild(element);
+                """, navbar_2)
             case_details = []
+            j = 1
             for link in driver.find_elements(by="xpath", value='/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table/tbody/tr/td[5]'):
+                print(f'case no {j}')
                 print('link', link)
                 time.sleep(2)
                 driver.execute_script(
@@ -258,55 +307,154 @@ def main(advoc_name, high_court_id, bench_id):
                     driver, '//*[@id="caseBusinessDiv4"]/div/table/tbody/tr[1]/td[4]')
                 case_details_registration_date = selenium_get_text_xpath(
                     driver, '//*[@id="caseBusinessDiv4"]/div/table/tbody/tr[2]/td[4]/label')
+                print('case details')
                 # case status
                 try:
                     case_status_data = get_table_data_as_list(
                         driver, '//*[@id="caseBusinessDiv4"]/table')
                     case_status = {'status': True, 'data': case_status_data}
+                    print('case status')
+
                 except:
                     case_status = {'status': False, 'data': {}}
                 # paa = petitioned and advocate
                 try:
                     case_paa_data = selenium_get_text_xpath(
-                        driver, '//*[@id="caseHistoryDiv"]/div[2]/div[2]/span[1]')
+                        driver, '//span[@class="Petitioner_Advocate_table"]')
                     case_paa = {'status': True, 'data': case_paa_data}
+                    print('paa')
+
                 except:
                     case_paa = {'status': False, 'data': {}}
                 # raa = respondent and advocate
                 try:
                     case_raa_data = selenium_get_text_xpath(
-                        driver, '//*[@id="caseHistoryDiv"]/div[2]/div[2]/span[2]')
+                        driver, '//span[@class="Respondent_Advocate_table"]')
                     case_raa = {'status': True, 'data': case_raa_data}
+                    print('raa')
+
                 except:
                     case_raa = {'status': False, 'data': {}}
                 # acts
                 try:
-                    case_acts_data = get_table_data_as_list(
-                        driver, '//*[@id="act_table"]')
-                    case_acts = {'status': True, 'data': case_acts_data}
+                    acts_data = get_table_data_as_list(
+                        driver, '//table[@id="act_table"]')
+                    acts = {'status': True, 'data': acts_data}
+                    print('acts')
+
                 except:
-                    case_acts = {'status': False, 'data': {}}
+                    acts = {'status': False, 'data': {}}
+
+                # Category Details
+                try:
+                    cd_data = get_table_data_as_list(
+                        driver, '//table[@id="subject_table"]')
+                    cd = {'status': True, 'data': cd_data}
+                    print('category details')
+
+                except:
+                    cd = {'status': False, 'data': {}}
+
+                # Subordinate Court Information
+                try:
+                    sci_element = selenium_get_element_xpath(
+                        driver, '//span[@class="Lower_court_table"]')
+                    court_number_and_name = selenium_get_text_xpath(
+                        sci_element, ".//label[1]")
+                    case_number_and_year = selenium_get_text_xpath(
+                        sci_element, ".//label[2]")
+                    case_decision_date = selenium_get_text_xpath(
+                        sci_element, ".//label[3]")
+                    sci_data = {
+                        'court_number_and_name': court_number_and_name,
+                        'case_number_and_year': case_number_and_year,
+                        'case_decision_date': case_decision_date
+                    }
+                    sci = {'status': True, "data": sci_data}
+
+                except:
+                    sci = {'status': False, "data": {}}
+
+                # IA Details
+                try:
+                    iad_data = get_table_data_as_list(
+                        driver, '//table[@class="IAheading"]')
+                    iad = {'status': True, 'data': iad_data}
+                    print('IA details')
+
+                except:
+                    iad = {'status': False, 'data': {}}
                 # history
                 try:
                     case_history_data = get_table_data_as_list(
-                        driver, '//*[@id="caseHistoryDiv"]/div[2]/div[2]/table[2]')
+                        driver, '//table[@class="history_table"]')
                     case_history = {'status': True, 'data': case_history_data}
+                    print('case history')
+
                 except:
                     case_history = {'status': False, 'data': {}}
                 # orders
                 try:
                     case_orders_data = get_table_data_as_list(
-                        driver, '//*[@id="caseHistoryDiv"]/div[2]/div[2]/table[4]')
-                    case_orders = {'status': True, 'data': case_orders_data}
+                        driver, '//table[@class="order_table"]')
+                    no_of_orders = len(case_orders_data) - 1
+                    orders = selenium_get_element_xpath(
+                        driver, '//table[@class="order_table"]')
+                    driver.implicitly_wait(5)
+                    driver.execute_script(
+                        "arguments[0].scrollIntoView();", orders)
+                    driver.implicitly_wait(2)
+                    print('first scroll')
+
+                    i = 1
+                    for n in range(0, no_of_orders):
+                        pdf_xpath = f'//table[@class="order_table"]/tbody/tr[{(n+2)}]/td[5]/a'
+                        pdf_element = selenium_get_element_xpath(
+                            driver, pdf_xpath)
+
+                        driver.execute_script(
+                            "arguments[0].click();", pdf_element)
+                        print('clicked')
+
+                        case_no = case_details_title.replace("/", "-")
+                        try:
+                            wait_for_download_and_rename(case_no, i)
+                            order = case_orders_data[i]
+                            order["file"] = f"{advoc_name}/{case_no}/{date.today().month}/{date.today().day}/{i}.pdf"
+                            print(order)
+                            case_orders_data[i] = order
+                            print(f'downloaded {i}')
+                            i = i+1
+
+                        except Exception as e:
+                            print(str(e))
+                    print("orders----->", case_orders_data)
+                    case_orders = {
+                        'status': True, 'data': case_orders_data, 'number_of_downloaded_files': i-1}
+                    print("case orders")
+                except Exception as e:
+                    print("error", str(e))
+                    case_orders = {'status': False, 'data': {},
+                                   'number_of_downloaded_files': 0}
+
+                #  Document details
+                try:
+                    dd_data = get_table_data_as_list(
+                        driver, '//table[@class="transfer_table"]')
+                    dd = {'status': True, 'data': dd_data}
+                    print('dd')
+
                 except:
-                    case_orders = {'status': False, 'data': {}}
+                    dd = {'status': False, 'data': {}}
 
                 # objections
                 try:
                     case_objections_data = get_table_data_as_list(
-                        driver, '//*[@id="caseHistoryDiv"]/div[3]/table')
+                        driver, '//table[@class="obj_table"]')
                     case_objections = {'status': True,
                                        'data': case_objections_data}
+                    print('case objections')
+
                 except:
                     case_objections = {'status': False, 'data': {}}
 
@@ -319,9 +467,13 @@ def main(advoc_name, high_court_id, bench_id):
                     "status": case_status,
                     "paa": case_paa,
                     "raa": case_raa,
-                    "acts": case_acts,
+                    "acts": acts,
+                    "cd": cd,
+                    "iad": iad,
+                    "sci": sci,
                     "history": case_history,
                     "orders": case_orders,
+                    "dd": dd,
                     "objections": case_objections,
                 }
                 case_details.append(details)
@@ -337,6 +489,7 @@ def main(advoc_name, high_court_id, bench_id):
 
                 WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
                     (By.XPATH, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table")))
+                j = j+1
 
             data = {
                 "number_of_establishments_in_court_complex": number_of_establishments_in_court_complex,
