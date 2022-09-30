@@ -165,7 +165,7 @@ def main(advoc_name, high_court_id, bench_id):
     def wait_for_download_and_rename(case_no, i):
 
         blob_service_client = BlobServiceClient.from_connection_string(
-            'DefaultEndpointsProtocol=https;AccountName=ecourts;AccountKey=EsHzeZLy2mv3MZFI9bB48z4NMlx64Tnfnol18wECETLzLaFRF3KZhVk/bIi6fPFP30CyPJCfFDAl+AStPFQTfw==;EndpointSuffix=core.windows.net')
+            os.environ.get('BLOB_STORAGE_CONTAINER'))
         blob_client = blob_service_client.get_blob_client(
             container="ecourtsapiservicebucketdev", blob=f"{advoc_name}/{case_no}/{date.today().month}/{date.today().day}/{i}.pdf")
         with open(os.path.join(__location__, "display_pdf.pdf"), "rb") as data:
