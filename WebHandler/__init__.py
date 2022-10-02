@@ -17,7 +17,7 @@ from .scrappers.highcourts import get_highcourt_cases_by_name
 #     traces_sample_rate=1.0
 # )
 
-version = "2.0.2"
+version = "2.0.3"
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -86,6 +86,8 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
     chrome_options.add_argument("--disable-extensions")
     chrome_options.add_argument("--disable-infobars")
     chrome_options.add_argument('--headless')
+    chrome_options.add_arguments("--disable-dev-shm-usage")
+    chrome_options.add_arguments("--no-sandbox")
     chrome_options.add_argument("--window-size=1700x800")
     prefs = {
         "browser.helperApps.neverAsk.saveToDisk": "application/octet-stream;application/vnd.ms-excel;text/html;application/pdf",
