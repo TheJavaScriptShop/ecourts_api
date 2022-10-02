@@ -16,6 +16,8 @@ from .scrappers.highcourts import get_highcourt_cases_by_name
 #     traces_sample_rate=1.0
 # )
 
+version = "2.0.1"
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 sh = logging.StreamHandler()
@@ -24,6 +26,7 @@ logger.addHandler(sh)
 
 __location__ = os.path.realpath(os.path.join(
     os.getcwd(), os.path.dirname(__file__)))
+logger.info(__location__)
 
 
 def fire_and_forget(f):
@@ -40,7 +43,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
     if (req.method.lower() != "post"):
         return func.HttpResponse(
             body=json.dumps(
-                {"status": False, "debugMessage": "Method not supported"}),
+                {"status": False, "debugMessage": "Method not supported", "version": version}),
             status_code=200
         )
 
@@ -50,7 +53,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
     except Exception as e_exception:
         return func.HttpResponse(
             body=json.dumps(
-                {"status": False, "debugMessage": str(e_exception)}),
+                {"status": False, "debugMessage": str(e_exception), "version": version}),
             status_code=200
         )
     req_params = dict(req.params.items())
@@ -68,14 +71,14 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
     else:
         return func.HttpResponse(
             body=json.dumps(
-                {"status": False, "debugMessage": "Method not supported"}),
+                {"status": False, "debugMessage": "Method not supported", "version": version}),
             status_code=200
         )
 
     if not is_valid_request:
         return func.HttpResponse(
             body=json.dumps(
-                {"status": False, "debugMessage": "Insufficient parameters"}),
+                {"status": False, "debugMessage": "Insufficient parameters", "version": version}),
             status_code=200
         )
 
@@ -104,7 +107,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
     driver.maximize_window()
 
     if req_params.get("method") == "advocatecasesbyname":
-        @fire_and_forget
+        @ fire_and_forget
         def get_highcourt_cases_by_name_wrapper():
             logger.info("get_highcourt_cases_by_name_wrapper")
             try:
@@ -119,11 +122,11 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
         # sentry_sdk.capture_message("return")
         return func.HttpResponse(
             body=json.dumps(
-                {"status": True, "debugMessage": "Request Received and processing", "request": {"body": req_body, "params": req_params}}),
+                {"status": True, "debugMessage": "Request Received and processing", "request": {"body": req_body, "params": req_params, "version": version}}),
         )
     return func.HttpResponse(
         body=json.dumps(
-            {"status": False, "debugMessage": "Method not supported", "request": {"body": req_body, "params": req_params}}),
+            {"status": False, "debugMessage": "Method not supported", "request": {"body": req_body, "params": req_params, "version": version}}),
         status_code=200
     )
 
@@ -136,6 +139,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         # sentry_sdk.capture_exception(e_exception)
         return func.HttpResponse(
             body=json.dumps(
-                {"status": False, "debugMessage": str(e_exception)}),
+                {"status": False, "debugMessage": str(e_exception), "version": version}),
             status_code=200
         )

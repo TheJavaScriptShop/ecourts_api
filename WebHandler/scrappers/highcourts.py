@@ -293,6 +293,8 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code, __lo
                             driver, pdf_xpath)
                         driver.execute_script(
                             "arguments[0].click();", pdf_element)
+                        logger.info('clicked')
+
                         case_no = case_details_title.replace("/", "-")
                         try:
                             blob_path_container = f"{advoc_name}/{case_no}/{date.today().month}/{date.today().day}/orders/{order_no}.pdf"
@@ -306,7 +308,7 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code, __lo
                         except Exception as e:
                             logger.info(str(e))
                     case_orders = {'status': True, 'data': case_orders_data,
-                                   'number_of_downloaded_files': order_no-1}
+                                   'number_of_downloaded_files': order_no - 1}
                     logger.info("case orders")
                 except Exception as e:
                     logger.info("error", str(e))
