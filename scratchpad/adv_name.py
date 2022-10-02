@@ -25,9 +25,13 @@ import torch
 import ipdb
 import os
 import shutil
+from dotenv import load_dotenv
 
+load_dotenv()
 
 # get grayscale image
+
+
 def get_grayscale(image):
     return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
@@ -131,7 +135,7 @@ def get_captcha(driver):
 
 def main(advoc_name, high_court_id, bench_id):
     options = Options()
-    DRIVER_PATH = '/Users/sarvani/Downloads/chromedriver'
+    DRIVER_PATH = '/Users/pp/Downloads/chromedriver'
     options.add_argument("--disable-extensions")
     options.add_argument("--disable-infobars")
     options.add_argument("--window-size=1700x800")
