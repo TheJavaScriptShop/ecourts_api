@@ -80,8 +80,8 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
         )
 
     chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_argument('--no-sandbox')
-    chrome_options.add_argument('--disable-dev-shm-usage')
+    chrome_options.add_argument("--disable-extensions")
+    chrome_options.add_argument("--disable-infobars")
     chrome_options.add_argument('--headless')
     chrome_options.add_argument("--window-size=1700x800")
     prefs = {
@@ -91,8 +91,9 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
         "print.show_print_progress": False,
         "browser.download.show_plugins_in_list": False,
         "browser.download.folderList": 2,
+        # Change default directory for downloads
         "download.default_directory": __location__,
-        "download.prompt_for_download": False,
+        "download.prompt_for_download": False,  # To auto download the file
         "download.directory_upgrade": True,
         "plugins.always_open_pdf_externally": True
     }
