@@ -37,35 +37,37 @@ logger.addHandler(sh)
 
 
 def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code, __location__):
-    is_failed_with_captach = True
-    fetched_data = False
-
-    def wait_for_download_and_rename(case_no, order_no):
+    def wait_for_download_and_rename(blob_path):
 
         blob_service_client = BlobServiceClient.from_connection_string(
             os.environ.get('BLOB_STORAGE_CONTAINER'))
         blob_client = blob_service_client.get_blob_client(
-            container="ecourtsapiservicebucketdev", blob=f"{advoc_name}/{case_no}/{date.today().month}/{date.today().day}/{order_no}.pdf")
+            container="ecourtsapiservicebucketdev", blob=blob_path)
         with open(os.path.join(__location__, "display_pdf.pdf"), "rb") as data:
             blob_client.upload_blob(data, overwrite=True)
 
+    is_failed_with_captach = True
+    fetched_data = False
+
+    counter_retry = 0
     while is_failed_with_captach:
+        counter_retry += 1
         driver.get('https://hcservices.ecourts.gov.in/hcservices/main.php')
         driver.maximize_window()
 
         selenium_click_id(driver, 'leftPaneMenuCS')
         logger.info("Successfully clicked")
         selenium_click_xpath(driver, '/html/body/div[2]/div/div/div[2]/button')
+        time.sleep(3)
         logger.info("ok clicked")
-        driver.implicitly_wait(3)
         state_select = Select(
             selenium_get_element_id(driver, 'sess_state_code'))
         state_select.select_by_value(state_code)
-        driver.implicitly_wait(3)
+        time.sleep(3)
         logger.info("Values selected")
         court_select = Select(selenium_get_element_id(
             driver, 'court_complex_code'))
-        driver.implicitly_wait(3)
+        time.sleep(3)
         court_select.select_by_value(bench_code)
         logger.info("court code selected")
         selenium_click_id(driver, 'CSAdvName')
@@ -111,7 +113,8 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code, __lo
                 else:
                     is_failed_with_captach = False
             except Exception as e:
-                return {'status': False, 'data': {}, "debugMessage": str(e)}
+                if counter_retry > 10:
+                    return {'status': False, 'data': {}, "debugMessage": "Maximun retries reached"}
 
     if not fetched_data:
         try:
@@ -165,14 +168,14 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code, __lo
             for link in driver.find_elements(by="xpath", value='/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table/tbody/tr/td[5]'):
                 logger.info(link)
                 logger.info(f'case no: {case_sl_no}')
-                driver.implicitly_wait(3)
+                time.sleep(3)
                 driver.execute_script(
                     "arguments[0].scrollIntoView();", link)
                 WebDriverWait(driver, 20).until(
                     EC.element_to_be_clickable((By.CLASS_NAME, 'someclass')))
                 selenium_click_class(link, 'someclass')
                 logger.info("view clicked")
-                driver.implicitly_wait(3)
+                time.sleep(3)
                 # details behind the hyperlink
                 # case details
                 case_details_title = selenium_get_text_xpath(
@@ -292,7 +295,8 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code, __lo
                             "arguments[0].click();", pdf_element)
                         case_no = case_details_title.replace("/", "-")
                         try:
-                            wait_for_download_and_rename(case_no, order_no)
+                            blob_path_container = f"{advoc_name}/{case_no}/{date.today().month}/{date.today().day}/orders/{order_no}.pdf"
+                            wait_for_download_and_rename(blob_path_container)
                             order = case_orders_data[order_no]
                             order["file"] = f"{advoc_name}/{case_no}/{date.today().month}/{date.today().day}/{order_no}.pdf"
                             case_orders_data[order_no] = order
