@@ -26,6 +26,7 @@ import ipdb
 import os
 import shutil
 from dotenv import load_dotenv
+import tempfile
 
 load_dotenv()
 
@@ -141,8 +142,7 @@ def main(advoc_name, high_court_id, bench_id):
     options.add_argument("--window-size=1700x800")
 
     options.add_argument("--headless")
-    __location__ = os.path.realpath(os.path.join(
-        os.getcwd(), os.path.dirname(__file__)))
+    __location__ = tempfile.gettempdir()
     print(__location__)
     prefs = {
         "browser.helperApps.neverAsk.saveToDisk": "application/octet-stream;application/vnd.ms-excel;text/html;application/pdf",

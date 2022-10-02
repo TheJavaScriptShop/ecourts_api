@@ -4,6 +4,7 @@ import json
 import time
 import requests
 import threading
+import tempfile
 
 import azure.functions as func
 from selenium import webdriver
@@ -16,7 +17,7 @@ from .scrappers.highcourts import get_highcourt_cases_by_name
 #     traces_sample_rate=1.0
 # )
 
-version = "2.0.1"
+version = "2.0.2"
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -24,8 +25,7 @@ sh = logging.StreamHandler()
 sh.setLevel(logging.DEBUG)
 logger.addHandler(sh)
 
-__location__ = os.path.realpath(os.path.join(
-    os.getcwd(), os.path.dirname(__file__)))
+__location__ = tempfile.gettempdir()
 logger.info(__location__)
 
 
