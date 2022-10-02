@@ -298,7 +298,7 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code, __lo
                             blob_path_container = f"{advoc_name}/{case_no}/{date.today().month}/{date.today().day}/orders/{order_no}.pdf"
                             wait_for_download_and_rename(blob_path_container)
                             order = case_orders_data[order_no]
-                            order["file"] = f"{advoc_name}/{case_no}/{date.today().month}/{date.today().day}/{order_no}.pdf"
+                            order["file"] = blob_path_container
                             case_orders_data[order_no] = order
                             logger.info(f'downloaded {order_no}')
                             order_no = order_no+1
