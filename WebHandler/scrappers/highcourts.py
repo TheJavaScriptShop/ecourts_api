@@ -2,6 +2,7 @@ import time
 import logging
 import os
 from datetime import date
+import traceback
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -113,6 +114,7 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code, __lo
                 else:
                     is_failed_with_captach = False
             except Exception as e:
+                logger.error(e, exc_info=True)
                 if counter_retry > 10:
                     return {'status': False, 'data': {}, "debugMessage": "Maximun retries reached"}
 
@@ -195,7 +197,8 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code, __lo
                     case_status = {'status': True, 'data': case_status_data}
                     logger.info('case status')
 
-                except:
+                except Exception as e:
+                    logger.error(e, exc_info=True)
                     case_status = {'status': False, 'data': {}}
                 # paa = petitioned and advocate
                 try:
@@ -204,7 +207,8 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code, __lo
                     case_paa = {'status': True, 'data': case_paa_data}
                     logger.info('paa')
 
-                except:
+                except Exception as e:
+                    logger.error(e, exc_info=True)
                     case_paa = {'status': False, 'data': {}}
                 # raa = respondent and advocate
                 try:
@@ -213,7 +217,8 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code, __lo
                     case_raa = {'status': True, 'data': case_raa_data}
                     logger.info('raa')
 
-                except:
+                except Exception as e:
+                    logger.error(e, exc_info=True)
                     case_raa = {'status': False, 'data': {}}
                 # acts
                 try:
@@ -222,7 +227,8 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code, __lo
                     acts = {'status': True, 'data': acts_data}
                     logger.info('acts')
 
-                except:
+                except Exception as e:
+                    logger.error(e, exc_info=True)
                     acts = {'status': False, 'data': {}}
 
                 # Category Details
@@ -232,7 +238,8 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code, __lo
                     cd = {'status': True, 'data': cd_data}
                     logger.info('category details')
 
-                except:
+                except Exception as e:
+                    logger.error(e, exc_info=True)
                     cd = {'status': False, 'data': {}}
 
                 # Subordinate Court Information
@@ -252,7 +259,8 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code, __lo
                     }
                     sci = {'status': True, "data": sci_data}
 
-                except:
+                except Exception as e:
+                    logger.error(e, exc_info=True)
                     sci = {'status': False, "data": {}}
 
                 # IA Details
@@ -262,7 +270,8 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code, __lo
                     iad = {'status': True, 'data': iad_data}
                     logger.info('IA details')
 
-                except:
+                except Exception as e:
+                    logger.error(e, exc_info=True)
                     iad = {'status': False, 'data': {}}
                 # history
                 try:
@@ -271,7 +280,8 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code, __lo
                     case_history = {'status': True, 'data': case_history_data}
                     logger.info('case history')
 
-                except:
+                except Exception as e:
+                    logger.error(e, exc_info=True)
                     case_history = {'status': False, 'data': {}}
                 # orders
                 try:
@@ -306,12 +316,12 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code, __lo
                             order_no = order_no+1
 
                         except Exception as e:
-                            logger.info(str(e))
+                            logger.error(e, exc_info=True)
                     case_orders = {'status': True, 'data': case_orders_data,
                                    'number_of_downloaded_files': order_no - 1}
                     logger.info("case orders")
                 except Exception as e:
-                    logger.info("error", str(e))
+                    logger.error(e, exc_info=True)
                     case_orders = {'status': False, 'data': {},
                                    'number_of_downloaded_files': 0}
 
@@ -322,7 +332,8 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code, __lo
                     dd = {'status': True, 'data': dd_data}
                     logger.info('dd')
 
-                except:
+                except Exception as e:
+                    logger.error(e, exc_info=True)
                     dd = {'status': False, 'data': {}}
 
                 # objections
@@ -333,7 +344,8 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code, __lo
                                        'data': case_objections_data}
                     logger.info('case objections')
 
-                except:
+                except Exception as e:
+                    logger.error(e, exc_info=True)
                     case_objections = {'status': False, 'data': {}}
 
                 details = {
@@ -378,5 +390,5 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code, __lo
             logger.info({"status": True, "data": data})
             return {"status": True, "data": data}
         except Exception as e_exception:
-            logger.error(e_exception)
+            logger.error(e_exception, exc_info=True)
             return {'status': False, 'data': {}, "debugMessage": str(e_exception)}
