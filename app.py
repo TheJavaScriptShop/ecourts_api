@@ -1,11 +1,5 @@
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
-from webdriver_manager.firefox import GeckoDriverManager
-from selenium.webdriver.support.ui import Select
 from flask import Flask, jsonify, request
 
 import base64
@@ -21,24 +15,28 @@ import time
 import torch
 import ipdb
 import logging
+import threading
+import requests
 
 from WebHandler.scrappers.highcourts import get_highcourt_cases_by_name
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+sh = logging.StreamHandler()
+sh.setLevel(logging.DEBUG)
+logger.addHandler(sh)
+__location__ = "Users/sarvani/Desktop/arbito"
 
-app = Flask(__name__)
 
-
-@app.route("/", methods=["POST"])
-def main():
-    body = request.json
-    print(body)
+def create_driver():
     options = Options()
     DRIVER_PATH = '/Users/sarvani/Downloads/chromedriver'
     options.add_argument("--disable-extensions")
     options.add_argument("--disable-infobars")
+    # options.add_argument("--headless")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--no-sandbox")
     options.add_argument("--window-size=1700x800")
-    options.add_argument("--headless")
-    __location__ = "Users/sarvani/Desktop/arbito"
     prefs = {
         "browser.helperApps.neverAsk.saveToDisk": "application/octet-stream;application/vnd.ms-excel;text/html;application/pdf",
         "pdfjs.disabled": True,
@@ -56,31 +54,71 @@ def main():
     options.add_experimental_option("prefs", prefs)
     driver = webdriver.Chrome(DRIVER_PATH, chrome_options=options)
     driver.maximize_window()
+    return driver
+
+
+def fire_and_forget(f):
+    def wrapped():
+        threading.Thread(target=f).start()
+
+    return wrapped
+
+
+app = Flask(__name__)
+
+
+@app.route("/")
+def main():
+    body = request.json
     data = {}
-    try:
-        data = get_highcourt_cases_by_name(
-            driver, body["advocateName"], body["highCourtId"], body["benchCode"], __location__)
-    except Exception as e:
-        print(str(e))
+    if request.method != 'POST':
+        data = {"status": False, "debugMessage": "Method not supported"}
+        logger.info(data)
+        return jsonify(data)
 
-    print(data)
-    json_data = json.dumps(data)
-    page = "scrape.json"
-    with open(page, "w+", newline="", encoding="UTF-8") as file:
-        file.write(json_data)
+    is_valid_request = True
+    if request.args.get('method') == "advocatecasesbyname":
+        if not body.get("advocateName"):
+            is_valid_request = False
+        if not body.get("highCourtId"):
+            is_valid_request = False
+        if not body.get("benchCode"):
+            is_valid_request = False
+        if not body.get("callBackUrl"):
+            is_valid_request = False
+    else:
+        data = {"status": False, "debugMessage": "Method not supported"}
+        logger.info(data)
+        return jsonify(data)
 
-    page = "scrape1.html"
-    with open(page, "w+", newline="", encoding="UTF-8") as f:
-        f.write("<html><body><pre id='json'></pre></body></html>")
-        f.write("<script>")
-        f.write(
-            f"document.getElementById('json').textContent = JSON.stringify({json.dumps(data)}, undefined, 2);")
-        f.write("</script>")
-    webbrowser.open('file://' + os.path.realpath(page), new=2)
+    if not is_valid_request:
+        data = {"status": False, "debugMessage": "Insufficient parameters"}
+        logger.info(data)
+        return jsonify(data)
 
-    driver.close()
-    driver.quit()
-    return jsonify({"status": True, "debugMessage": "Received"})
+    if request.args.get('method') == "advocatecasesbyname":
+        @ fire_and_forget
+        def get_highcourt_cases_by_name_wrapper():
+            try:
+                chrome_driver = create_driver()
+                data = get_highcourt_cases_by_name(
+                    chrome_driver, body["advocateName"], body["highCourtId"], body["benchCode"], __location__)
+                requests.post(url=body["callBackUrl"], timeout=10, json={
+                              "data": data, "request": {"body": body, "params": request.args}})
+                chrome_driver.close()
+                chrome_driver.quit()
+            except Exception as e:
+                print("error")
+                print(str(e))
+
+        get_highcourt_cases_by_name_wrapper()
+        data = {
+            "status": True,
+            "debugMessage": "Request Received and processing",
+            "request": {"body": body, "params": request.args}
+        }
+
+    return jsonify({"status": True, "debugMessage": "Received", "data": data})
 
 
 if __name__ == "__main__":
