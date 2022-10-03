@@ -17,7 +17,7 @@ from .scrappers.highcourts import get_highcourt_cases_by_name
 #     traces_sample_rate=1.0
 # )
 
-version = "2.0.3"
+version = "2.0.4"
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -25,7 +25,7 @@ sh = logging.StreamHandler()
 sh.setLevel(logging.DEBUG)
 logger.addHandler(sh)
 
-__location__ = tempfile.gettempdir()
+__location__ = r"/home/site/wwwroot"
 logger.info(__location__)
 
 
@@ -85,7 +85,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument("--disable-extensions")
     chrome_options.add_argument("--disable-infobars")
-    chrome_options.add_argument('--headless')
+    chrome_options.add_argument("--headless")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--window-size=1700x800")
