@@ -357,7 +357,7 @@ def get_highcourt_cases_by_name(driver, advoc_name, state_code, bench_code, __lo
                 case_details.append(details)
                 logger.info(case_details)
                 selenium_click_xpath(driver, "/html/body/div[1]/div/p/a")
-                driver.implicitly_wait(5)
+                time.sleep(3)
                 selenium_click_xpath(
                     driver, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[48]/input")
                 view_link = selenium_get_element_id(driver, 'dispTable')
