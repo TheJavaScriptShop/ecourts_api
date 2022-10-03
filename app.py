@@ -6,7 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.firefox import GeckoDriverManager
 from selenium.webdriver.support.ui import Select
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 
 import base64
 import os
@@ -25,20 +25,41 @@ import logging
 from WebHandler.scrappers.highcourts import get_highcourt_cases_by_name
 
 
-def main(advoc_name, high_court_id, bench_id):
+app = Flask(__name__)
+
+
+@app.route("/", methods=["POST"])
+def main():
+    body = request.json
+    print(body)
     options = Options()
-    DRIVER_PATH = '/Users/pp/Downloads/chromedriver'
+    DRIVER_PATH = '/Users/sarvani/Downloads/chromedriver'
     options.add_argument("--disable-extensions")
     options.add_argument("--disable-infobars")
     options.add_argument("--window-size=1700x800")
     options.add_argument("--headless")
+    __location__ = "Users/sarvani/Desktop/arbito"
+    prefs = {
+        "browser.helperApps.neverAsk.saveToDisk": "application/octet-stream;application/vnd.ms-excel;text/html;application/pdf",
+        "pdfjs.disabled": True,
+        "print.always_print_silent": True,
+        "print.show_print_progress": False,
+        "browser.download.show_plugins_in_list": False,
+        "browser.download.folderList": 2,
+        # Change default directory for downloads
+        "download.default_directory": __location__,
+        "download.prompt_for_download": False,  # To auto download the file
+        "download.directory_upgrade": True,
+        "plugins.always_open_pdf_externally": True
+    }
 
+    options.add_experimental_option("prefs", prefs)
     driver = webdriver.Chrome(DRIVER_PATH, chrome_options=options)
     driver.maximize_window()
     data = {}
     try:
         data = get_highcourt_cases_by_name(
-            driver, advoc_name, high_court_id, bench_id)
+            driver, body["advocateName"], body["highCourtId"], body["benchCode"], __location__)
     except Exception as e:
         print(str(e))
 
@@ -59,29 +80,6 @@ def main(advoc_name, high_court_id, bench_id):
 
     driver.close()
     driver.quit()
-
-
-if __name__ == "__main__":
-    start = datetime.datetime.now()
-    try:
-        advoc_name = 'V Aneesh'
-        high_court_id = '29'
-        bench_id = '1'
-
-        main(advoc_name, high_court_id, bench_id)
-    except Exception as e:
-        print(traceback.format_exc())
-        print(str(e))
-    finally:
-        end = datetime.datetime.now()
-        total = end - start
-        print(total.seconds)
-
-app = Flask(__name__)
-
-
-@app.route("/", methods=["POST"])
-def main():
     return jsonify({"status": True, "debugMessage": "Received"})
 
 
