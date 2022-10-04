@@ -115,13 +115,14 @@ def get_no_of_cases(driver, advoc_name, state_code, bench_code):
             data = {
                 "number_of_establishments_in_court_complex": number_of_establishments_in_court_complex,
                 "number_of_cases": number_of_cases,
+                "driver": driver
             }
             return data
         except Exception as e:
             logger.info(str(e))
 
 
-def get_highcourt_cases_by_name(driver, data, advoc_name, __location__):
+def get_highcourt_cases_by_name(driver, __location__, start=None, stop=None):
     def wait_for_download_and_rename(blob_path):
 
         blob_service_client = BlobServiceClient.from_connection_string(
@@ -145,8 +146,6 @@ def get_highcourt_cases_by_name(driver, data, advoc_name, __location__):
         case_list = get_table_data_as_list(
             driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table')
         data = {
-            "number_of_establishments_in_court_complex": data["number_of_establishments_in_court_complex"],
-            "number_of_cases": data["number_of_cases"],
             "case_list": case_list,
             'case_details': [],
         }
@@ -168,7 +167,11 @@ def get_highcourt_cases_by_name(driver, data, advoc_name, __location__):
         # list of case details
         case_details = []
         case_sl_no = 1
-        for link in driver.find_elements(by="xpath", value='/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table/tbody/tr/td[5]'):
+        case_links = driver.find_elements(
+            by="xpath", value='/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table/tbody/tr/td[5]')
+        if start is not None and stop is not None:
+            case_links = case_links[start:stop]
+        for link in case_links:
             logger.info(link)
             logger.info(f'case no: {case_sl_no}')
             time.sleep(3)

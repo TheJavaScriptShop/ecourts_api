@@ -69,17 +69,18 @@ app = Flask(__name__)
 
 @app.route("/", methods=["POST"])
 def main():
-    body = request.json
-    params = request.args
+
+    permitted_cases = 10
+    total_cases = 0
     data = {}
-    print(request.method)
-    if request.method != 'POST':
-        data = {"status": False, "debugMessage": "Method not supported"}
-        logger.info(data)
-        return jsonify(data)
 
     is_valid_request = True
+
+    chrome_driver = create_driver()
+
     if request.args.get('method') == "advocatecasesbyname":
+        body = request.json
+        params = request.args
         if not body.get("advocateName"):
             is_valid_request = False
         if not body.get("highCourtId"):
@@ -88,39 +89,96 @@ def main():
             is_valid_request = False
         if not body.get("callBackUrl"):
             is_valid_request = False
-    else:
-        data = {"status": False, "debugMessage": "Method not supported"}
-        logger.info(data)
-        return jsonify(data)
 
-    if not is_valid_request:
-        data = {"status": False, "debugMessage": "Insufficient parameters"}
-        logger.info(data)
-        return jsonify(data)
-
-    if request.args.get('method') == "advocatecasesbyname":
         @ fire_and_forget
-        def get_highcourt_cases_by_name_wrapper():
+        def get_total_no_of_cases_wrapper():
             try:
-                chrome_driver = create_driver()
-                no_of_cases = get_no_of_cases(
+                case_details = get_no_of_cases(
                     chrome_driver, body["advocateName"], body["highCourtId"], body["benchCode"])
-                data = get_highcourt_cases_by_name(
-                    chrome_driver, no_of_cases, __location__)
-                chrome_driver.close()
-                chrome_driver.quit()
-                requests.post(url=body["callBackUrl"], timeout=10, json={
-                              "data": data, "request": {"body": body, "params": params}})
+                total_cases = int(case_details["number_of_cases"][23:])
+                logger.info({"total_cases": total_cases})
+                if total_cases <= permitted_cases:
+                    data = get_highcourt_cases_by_name(
+                        chrome_driver, __location__)
+                else:
+                    logger.info("entered else")
+                    n = total_cases/permitted_cases
+                    logger.info({"n": n})
+                    start = 0
+                    stop = permitted_cases
+                    while (n > 0):
+                        logger.info({"n inside while": n})
+                        logger.info("about to request")
+                        body["start"] = start
+                        if stop > total_cases:
+                            body["stop"] = total_cases
+                        else:
+                            body["stop"] = stop
+                        logger.info({"body": body})
+                        try:
+                            requests.post(
+                                url="http://127.0.0.1:4000?method=advocatecasesbynamepagination", timeout=1, json=body)
+                        except:
+                            pass
+                        logger.info("requested")
+                        start = start + permitted_cases
+                        stop = stop + permitted_cases
+                        n = n-1
             except Exception as e:
                 logger.info(str(e))
 
+        get_total_no_of_cases_wrapper()
+        data = {
+            "status": True,
+            "debugMessage": "Request Received and processing",
+            "request": {"body": body, "params": params}
+        }
+        return jsonify({"status": True, "debugMessage": "Received", "data": data})
+
+    if request.args.get('method') == "advocatecasesbynamepagination":
+        body = request.json
+        params = request.args
+        if not body.get("advocateName"):
+            is_valid_request = False
+        if not body.get("highCourtId"):
+            is_valid_request = False
+        if not body.get("benchCode"):
+            is_valid_request = False
+        if not body.get("callBackUrl"):
+            is_valid_request = False
+        if not body.get("start"):
+            is_valid_request = False
+        if not body.get("stop"):
+            is_valid_request = False
+        logger.info("url request made")
+
+        @fire_and_forget
+        def get_highcourt_cases_by_name_wrapper():
+            try:
+                case_details = get_no_of_cases(
+                    chrome_driver, body["advocateName"], body["highCourtId"], body["benchCode"])
+                data = get_highcourt_cases_by_name(
+                    chrome_driver, __location__, body["start"], body["stop"])
+            except Exception as e:
+                logger.info(str(e))
         get_highcourt_cases_by_name_wrapper()
         data = {
             "status": True,
             "debugMessage": "Request Received and processing",
             "request": {"body": body, "params": params}
         }
+        return jsonify({"status": True, "debugMessage": "Received", "data": data})
 
+    # else:
+    #     data = {"status": False, "debugMessage": "Method not supported"}
+    #     logger.info(data)
+    #     return jsonify(data)
+    if not is_valid_request:
+        data = {"status": False, "debugMessage": "Insufficient parameters"}
+        logger.info(data)
+        return jsonify(data)
+    chrome_driver.close()
+    chrome_driver.quit()
     return jsonify({"status": True, "debugMessage": "Received", "data": data})
 
 
