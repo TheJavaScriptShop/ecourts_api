@@ -29,6 +29,35 @@ __location__ = r"/home/site/wwwroot"
 logger.info(__location__)
 
 
+def create_driver():
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument("--disable-extensions")
+    chrome_options.add_argument("--disable-infobars")
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--window-size=1700x800")
+    prefs = {
+        "browser.helperApps.neverAsk.saveToDisk": "application/octet-stream;application/vnd.ms-excel;text/html;application/pdf",
+        "pdfjs.disabled": True,
+        "print.always_print_silent": True,
+        "print.show_print_progress": False,
+        "browser.download.show_plugins_in_list": False,
+        "browser.download.folderList": 2,
+        # Change default directory for downloads
+        "download.default_directory": __location__,
+        "download.prompt_for_download": False,  # To auto download the file
+        "download.directory_upgrade": True,
+        "plugins.always_open_pdf_externally": True
+    }
+
+    chrome_options.add_experimental_option("prefs", prefs)
+    driver = webdriver.Chrome(
+        "/usr/local/bin/chromedriver", chrome_options=chrome_options)
+    driver.maximize_window()
+    return driver
+
+
 def fire_and_forget(f):
     def wrapped():
         threading.Thread(target=f).start()
@@ -82,42 +111,19 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
             status_code=200
         )
 
-    chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_argument("--disable-extensions")
-    chrome_options.add_argument("--disable-infobars")
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--window-size=1700x800")
-    prefs = {
-        "browser.helperApps.neverAsk.saveToDisk": "application/octet-stream;application/vnd.ms-excel;text/html;application/pdf",
-        "pdfjs.disabled": True,
-        "print.always_print_silent": True,
-        "print.show_print_progress": False,
-        "browser.download.show_plugins_in_list": False,
-        "browser.download.folderList": 2,
-        # Change default directory for downloads
-        "download.default_directory": __location__,
-        "download.prompt_for_download": False,  # To auto download the file
-        "download.directory_upgrade": True,
-        "plugins.always_open_pdf_externally": True
-    }
-
-    chrome_options.add_experimental_option("prefs", prefs)
-    driver = webdriver.Chrome(
-        "/usr/local/bin/chromedriver", chrome_options=chrome_options)
-    driver.maximize_window()
-
     if req_params.get("method") == "advocatecasesbyname":
         @ fire_and_forget
         def get_highcourt_cases_by_name_wrapper():
             logger.info("get_highcourt_cases_by_name_wrapper")
             try:
+                driver = create_driver()
                 data = get_highcourt_cases_by_name(driver, req_body.get(
                     "advocateName"), req_body.get("highCourtId"), req_body.get("benchCode"), __location__)
                 logger.info(json.dumps(data))
                 requests.post(url=req_body.get("callBackUrl"), timeout=10, json={
                               "data": data, "request": {"body": req_body, "params": req_params}})
+                driver.close()
+                driver.quit()
             except Exception as e:
                 logger.info(e)
         get_highcourt_cases_by_name_wrapper()
