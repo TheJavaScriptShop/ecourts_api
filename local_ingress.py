@@ -1,11 +1,13 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
+
 
 app = Flask(__name__)
 
 
 @app.route("/", methods=["POST"])
 def ingress():
-    return jsonify({"status": True, "debugMessage": "Received"})
+    body = request.json
+    return jsonify({"status": True, "debugMessage": "Received", "body": body})
 
 
 if __name__ == "__main__":

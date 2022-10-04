@@ -67,10 +67,12 @@ def fire_and_forget(f):
 app = Flask(__name__)
 
 
-@app.route("/")
+@app.route("/", methods=["POST"])
 def main():
     body = request.json
+    params = request.args
     data = {}
+    print(request.method)
     if request.method != 'POST':
         data = {"status": False, "debugMessage": "Method not supported"}
         logger.info(data)
@@ -103,19 +105,18 @@ def main():
                 chrome_driver = create_driver()
                 data = get_highcourt_cases_by_name(
                     chrome_driver, body["advocateName"], body["highCourtId"], body["benchCode"], __location__)
-                requests.post(url=body["callBackUrl"], timeout=10, json={
-                              "data": data, "request": {"body": body, "params": request.args}})
                 chrome_driver.close()
                 chrome_driver.quit()
+                requests.post(url=body["callBackUrl"], timeout=10, json={
+                              "data": data, "request": {"body": body, "params": params}})
             except Exception as e:
-                print("error")
-                print(str(e))
+                logger.info(str(e))
 
         get_highcourt_cases_by_name_wrapper()
         data = {
             "status": True,
             "debugMessage": "Request Received and processing",
-            "request": {"body": body, "params": request.args}
+            "request": {"body": body, "params": params}
         }
 
     return jsonify({"status": True, "debugMessage": "Received", "data": data})
