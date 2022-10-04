@@ -18,7 +18,7 @@ import logging
 import threading
 import requests
 
-from WebHandler.scrappers.highcourts import get_highcourt_cases_by_name
+from WebHandler.scrappers.highcourts import get_highcourt_cases_by_name, get_no_of_cases
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -103,8 +103,10 @@ def main():
         def get_highcourt_cases_by_name_wrapper():
             try:
                 chrome_driver = create_driver()
+                no_of_cases = get_no_of_cases(
+                    chrome_driver, body["advocateName"], body["highCourtId"], body["benchCode"])
                 data = get_highcourt_cases_by_name(
-                    chrome_driver, body["advocateName"], body["highCourtId"], body["benchCode"], __location__)
+                    chrome_driver, no_of_cases, __location__)
                 chrome_driver.close()
                 chrome_driver.quit()
                 requests.post(url=body["callBackUrl"], timeout=10, json={
