@@ -25,12 +25,12 @@ logger.setLevel(logging.DEBUG)
 sh = logging.StreamHandler()
 sh.setLevel(logging.DEBUG)
 logger.addHandler(sh)
-__location__ = "Users/sarvani/Desktop/arbito"
+__location__ = os.environ.get('DOWNLOAD_PATH')
 
 
 def create_driver():
     options = Options()
-    DRIVER_PATH = '/Users/sarvani/Downloads/chromedriver'
+    DRIVER_PATH = os.environ.get('DRIVER_PATH')
     options.add_argument("--disable-extensions")
     options.add_argument("--disable-infobars")
     # options.add_argument("--headless")
