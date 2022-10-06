@@ -25,10 +25,10 @@ logger.setLevel(logging.DEBUG)
 sh = logging.StreamHandler()
 sh.setLevel(logging.DEBUG)
 logger.addHandler(sh)
-__location__ = os.environ.get('DOWNLOAD_PATH')
+path = os.environ.get('DOWNLOAD_PATH')
 
 
-def create_driver():
+def create_driver(__location__):
     options = Options()
     DRIVER_PATH = os.environ.get('DRIVER_PATH')
     options.add_argument("--disable-extensions")
@@ -69,14 +69,9 @@ app = Flask(__name__)
 
 @app.route("/", methods=["POST"])
 def main():
-
     permitted_cases = 10
-    total_cases = 0
     data = {}
-
     is_valid_request = True
-
-    chrome_driver = create_driver()
 
     if request.args.get('method') == "advocatecasesbyname":
         body = request.json
@@ -93,23 +88,27 @@ def main():
         @ fire_and_forget
         def get_total_no_of_cases_wrapper():
             try:
+                __location__ = f'{path}/{body["advocateName"]}'
+                chrome_driver = create_driver(__location__)  # open browser
                 case_details = get_no_of_cases(
                     chrome_driver, body["advocateName"], body["highCourtId"], body["benchCode"])
                 total_cases = int(case_details["number_of_cases"][23:])
                 logger.info({"total_cases": total_cases})
+                chrome_driver.close()
+                chrome_driver.quit()
                 if total_cases <= permitted_cases:
                     data = get_highcourt_cases_by_name(
-                        chrome_driver, __location__)
+                        chrome_driver, body["advocateName"], __location__)
+                    data["number_of_establishments_in_court_complex"] = case_details["number_of_establishments_in_court_complex"]
+                    data["number_of_cases"] = case_details["number_of_cases"]
                 else:
-                    logger.info("entered else")
                     n = total_cases/permitted_cases
-                    logger.info({"n": n})
                     start = 0
                     stop = permitted_cases
+                    iteration = 1
                     while (n > 0):
-                        logger.info({"n inside while": n})
-                        logger.info("about to request")
                         body["start"] = start
+                        body["iteration"] = iteration
                         if stop > total_cases:
                             body["stop"] = total_cases
                         else:
@@ -120,10 +119,10 @@ def main():
                                 url="http://127.0.0.1:4000?method=advocatecasesbynamepagination", timeout=1, json=body)
                         except:
                             pass
-                        logger.info("requested")
                         start = start + permitted_cases
                         stop = stop + permitted_cases
                         n = n-1
+                        iteration = iteration+1
             except Exception as e:
                 logger.info(str(e))
 
@@ -155,10 +154,18 @@ def main():
         @fire_and_forget
         def get_highcourt_cases_by_name_wrapper():
             try:
+
+                __location__ = f'{path}/{body["advocateName"]}/{body["iteration"]}'
+                logger.info({"location---->": __location__})
+                chrome_driver = create_driver(__location__)  # open browser
                 case_details = get_no_of_cases(
                     chrome_driver, body["advocateName"], body["highCourtId"], body["benchCode"])
                 data = get_highcourt_cases_by_name(
-                    chrome_driver, __location__, body["start"], body["stop"])
+                    chrome_driver, body["advocateName"], __location__, body["start"], body["stop"])
+                data["number_of_establishments_in_court_complex"] = case_details["number_of_establishments_in_court_complex"]
+                data["number_of_cases"] = case_details["number_of_cases"]
+                chrome_driver.close()
+                chrome_driver.quit()
             except Exception as e:
                 logger.info(str(e))
         get_highcourt_cases_by_name_wrapper()
@@ -169,17 +176,14 @@ def main():
         }
         return jsonify({"status": True, "debugMessage": "Received", "data": data})
 
-    # else:
-    #     data = {"status": False, "debugMessage": "Method not supported"}
-    #     logger.info(data)
-    #     return jsonify(data)
     if not is_valid_request:
         data = {"status": False, "debugMessage": "Insufficient parameters"}
         logger.info(data)
         return jsonify(data)
-    chrome_driver.close()
-    chrome_driver.quit()
-    return jsonify({"status": True, "debugMessage": "Received", "data": data})
+
+    data = {"status": False, "debugMessage": "Method not supported"}
+    logger.info(data)
+    return jsonify(data)
 
 
 if __name__ == "__main__":

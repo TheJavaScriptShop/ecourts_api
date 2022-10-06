@@ -122,7 +122,7 @@ def get_no_of_cases(driver, advoc_name, state_code, bench_code):
             logger.info(str(e))
 
 
-def get_highcourt_cases_by_name(driver, __location__, start=None, stop=None):
+def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, stop=None):
     def wait_for_download_and_rename(blob_path):
 
         blob_service_client = BlobServiceClient.from_connection_string(
@@ -166,7 +166,7 @@ def get_highcourt_cases_by_name(driver, __location__, start=None, stop=None):
 
         # list of case details
         case_details = []
-        case_sl_no = 1
+        case_sl_no = start + 1
         case_links = driver.find_elements(
             by="xpath", value='/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table/tbody/tr/td[5]')
         if start is not None and stop is not None:
@@ -180,7 +180,7 @@ def get_highcourt_cases_by_name(driver, __location__, start=None, stop=None):
             WebDriverWait(driver, 20).until(
                 EC.element_to_be_clickable((By.CLASS_NAME, 'someclass')))
             selenium_click_class(link, 'someclass')
-            logger.info("view clicked")
+            logger.info(f"{case_sl_no} view clicked")
             time.sleep(3)
             # details behind the hyperlink
             # case details
@@ -199,7 +199,7 @@ def get_highcourt_cases_by_name(driver, __location__, start=None, stop=None):
                 case_status_data = get_table_data_as_list(
                     driver, '//*[@id="caseBusinessDiv4"]/table')
                 case_status = {'status': True, 'data': case_status_data}
-                logger.info('case status')
+                logger.info(f'{case_sl_no} case status')
 
             except:
                 case_status = {'status': False, 'data': {}}
@@ -208,7 +208,7 @@ def get_highcourt_cases_by_name(driver, __location__, start=None, stop=None):
                 case_paa_data = selenium_get_text_xpath(
                     driver, '//span[@class="Petitioner_Advocate_table"]')
                 case_paa = {'status': True, 'data': case_paa_data}
-                logger.info('paa')
+                logger.info(f'{case_sl_no} paa')
 
             except:
                 case_paa = {'status': False, 'data': {}}
@@ -217,7 +217,7 @@ def get_highcourt_cases_by_name(driver, __location__, start=None, stop=None):
                 case_raa_data = selenium_get_text_xpath(
                     driver, '//span[@class="Respondent_Advocate_table"]')
                 case_raa = {'status': True, 'data': case_raa_data}
-                logger.info('raa')
+                logger.info(f'{case_sl_no} raa')
 
             except:
                 case_raa = {'status': False, 'data': {}}
@@ -226,7 +226,7 @@ def get_highcourt_cases_by_name(driver, __location__, start=None, stop=None):
                 acts_data = get_table_data_as_list(
                     driver, '//table[@id="act_table"]')
                 acts = {'status': True, 'data': acts_data}
-                logger.info('acts')
+                logger.info(f'{case_sl_no} acts')
 
             except:
                 acts = {'status': False, 'data': {}}
@@ -236,7 +236,7 @@ def get_highcourt_cases_by_name(driver, __location__, start=None, stop=None):
                 cd_data = get_table_data_as_list(
                     driver, '//table[@id="subject_table"]')
                 cd = {'status': True, 'data': cd_data}
-                logger.info('category details')
+                logger.info(f'{case_sl_no} category details')
 
             except:
                 cd = {'status': False, 'data': {}}
@@ -266,7 +266,7 @@ def get_highcourt_cases_by_name(driver, __location__, start=None, stop=None):
                 iad_data = get_table_data_as_list(
                     driver, '//table[@class="IAheading"]')
                 iad = {'status': True, 'data': iad_data}
-                logger.info('IA details')
+                logger.info(f'{case_sl_no} IA details')
 
             except:
                 iad = {'status': False, 'data': {}}
@@ -275,7 +275,7 @@ def get_highcourt_cases_by_name(driver, __location__, start=None, stop=None):
                 case_history_data = get_table_data_as_list(
                     driver, '//table[@class="history_table"]')
                 case_history = {'status': True, 'data': case_history_data}
-                logger.info('case history')
+                logger.info(f'{case_sl_no} case history')
 
             except:
                 case_history = {'status': False, 'data': {}}
@@ -290,7 +290,7 @@ def get_highcourt_cases_by_name(driver, __location__, start=None, stop=None):
                 driver.execute_script(
                     "arguments[0].scrollIntoView();", orders)
                 driver.implicitly_wait(2)
-                logger.info('first scroll')
+                logger.info(f'{case_sl_no} first scroll')
 
                 order_no = 1
                 for n in range(0, no_of_orders):
@@ -299,7 +299,7 @@ def get_highcourt_cases_by_name(driver, __location__, start=None, stop=None):
                         driver, pdf_xpath)
                     driver.execute_script(
                         "arguments[0].click();", pdf_element)
-                    logger.info('clicked')
+                    logger.info(f'{case_sl_no} clicked')
 
                     case_no = case_details_title.replace("/", "-")
                     try:
@@ -312,12 +312,12 @@ def get_highcourt_cases_by_name(driver, __location__, start=None, stop=None):
                         order_no = order_no+1
 
                     except Exception as e:
-                        logger.info(str(e))
+                        logger.info({'err': str(e), 'case_no': case_sl_no})
                 case_orders = {'status': True, 'data': case_orders_data,
                                'number_of_downloaded_files': order_no - 1}
                 logger.info("case orders")
             except Exception as e:
-                logger.info("error", str(e))
+                logger.info({"error": str(e), 'case_no': case_sl_no})
                 case_orders = {'status': False, 'data': {},
                                'number_of_downloaded_files': 0}
 
@@ -326,7 +326,7 @@ def get_highcourt_cases_by_name(driver, __location__, start=None, stop=None):
                 dd_data = get_table_data_as_list(
                     driver, '//table[@class="transfer_table"]')
                 dd = {'status': True, 'data': dd_data}
-                logger.info('dd')
+                logger.info(f'{case_sl_no} dd')
 
             except:
                 dd = {'status': False, 'data': {}}
@@ -337,7 +337,7 @@ def get_highcourt_cases_by_name(driver, __location__, start=None, stop=None):
                     driver, '//table[@class="obj_table"]')
                 case_objections = {'status': True,
                                    'data': case_objections_data}
-                logger.info('case objections')
+                logger.info(f'{case_sl_no} case objections')
 
             except:
                 case_objections = {'status': False, 'data': {}}
@@ -361,7 +361,7 @@ def get_highcourt_cases_by_name(driver, __location__, start=None, stop=None):
                 "objections": case_objections,
             }
             case_details.append(details)
-            logger.info(case_details)
+            logger.info({'case_details': case_details, "case_no": case_sl_no})
             selenium_click_xpath(driver, "/html/body/div[1]/div/p/a")
             time.sleep(3)
             selenium_click_xpath(
@@ -376,13 +376,11 @@ def get_highcourt_cases_by_name(driver, __location__, start=None, stop=None):
             case_sl_no = case_sl_no + 1
 
         data = {
-            "number_of_establishments_in_court_complex": number_of_establishments_in_court_complex,
-            "number_of_cases": number_of_cases,
             "case_list": case_list,
             "case_details": case_details
         }
-        logger.info({"status": True, "data": data})
+        logger.info({"status": True, "data": data, "case_no": case_sl_no})
         return {"status": True, "data": data}
     except Exception as e_exception:
         logger.error(e_exception)
-        return {'status': False, 'data': {}, "debugMessage": str(e_exception)}
+        return {'status': False, 'data': {}, "debugMessage": str(e_exception), 'case_no': case_sl_no}
