@@ -1,6 +1,7 @@
 import time
 import logging
 import os
+import shutil
 from datetime import date
 
 from selenium import webdriver
@@ -124,13 +125,23 @@ def get_no_of_cases(driver, advoc_name, state_code, bench_code):
 
 def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, stop=None):
     def wait_for_download_and_rename(blob_path):
+        try:
+            # time.sleep(5)
+            blob_service_client = BlobServiceClient.from_connection_string(
+                os.environ.get('BLOB_STORAGE_CONTAINER'))
+            blob_client = blob_service_client.get_blob_client(
+                container="ecourtsapiservicebucketdev", blob=blob_path)
+            while True:
+                if os.path.isfile(f"{__location__}/display_pdf.pdf"):
+                    with open(os.path.join(__location__, "display_pdf.pdf"), "rb") as data:
+                        blob_client.upload_blob(data, overwrite=True)
+                    break
 
-        blob_service_client = BlobServiceClient.from_connection_string(
-            os.environ.get('BLOB_STORAGE_CONTAINER'))
-        blob_client = blob_service_client.get_blob_client(
-            container="ecourtsapiservicebucketdev", blob=blob_path)
-        with open(os.path.join(__location__, "display_pdf.pdf"), "rb") as data:
-            blob_client.upload_blob(data, overwrite=True)
+            # time.sleep(3)
+            if os.path.isfile(f"{__location__}/display_pdf.pdf"):
+                os.remove(f"{__location__}/display_pdf.pdf")
+        except Exception as e:
+            logger.error(str(e), exc_info=True)
 
     try:
         # case details
@@ -304,7 +315,8 @@ def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, st
                     case_no = case_details_title.replace("/", "-")
                     try:
                         blob_path_container = f"{advoc_name}/{case_no}/{date.today().month}/{date.today().day}/orders/{order_no}.pdf"
-                        wait_for_download_and_rename(blob_path_container)
+                        wait_for_download_and_rename(
+                            blob_path_container)
                         order = case_orders_data[order_no]
                         order["file"] = blob_path_container
                         case_orders_data[order_no] = order
@@ -312,12 +324,15 @@ def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, st
                         order_no = order_no+1
 
                     except Exception as e:
+                        # logger.error(exc_info=True)
+
                         logger.info({'err': str(e), 'case_no': case_sl_no})
                 case_orders = {'status': True, 'data': case_orders_data,
                                'number_of_downloaded_files': order_no - 1}
                 logger.info("case orders")
             except Exception as e:
-                logger.info({"error": str(e), 'case_no': case_sl_no})
+                logger.info(
+                    {"error": str(e), 'case_no': case_sl_no}, exc_info=True)
                 case_orders = {'status': False, 'data': {},
                                'number_of_downloaded_files': 0}
 
