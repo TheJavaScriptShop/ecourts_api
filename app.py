@@ -33,7 +33,7 @@ def create_driver(__location__):
     DRIVER_PATH = os.environ.get('DRIVER_PATH')
     options.add_argument("--disable-extensions")
     options.add_argument("--disable-infobars")
-    # options.add_argument("--headless")
+    options.add_argument("--headless")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--no-sandbox")
     options.add_argument("--window-size=1700x800")
@@ -69,7 +69,7 @@ app = Flask(__name__)
 
 @app.route("/", methods=["POST"])
 def main():
-    permitted_cases = 5
+    permitted_cases = int(os.environ.get('CASES_PER_ITERATION'))
     data = {}
     is_valid_request = True
 

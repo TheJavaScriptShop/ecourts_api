@@ -213,7 +213,7 @@ def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, st
                 logger.info(f'{case_sl_no} case status')
 
             except:
-                case_status = {'status': False, 'data': {}}
+                case_status = {'status': False, 'data': []}
             # paa = petitioned and advocate
             try:
                 case_paa_data = selenium_get_text_xpath(
@@ -222,7 +222,7 @@ def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, st
                 logger.info(f'{case_sl_no} paa')
 
             except:
-                case_paa = {'status': False, 'data': {}}
+                case_paa = {'status': False, 'data': []}
             # raa = respondent and advocate
             try:
                 case_raa_data = selenium_get_text_xpath(
@@ -231,7 +231,7 @@ def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, st
                 logger.info(f'{case_sl_no} raa')
 
             except:
-                case_raa = {'status': False, 'data': {}}
+                case_raa = {'status': False, 'data': []}
             # acts
             try:
                 acts_data = get_table_data_as_list(
@@ -240,7 +240,7 @@ def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, st
                 logger.info(f'{case_sl_no} acts')
 
             except:
-                acts = {'status': False, 'data': {}}
+                acts = {'status': False, 'data': []}
 
             # Category Details
             try:
@@ -250,7 +250,7 @@ def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, st
                 logger.info(f'{case_sl_no} category details')
 
             except:
-                cd = {'status': False, 'data': {}}
+                cd = {'status': False, 'data': []}
 
             # Subordinate Court Information
             try:
@@ -270,7 +270,7 @@ def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, st
                 sci = {'status': True, "data": sci_data}
 
             except:
-                sci = {'status': False, "data": {}}
+                sci = {'status': False, "data": []}
 
             # IA Details
             try:
@@ -280,7 +280,7 @@ def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, st
                 logger.info(f'{case_sl_no} IA details')
 
             except:
-                iad = {'status': False, 'data': {}}
+                iad = {'status': False, 'data': []}
             # history
             try:
                 case_history_data = get_table_data_as_list(
@@ -289,7 +289,7 @@ def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, st
                 logger.info(f'{case_sl_no} case history')
 
             except:
-                case_history = {'status': False, 'data': {}}
+                case_history = {'status': False, 'data': []}
             # orders
             try:
                 case_orders_data = get_table_data_as_list(
@@ -333,7 +333,7 @@ def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, st
             except Exception as e:
                 logger.info(
                     {"error": str(e), 'case_no': case_sl_no}, exc_info=True)
-                case_orders = {'status': False, 'data': {},
+                case_orders = {'status': False, 'data': [],
                                'number_of_downloaded_files': 0}
 
             #  Document details
@@ -344,7 +344,7 @@ def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, st
                 logger.info(f'{case_sl_no} dd')
 
             except:
-                dd = {'status': False, 'data': {}}
+                dd = {'status': False, 'data': []}
 
             # objections
             try:
@@ -355,7 +355,7 @@ def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, st
                 logger.info(f'{case_sl_no} case objections')
 
             except:
-                case_objections = {'status': False, 'data': {}}
+                case_objections = {'status': False, 'data': []}
 
             details = {
                 "title": case_details_title,
