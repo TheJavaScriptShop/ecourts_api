@@ -397,5 +397,5 @@ def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, st
         logger.info({"status": True, "data": data, "case_no": case_sl_no})
         return {"status": True, "data": data}
     except Exception as e_exception:
-        logger.error(e_exception)
-        return {'status': False, 'data': {}, "debugMessage": str(e_exception), 'case_no': case_sl_no}
+        logger.error(e_exception, exc_info=True)
+        return {'status': False, 'data': {}, "debugMessage": str(e_exception)}

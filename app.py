@@ -125,10 +125,8 @@ def main():
                 chrome_driver.close()
                 chrome_driver.quit()
                 if total_cases <= cases_per_iteration:
-                    start = 0
-                    stop = total_cases
                     data = get_highcourt_cases_by_name(
-                        chrome_driver, body["advocateName"], __location__, start, stop)
+                        chrome_driver, body["advocateName"], __location__)
                     data["number_of_establishments_in_court_complex"] = case_details["number_of_establishments_in_court_complex"]
                     data["number_of_cases"] = case_details["number_of_cases"]
                     requests.post(url=body["callBackUrl"], timeout=10, json={
