@@ -10,7 +10,7 @@ import azure.functions as func
 from selenium import webdriver
 # import sentry_sdk
 
-from .scrappers.highcourts import get_highcourt_cases_by_name
+from .scrappers.highcourts import get_highcourt_cases_by_name, get_no_of_cases
 
 # sentry_sdk.init(
 #     dsn="https://7818402c6eff4a99a87db4ceaf0ce3e5@o1183470.ingest.sentry.io/6776130",
@@ -25,11 +25,11 @@ sh = logging.StreamHandler()
 sh.setLevel(logging.DEBUG)
 logger.addHandler(sh)
 
-__location__ = r"/home/site/wwwroot"
-logger.info(__location__)
+path = r"/home/site/wwwroot"
+logger.info(path)
 
 
-def create_driver():
+def create_driver(__location__):
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument("--disable-extensions")
     chrome_options.add_argument("--disable-infobars")
@@ -69,6 +69,9 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
     logger.info(req)
     logger.info('Called ECourts Service.')
     logger.info(time.ctime())
+    cases_per_iteration = int(os.environ.get('CASES_PER_ITERATION'))
+
+    is_valid_request = True
     if (req.method.lower() != "post"):
         return func.HttpResponse(
             body=json.dumps(
@@ -76,19 +79,17 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
             status_code=200
         )
 
-    req_body = {}
-    try:
-        req_body = req.get_json()
-    except Exception as e_exception:
-        return func.HttpResponse(
-            body=json.dumps(
-                {"status": False, "debugMessage": str(e_exception), "version": version}),
-            status_code=200
-        )
-    req_params = dict(req.params.items())
-
-    is_valid_request = True
     if req_params.get("method") == "advocatecasesbyname":
+        req_body = {}
+        try:
+            req_body = req.get_json()
+        except Exception as e_exception:
+            return func.HttpResponse(
+                body=json.dumps(
+                    {"status": False, "debugMessage": str(e_exception), "version": version}),
+                status_code=200
+            )
+        req_params = dict(req.params.items())
         if not req_body.get("advocateName"):
             is_valid_request = False
         if not req_body.get("highCourtId"):
@@ -96,6 +97,29 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
         if not req_body.get("benchCode"):
             is_valid_request = False
         if not req_body.get("callBackUrl"):
+            is_valid_request = False
+    elif req_params.get("method") == "advocatecasesbyname":
+        req_body = {}
+        try:
+            req_body = req.get_json()
+        except Exception as e_exception:
+            return func.HttpResponse(
+                body=json.dumps(
+                    {"status": False, "debugMessage": str(e_exception), "version": version}),
+                status_code=200
+            )
+        req_params = dict(req.params.items())
+        if not req_body.get("advocateName"):
+            is_valid_request = False
+        if not req_body.get("highCourtId"):
+            is_valid_request = False
+        if not req_body.get("benchCode"):
+            is_valid_request = False
+        if not req_body.get("callBackUrl"):
+            is_valid_request = False
+        if not req_body.get("start"):
+            is_valid_request = False
+        if not req_body.get("stop"):
             is_valid_request = False
     else:
         return func.HttpResponse(
@@ -112,31 +136,112 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
         )
 
     if req_params.get("method") == "advocatecasesbyname":
+
+        req_body = {}
+        try:
+            req_body = req.get_json()
+        except Exception as e_exception:
+            return func.HttpResponse(
+                body=json.dumps(
+                    {"status": False, "debugMessage": str(e_exception), "version": version}),
+                status_code=200
+            )
+        req_params = dict(req.params.items())
+
         @ fire_and_forget
-        def get_highcourt_cases_by_name_wrapper():
+        def get_total_no_of_cases_wrapper():
             logger.info("get_highcourt_cases_by_name_wrapper")
             try:
-                driver = create_driver()
-                data = get_highcourt_cases_by_name(driver, req_body.get(
-                    "advocateName"), req_body.get("highCourtId"), req_body.get("benchCode"), __location__)
-                logger.info(json.dumps(data))
-                requests.post(url=req_body.get("callBackUrl"), timeout=10, json={
-                              "data": data, "request": {"body": req_body, "params": req_params}})
+                __location__ = f'{path}/{req_body.get("advocateName")}'
+                driver = create_driver(__location__)
+                case_details = get_no_of_cases(
+                    driver, req_body("advocateName"), req_body["highCourtId"], req_body["benchCode"])
+                total_cases = int(case_details["number_of_cases"][23:])
                 driver.close()
                 driver.quit()
+                if total_cases <= cases_per_iteration:
+                    start = 0
+                    stop = total_cases
+                    data = get_highcourt_cases_by_name(
+                        driver, req_body["advocateName"], __location__, start, stop)
+                    data["number_of_establishments_in_court_complex"] = case_details["number_of_establishments_in_court_complex"]
+                    data["number_of_cases"] = case_details["number_of_cases"]
+                    logger.info(json.dumps(data))
+                    requests.post(url=req_body["callBackUrl"], timeout=10, json={
+                        "data": data, "request": {"body": req_body, "params": req_params}})
+                else:
+                    n = total_cases/cases_per_iteration
+                    start = 0
+                    stop = cases_per_iteration
+                    iteration = 1
+                    while (n > 0):
+                        req_body["start"] = start
+                        req_body["iteration"] = iteration
+                        if stop > total_cases:
+                            req_body["stop"] = total_cases
+                        else:
+                            req_body["stop"] = stop
+                        logger.info({"body": req_body})
+                        try:
+                            requests.post(
+                                url="https://ecourtsapiservice-dev.azurewebsites.net/api/WebHandler?method=advocatecasesbyname", timeout=1, json=req_body)
+                        except:
+                            pass
+                        start = start + cases_per_iteration
+                        stop = stop + cases_per_iteration
+                        n = n-1
+                        iteration = iteration+1
+
             except Exception as e:
                 logger.info(e)
-        get_highcourt_cases_by_name_wrapper()
+        get_total_no_of_cases_wrapper()
         # sentry_sdk.capture_message("return")
         return func.HttpResponse(
             body=json.dumps(
                 {"status": True, "debugMessage": "Request Received and processing", "request": {"body": req_body, "params": req_params, "version": version}}),
         )
-    return func.HttpResponse(
-        body=json.dumps(
-            {"status": False, "debugMessage": "Method not supported", "request": {"body": req_body, "params": req_params, "version": version}}),
-        status_code=200
-    )
+
+    if req_params.get("method") == "advocatecasesbynamepagination":
+        req_body = {}
+        try:
+            req_body = req.get_json()
+        except Exception as e_exception:
+            return func.HttpResponse(
+                body=json.dumps(
+                    {"status": False, "debugMessage": str(e_exception), "version": version}),
+                status_code=200
+            )
+        req_params = dict(req.params.items())
+
+        logger.info("url request made")
+
+        @fire_and_forget
+        def get_highcourt_cases_by_name_wrapper():
+            try:
+                __location__ = f'{path}/{req_body["advocateName"]}/{req_body["iteration"]}'
+                logger.info({"location---->": __location__})
+                chrome_driver = create_driver(__location__)  # open browser
+                case_details = get_no_of_cases(
+                    chrome_driver, req_body["advocateName"], req_body["highCourtId"], req_body["benchCode"])
+                cases = get_highcourt_cases_by_name(
+                    chrome_driver, req_body["advocateName"], __location__, req_body["start"], req_body["stop"])
+                cases["number_of_establishments_in_court_complex"] = case_details["number_of_establishments_in_court_complex"]
+                cases["number_of_cases"] = case_details["number_of_cases"]
+                cases_data = {"start": req_body["start"],
+                              "stop": req_body["stop"], "data": cases}
+                logger.info(json.dumps(cases_data))
+                requests.post(url=req_body["callBackUrl"], timeout=10, json={
+                              "data": cases_data, "request": {"body": req_body, "params": req_params}})
+                chrome_driver.close()
+                chrome_driver.quit()
+            except Exception as e:
+                logger.info(str(e))
+        get_highcourt_cases_by_name_wrapper()
+
+        return func.HttpResponse(
+            body=json.dumps(
+                {"status": True, "debugMessage": "Request Received and processing", "request": {"body": req_body, "params": req_params, "version": version}}),
+        )
 
 
 def main(req: func.HttpRequest) -> func.HttpResponse:

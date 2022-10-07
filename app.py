@@ -69,7 +69,7 @@ app = Flask(__name__)
 
 @app.route("/", methods=["POST"])
 def main():
-    permitted_cases = int(os.environ.get('CASES_PER_ITERATION'))
+    cases_per_iteration = int(os.environ.get('CASES_PER_ITERATION'))
     data = {}
     is_valid_request = True
 
@@ -84,6 +84,34 @@ def main():
             is_valid_request = False
         if not body.get("callBackUrl"):
             is_valid_request = False
+    elif request.args.get('method') == "advocatecasesbynamepagination":
+        body = request.json
+        params = request.args
+        if not body.get("advocateName"):
+            is_valid_request = False
+        if not body.get("highCourtId"):
+            is_valid_request = False
+        if not body.get("benchCode"):
+            is_valid_request = False
+        if not body.get("callBackUrl"):
+            is_valid_request = False
+        if not body.get("start"):
+            is_valid_request = False
+        if not body.get("stop"):
+            is_valid_request = False
+    else:
+        data = {"status": False, "debugMessage": "Method not supported"}
+        logger.info(data)
+        return jsonify(data)
+
+    if not is_valid_request:
+        data = {"status": False, "debugMessage": "Insufficient parameters"}
+        logger.info(data)
+        return jsonify(data)
+
+    if request.args.get('method') == "advocatecasesbyname":
+        body = request.json
+        params = request.args
 
         @ fire_and_forget
         def get_total_no_of_cases_wrapper():
@@ -96,9 +124,9 @@ def main():
                 logger.info({"total_cases": total_cases})
                 chrome_driver.close()
                 chrome_driver.quit()
-                if total_cases <= permitted_cases:
-                    start = None
-                    stop = None
+                if total_cases <= cases_per_iteration:
+                    start = 0
+                    stop = total_cases
                     data = get_highcourt_cases_by_name(
                         chrome_driver, body["advocateName"], __location__, start, stop)
                     data["number_of_establishments_in_court_complex"] = case_details["number_of_establishments_in_court_complex"]
@@ -106,9 +134,9 @@ def main():
                     requests.post(url=body["callBackUrl"], timeout=10, json={
                         "data": data, "request": {"body": body, "params": params}})
                 else:
-                    n = total_cases/permitted_cases
+                    n = total_cases/cases_per_iteration
                     start = 0
-                    stop = permitted_cases
+                    stop = cases_per_iteration
                     iteration = 1
                     while (n > 0):
                         body["start"] = start
@@ -123,8 +151,8 @@ def main():
                                 url="http://127.0.0.1:4000?method=advocatecasesbynamepagination", timeout=1, json=body)
                         except:
                             pass
-                        start = start + permitted_cases
-                        stop = stop + permitted_cases
+                        start = start + cases_per_iteration
+                        stop = stop + cases_per_iteration
                         n = n-1
                         iteration = iteration+1
             except Exception as e:
@@ -141,18 +169,7 @@ def main():
     if request.args.get('method') == "advocatecasesbynamepagination":
         body = request.json
         params = request.args
-        if not body.get("advocateName"):
-            is_valid_request = False
-        if not body.get("highCourtId"):
-            is_valid_request = False
-        if not body.get("benchCode"):
-            is_valid_request = False
-        if not body.get("callBackUrl"):
-            is_valid_request = False
-        if not body.get("start"):
-            is_valid_request = False
-        if not body.get("stop"):
-            is_valid_request = False
+
         logger.info("url request made")
 
         @fire_and_forget
@@ -182,15 +199,6 @@ def main():
             "request": {"body": body, "params": params}
         }
         return jsonify({"status": True, "debugMessage": "Received", "data": data})
-
-    if not is_valid_request:
-        data = {"status": False, "debugMessage": "Insufficient parameters"}
-        logger.info(data)
-        return jsonify(data)
-
-    data = {"status": False, "debugMessage": "Method not supported"}
-    logger.info(data)
-    return jsonify(data)
 
 
 if __name__ == "__main__":
