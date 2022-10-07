@@ -69,7 +69,7 @@ app = Flask(__name__)
 
 @app.route("/", methods=["POST"])
 def main():
-    permitted_cases = 10
+    permitted_cases = 5
     data = {}
     is_valid_request = True
 
@@ -103,6 +103,8 @@ def main():
                         chrome_driver, body["advocateName"], __location__, start, stop)
                     data["number_of_establishments_in_court_complex"] = case_details["number_of_establishments_in_court_complex"]
                     data["number_of_cases"] = case_details["number_of_cases"]
+                    requests.post(url=body["callBackUrl"], timeout=10, json={
+                        "data": data, "request": {"body": body, "params": params}})
                 else:
                     n = total_cases/permitted_cases
                     start = 0
@@ -156,16 +158,19 @@ def main():
         @fire_and_forget
         def get_highcourt_cases_by_name_wrapper():
             try:
-
                 __location__ = f'{path}/{body["advocateName"]}/{body["iteration"]}'
                 logger.info({"location---->": __location__})
                 chrome_driver = create_driver(__location__)  # open browser
                 case_details = get_no_of_cases(
                     chrome_driver, body["advocateName"], body["highCourtId"], body["benchCode"])
-                data = get_highcourt_cases_by_name(
+                cases = get_highcourt_cases_by_name(
                     chrome_driver, body["advocateName"], __location__, body["start"], body["stop"])
-                data["number_of_establishments_in_court_complex"] = case_details["number_of_establishments_in_court_complex"]
-                data["number_of_cases"] = case_details["number_of_cases"]
+                cases["number_of_establishments_in_court_complex"] = case_details["number_of_establishments_in_court_complex"]
+                cases["number_of_cases"] = case_details["number_of_cases"]
+                cases_data = {"start": body["start"],
+                              "stop": body["stop"], "data": cases}
+                requests.post(url=body["callBackUrl"], timeout=10, json={
+                              "data": cases_data, "request": {"body": body, "params": params}})
                 chrome_driver.close()
                 chrome_driver.quit()
             except Exception as e:
