@@ -72,7 +72,7 @@ def get_no_of_cases(driver, advoc_name, state_code, bench_code):
         get_captcha(driver, img_path, captcha_xpath)
         text = get_text_from_captcha(
             driver, img_path, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/span/div/div[1]/div[1]/img', captcha_xpath)
-        time.sleep(3)
+        # time.sleep(3)
         selenium_click_xpath(
             driver, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/span/div/div[2]/label")
         selenium_send_keys_xpath(driver, '//*[@id="captcha"]', text)
@@ -160,20 +160,6 @@ def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, st
             "case_list": case_list,
             'case_details': [],
         }
-        # remove nav bar elemts
-        navbar_1 = selenium_get_element_xpath(
-            driver, '/html/body/div[1]/div/nav[1]')
-        navbar_2 = selenium_get_element_xpath(
-            driver, '/html/body/div[1]/div/nav[2]')
-        driver.execute_script("""
-            var element = arguments[0];
-            element.parentNode.removeChild(element);
-            """, navbar_1)
-
-        driver.execute_script("""
-            var element = arguments[0];
-            element.parentNode.removeChild(element);
-            """, navbar_2)
 
         # list of case details
         case_details = []
@@ -193,7 +179,7 @@ def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, st
                 EC.element_to_be_clickable((By.CLASS_NAME, 'someclass')))
             selenium_click_class(link, 'someclass')
             logger.info(f"{case_sl_no} view clicked")
-            time.sleep(3)
+            # time.sleep(3)
             # details behind the hyperlink
             # case details
             case_details_title = selenium_get_text_xpath(
