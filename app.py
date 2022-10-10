@@ -69,7 +69,7 @@ app = Flask(__name__)
 
 @app.route("/", methods=["POST"])
 def main():
-    cases_per_iteration = int(os.environ.get('CASES_PER_ITERATION'))
+    cases_per_iteration = int(os.environ.get('CASES_PER_ITERATION', 50))
     data = {}
     is_valid_request = True
 
@@ -122,8 +122,7 @@ def main():
                     chrome_driver, body["advocateName"], body["highCourtId"], body["benchCode"])
                 total_cases = int(case_details["number_of_cases"][23:])
                 logger.info({"total_cases": total_cases})
-                chrome_driver.close()
-                chrome_driver.quit()
+
                 if total_cases <= cases_per_iteration:
                     data = get_highcourt_cases_by_name(
                         chrome_driver, body["advocateName"], __location__)
@@ -151,8 +150,10 @@ def main():
                             pass
                         start = start + cases_per_iteration
                         stop = stop + cases_per_iteration
-                        n = n-1
-                        iteration = iteration+1
+                        n = n - 1
+                        iteration = iteration + 1
+                chrome_driver.close()
+                chrome_driver.quit()
             except Exception as e:
                 logger.info(str(e))
 
@@ -174,7 +175,6 @@ def main():
         def get_highcourt_cases_by_name_wrapper():
             try:
                 __location__ = f'{path}/{body["advocateName"]}/{body["iteration"]}'
-                logger.info({"location---->": __location__})
                 chrome_driver = create_driver(__location__)  # open browser
                 case_details = get_no_of_cases(
                     chrome_driver, body["advocateName"], body["highCourtId"], body["benchCode"])

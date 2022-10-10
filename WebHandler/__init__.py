@@ -69,7 +69,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
     logger.info(req)
     logger.info('Called ECourts Service.')
     logger.info(time.ctime())
-    cases_per_iteration = int(os.environ.get('CASES_PER_ITERATION'))
+    cases_per_iteration = int(os.environ.get('CASES_PER_ITERATION', 50))
 
     is_valid_request = True
     if (req.method.lower() != "post"):
@@ -157,8 +157,6 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                 case_details = get_no_of_cases(
                     driver, req_body("advocateName"), req_body["highCourtId"], req_body["benchCode"])
                 total_cases = int(case_details["number_of_cases"][23:])
-                driver.close()
-                driver.quit()
                 if total_cases <= cases_per_iteration:
                     start = 0
                     stop = total_cases
@@ -189,9 +187,10 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                             pass
                         start = start + cases_per_iteration
                         stop = stop + cases_per_iteration
-                        n = n-1
+                        n = n - 1
                         iteration = iteration+1
-
+                driver.close()
+                driver.quit()
             except Exception as e:
                 logger.info(e)
         get_total_no_of_cases_wrapper()

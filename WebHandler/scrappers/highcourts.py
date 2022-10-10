@@ -177,11 +177,12 @@ def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, st
 
         # list of case details
         case_details = []
-        case_sl_no = start + 1
+        case_sl_no = 1
         case_links = driver.find_elements(
             by="xpath", value='/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table/tbody/tr/td[5]')
         if start is not None and stop is not None:
             case_links = case_links[start:stop]
+            case_sl_no = start + 1
         for link in case_links:
             logger.info(link)
             logger.info(f'case no: {case_sl_no}')
