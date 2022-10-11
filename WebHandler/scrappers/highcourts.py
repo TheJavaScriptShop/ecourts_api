@@ -1,3 +1,4 @@
+from sys import exc_info
 import time
 import logging
 import os
@@ -30,14 +31,8 @@ from ..utils.ocr import (
 if os.environ.get("APP_ENV") == "local":
     load_dotenv()
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-sh = logging.StreamHandler()
-sh.setLevel(logging.DEBUG)
-logger.addHandler(sh)
 
-
-def get_no_of_cases(driver, advoc_name, state_code, bench_code):
+def get_no_of_cases(driver, advoc_name, state_code, bench_code, logger):
     is_failed_with_captach = True
     fetched_data = False
 
@@ -123,11 +118,11 @@ def get_no_of_cases(driver, advoc_name, state_code, bench_code):
                 return data
             except Exception as e:
                 logger.info(str(e))
-    except:
-        logger.info(str(e))
+    except Exception as e:
+        logger.info(str(e), exc_info=True)
 
 
-def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, stop=None):
+def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, stop=None, logger=None):
     def wait_for_download_and_rename(blob_path):
         try:
             # time.sleep(5)
