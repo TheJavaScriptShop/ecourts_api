@@ -32,10 +32,18 @@ if os.environ.get("APP_ENV") == "local":
     load_dotenv()
 
 
-def get_no_of_cases(driver, advoc_name, state_code, bench_code, logger):
+def get_no_of_cases(props):
     is_failed_with_captach = True
     fetched_data = False
+    driver = props["driver"]
+    logger = props["logger"]
+    advoc_name = props["advocateName"]
+    state_code = props["highCourtId"]
+    bench_code = props["benchCode"]
+    img_path = r"image.png"
 
+    if props.get("iteration"):
+        img_path = f'img-{props["iteration"]}.png'
     counter_retry = 0
     try:
         while is_failed_with_captach:
@@ -64,7 +72,6 @@ def get_no_of_cases(driver, advoc_name, state_code, bench_code, logger):
             logger.info("names sent")
             time.sleep(3)
 
-            img_path = r"image.png"
             captcha_xpath = '//*[@id="captcha_image"]'
             get_captcha(driver, img_path, captcha_xpath)
             text = get_text_from_captcha(

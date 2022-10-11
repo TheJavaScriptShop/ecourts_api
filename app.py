@@ -86,10 +86,6 @@ def main():
             is_valid_request = False
         if not body.get("callBackUrl"):
             is_valid_request = False
-    else:
-        data = {"status": False, "debugMessage": "Method not supported"}
-        logger.info(data)
-        return jsonify(data)
 
     if not is_valid_request:
         data = {"status": False, "debugMessage": "Insufficient parameters"}
@@ -115,8 +111,9 @@ def main():
             try:
                 __location__ = f'{path}/{body["advocateName"]}'
                 chrome_driver = create_driver(__location__)  # open browser
-                case_details = get_no_of_cases(
-                    chrome_driver, body["advocateName"], body["highCourtId"], body["benchCode"], logger)
+                get_no_of_cases_props = {"driver": chrome_driver,
+                                         "advocateName": body["advocateName"], "highCourtId": body["highCourtId"], "benchCode": body["benchCode"], "logger": logger}
+                case_details = get_no_of_cases(get_no_of_cases_props)
                 total_cases = int(case_details["number_of_cases"][23:])
                 logger.info({"total_cases": total_cases})
 
@@ -184,8 +181,16 @@ def main():
             try:
                 __location__ = f'{path}/{body["advocateName"]}/{body["iteration"]}'
                 chrome_driver = create_driver(__location__)  # open browser
+                get_no_of_cases_pagination_props = {
+                    "driver": chrome_driver,
+                    "advocateName": body["advocateName"],
+                    "highCourtId": body["highCourtId"],
+                    "benchCode": body["benchCode"],
+                    "logger": logger,
+                    "iteration": body["iteration"]
+                }
                 case_details = get_no_of_cases(
-                    chrome_driver, body["advocateName"], body["highCourtId"], body["benchCode"], logger)
+                    get_no_of_cases_pagination_props)
                 cases = get_highcourt_cases_by_name(
                     chrome_driver, body["advocateName"], __location__, body["start"], body["stop"], logger)
                 cases["number_of_establishments_in_court_complex"] = case_details["number_of_establishments_in_court_complex"]
