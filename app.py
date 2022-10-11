@@ -156,6 +156,8 @@ def main():
                 chrome_driver.quit()
             except Exception as e:
                 logger.info(str(e))
+                requests.post(url=body["callBackUrl"], timeout=10, json={
+                    "error": str(e), "request": {"body": body, "params": params}})
 
         get_total_no_of_cases_wrapper()
         data = {
@@ -190,6 +192,8 @@ def main():
                 chrome_driver.quit()
             except Exception as e:
                 logger.info(str(e))
+                requests.post(url=body["callBackUrl"], timeout=10, json={
+                    "error": str(e), "request": {"body": body, "params": params}})
         get_highcourt_cases_by_name_wrapper()
         data = {
             "status": True,
