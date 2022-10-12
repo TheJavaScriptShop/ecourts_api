@@ -177,6 +177,7 @@ def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, st
         if start is not None and stop is not None:
             case_links = case_links[start:stop]
             case_sl_no = start + 1
+        total_downloaded_files = 0
         for link in case_links:
             logger.info(link)
             logger.info(f'case no: {case_sl_no}')
@@ -324,6 +325,7 @@ def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, st
                         logger.info({'err': str(e), 'case_no': case_sl_no})
                 case_orders = {'status': True, 'data': case_orders_data,
                                'number_of_downloaded_files': order_no - 1}
+                total_downloaded_files = total_downloaded_files + 1
                 logger.info("case orders")
             except Exception as e:
                 logger.info(
@@ -389,7 +391,8 @@ def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, st
             "case_list": case_list,
             "case_details": case_details
         }
-        logger.info({"status": True, "data": data})
+        logger.info({"status": True, "data": data,
+                    "total_downloaded_files": total_downloaded_files})
         return {"status": True, "data": data}
     except Exception as e_exception:
         logger.error(e_exception, exc_info=True)
