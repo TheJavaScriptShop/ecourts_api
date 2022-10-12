@@ -111,6 +111,8 @@ def get_no_of_cases(props):
                 except Exception as e:
                     if counter_retry > 10:
                         return {'status': False, 'data': {}, "debugMessage": "Maximun retries reached"}
+            if os.path.isfile(img_path):
+                os.remove(img_path)
         if not fetched_data:
             try:
                 number_of_establishments_in_court_complex = selenium_get_text_xpath(
