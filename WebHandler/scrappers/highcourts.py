@@ -89,12 +89,14 @@ def get_no_of_cases(props):
                     driver, '//*[@id="errSpan1"]')
                 logger.info(failure_text)
                 if 'THERE IS AN ERROR' in failure_text:
-                    is_failed_with_captach = False
+                    is_failed_with_captach = True
             except:
                 try:
                     failure_text_other_page = selenium_get_text_xpath(
                         driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[26]/p')
                     logger.info(failure_text_other_page)
+                    is_failed_with_captach = True
+
                     if 'Record Not Found' in failure_text_other_page:
                         data = {
                             "number_of_establishments_in_court_complex": 0,
@@ -103,11 +105,9 @@ def get_no_of_cases(props):
                             'case_details': [],
                         }
                         fetched_data = True
-                        return {'status': False, 'data': {}, "debugMessage": "No data found"}
-                    if "invalid" in failure_text_other_page.lower():
-                        is_failed_with_captach = True
-                    else:
                         is_failed_with_captach = False
+                        return {'status': False, 'data': {}, "debugMessage": "No data found"}
+
                 except Exception as e:
                     if counter_retry > 10:
                         return {'status': False, 'data': {}, "debugMessage": "Maximun retries reached"}
