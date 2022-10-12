@@ -8,7 +8,7 @@ scrape_nclt.html
 .DS_Store
 .env
 *.pdf
-/logger
+/local
 
 bin
 obj

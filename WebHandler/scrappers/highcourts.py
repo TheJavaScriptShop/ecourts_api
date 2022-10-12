@@ -40,10 +40,12 @@ def get_no_of_cases(props):
     advoc_name = props["advocateName"]
     state_code = props["highCourtId"]
     bench_code = props["benchCode"]
-    img_path = r"image.png"
+    location = props["location"]
+    name = "".join(ch for ch in advoc_name if ch.isalnum())
+    img_path = f"local/images/{name}-image.png"
 
     if props.get("iteration"):
-        img_path = f'img-{props["iteration"]}.png'
+        img_path = f'local/images/{name}-img-{props["iteration"]}.png'
     counter_retry = 0
     try:
         while is_failed_with_captach:
@@ -387,7 +389,7 @@ def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, st
             "case_list": case_list,
             "case_details": case_details
         }
-        logger.info({"status": True, "data": data, "case_no": case_sl_no})
+        logger.info({"status": True, "data": data})
         return {"status": True, "data": data}
     except Exception as e_exception:
         logger.error(e_exception, exc_info=True)

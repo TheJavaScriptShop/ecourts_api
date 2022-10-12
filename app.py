@@ -102,7 +102,7 @@ def main():
         sh.setLevel(logging.DEBUG)
         logger.addHandler(sh)
 
-        fh = logging.FileHandler('logger/initial.log', mode='w')
+        fh = logging.FileHandler('local/logger/initial.log', mode='w')
         fh.setLevel(logging.DEBUG)
         logger.addHandler(fh)
 
@@ -112,7 +112,7 @@ def main():
                 __location__ = f'{path}/{body["advocateName"]}'
                 chrome_driver = create_driver(__location__)  # open browser
                 get_no_of_cases_props = {"driver": chrome_driver,
-                                         "advocateName": body["advocateName"], "highCourtId": body["highCourtId"], "benchCode": body["benchCode"], "logger": logger}
+                                         "advocateName": body["advocateName"], "highCourtId": body["highCourtId"], "benchCode": body["benchCode"], "logger": logger, "location": __location__}
                 case_details = get_no_of_cases(get_no_of_cases_props)
                 total_cases = int(case_details["number_of_cases"][23:])
                 logger.info({"total_cases": total_cases})
@@ -172,7 +172,7 @@ def main():
         logger.addHandler(sh)
 
         fh = logging.FileHandler(
-            f'logger/{body["iteration"]}-{body["start"]}.log', mode='w')
+            f'local/logger/{body["iteration"]}-{body["start"]}.log', mode='w')
         fh.setLevel(logging.DEBUG)
         logger.addHandler(fh)
 
@@ -187,7 +187,8 @@ def main():
                     "highCourtId": body["highCourtId"],
                     "benchCode": body["benchCode"],
                     "logger": logger,
-                    "iteration": body["iteration"]
+                    "iteration": body["iteration"],
+                    "location": __location__
                 }
                 case_details = get_no_of_cases(
                     get_no_of_cases_pagination_props)
