@@ -40,12 +40,11 @@ def get_no_of_cases(props):
     advoc_name = props["advocateName"]
     state_code = props["highCourtId"]
     bench_code = props["benchCode"]
-    location = props["location"]
     name = "".join(ch for ch in advoc_name if ch.isalnum())
-    img_path = f"local/images/{name}-image.png"
+    img_path = f"{name}-image.png"
 
     if props.get("iteration"):
-        img_path = f'local/images/{name}-img-{props["iteration"]}.png'
+        img_path = f'{name}-img-{props["iteration"]}.png'
     counter_retry = 0
     try:
         while is_failed_with_captach:
