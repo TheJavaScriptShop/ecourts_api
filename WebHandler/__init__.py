@@ -17,7 +17,7 @@ from .scrappers.highcourts import get_highcourt_cases_by_name, get_no_of_cases
 #     traces_sample_rate=1.0
 # )
 
-version = "2.0.5"
+version = "2.0.6"
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -79,6 +79,8 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
             status_code=200
         )
 
+    req_params = dict(req.params.items())
+
     if req_params.get("method") == "advocatecasesbyname":
         req_body = {}
         try:
@@ -89,7 +91,6 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                     {"status": False, "debugMessage": str(e_exception), "version": version}),
                 status_code=200
             )
-        req_params = dict(req.params.items())
         if not req_body.get("advocateName"):
             is_valid_request = False
         if not req_body.get("highCourtId"):
@@ -117,7 +118,6 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                     {"status": False, "debugMessage": str(e_exception), "version": version}),
                 status_code=200
             )
-        req_params = dict(req.params.items())
 
         @ fire_and_forget
         def get_total_no_of_cases_wrapper():
@@ -181,7 +181,6 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                     {"status": False, "debugMessage": str(e_exception), "version": version}),
                 status_code=200
             )
-        req_params = dict(req.params.items())
 
         logger.info("url request made")
 
