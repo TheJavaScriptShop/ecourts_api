@@ -163,7 +163,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                 chrome_driver.close()
                 chrome_driver.quit()
             except Exception as e:
-                logger.info(e)
+                logger.info(str(e))
                 requests.post(url=req_body["callBackUrl"], timeout=10, json={
                     "error": str(e), "request": {"body": req_body, "params": req_params}})
         get_total_no_of_cases_wrapper()
