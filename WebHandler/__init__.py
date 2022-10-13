@@ -17,7 +17,7 @@ from .scrappers.highcourts import get_highcourt_cases_by_name, get_no_of_cases
 #     traces_sample_rate=1.0
 # )
 
-version = "2.0.6"
+version = "2.0.7"
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -152,8 +152,10 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                         try:
                             requests.post(
                                 url="https://ecourtsapiservice-dev.azurewebsites.net/api/WebHandler?method=advocatecasesbyname", timeout=1, json=req_body)
-                        except:
-                            pass
+                        except Exception as e:
+                            requests.post(url=req_body["callBackUrl"], timeout=10, json={
+                                "error": str(e), "message": "Request Failed", "request": {"body": req_body, "params": req_params}})
+
                         start = start + cases_per_iteration
                         stop = stop + cases_per_iteration
                         n = n - 1
