@@ -17,7 +17,7 @@ from .scrappers.highcourts import get_highcourt_cases_by_name, get_no_of_cases
 #     traces_sample_rate=1.0
 # )
 
-version = "2.0.7"
+version = "2.0.8"
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -165,7 +165,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
             except Exception as e:
                 logger.info(e)
                 requests.post(url=req_body["callBackUrl"], timeout=10, json={
-                    "error": e, "request": {"body": req_body, "params": req_params}})
+                    "error": str(e), "request": {"body": req_body, "params": req_params}})
         get_total_no_of_cases_wrapper()
         # sentry_sdk.capture_message("return")
         return func.HttpResponse(
