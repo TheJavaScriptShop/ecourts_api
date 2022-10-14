@@ -133,7 +133,7 @@ def main():
         except Exception as e:
             end = datetime.datetime.now()
             total = end - start
-            return jsonify({"status": False, "debugMessage": "Failed", "error": str(e), "total_time_taken": total.seconds})
+            return jsonify({"status": False, "debugMessage": "Request Failed", "error": str(e), "total_time_taken": total.seconds})
 
     if request.args.get('method') == "displayboard":
         try:
@@ -154,7 +154,7 @@ def main():
         except Exception as e:
             end = datetime.datetime.now()
             total = end - start
-            return jsonify({"status": False, "debugMessage": "Failed", "error": str(e), "total_time_taken": total.seconds})
+            return jsonify({"status": False, "debugMessage": "Request Failed", "error": str(e), "total_time_taken": total.seconds})
 
     if request.args.get('method') == "advocatecasesbyname":
         body = request.json

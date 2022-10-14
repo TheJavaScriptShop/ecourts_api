@@ -12,13 +12,17 @@ from ..utils.sel import (
     selenium_click_xpath,
     get_display_board_table_data_as_list, selenium_send_keys_id
 )
+import WebHandler.scrappers.constants as constants
 
 import time
 
 
 def get_cause_list_data(driver, advocateName, highCourtId):
-    if highCourtId == "29":
-        driver.get('https://tshc.gov.in/Hcdbs/search.do')
+    try:
+        url = constants.high_courts_codes[highCourtId]["causelist_url"]
+        if not url:
+            return {"status": False, "message": "invalid request"}
+        driver.get(url)
         time.sleep(2)
         selenium_click_xpath(driver, "//input[@value='DAILY LIST']")
         time.sleep(2)
@@ -28,4 +32,6 @@ def get_cause_list_data(driver, advocateName, highCourtId):
         selenium_click_xpath(driver, '//div[@id="advsearch"]/input[2]')
         time.sleep(3)
         data = get_display_board_table_data_as_list(driver, "//table")
-    return data
+        return data
+    except Exception as e:
+        return {"status": False, "message": "Failed to fetch data", "error": str(e)}
