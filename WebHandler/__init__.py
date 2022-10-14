@@ -5,6 +5,8 @@ import time
 import requests
 import threading
 import tempfile
+import datetime
+import traceback
 
 import azure.functions as func
 from selenium import webdriver
@@ -17,7 +19,7 @@ from .scrappers.highcourts import get_highcourt_cases_by_name, get_no_of_cases
 #     traces_sample_rate=1.0
 # )
 
-version = "2.0.10"
+version = "2.0.11"
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -88,7 +90,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
         except Exception as e_exception:
             return func.HttpResponse(
                 body=json.dumps(
-                    {"status": False, "debugMessage": str(e_exception), "version": version}),
+                    {"status": False, "debugMessage": str(e_exception), "version": version, "code": 1}),
                 status_code=200
             )
         if not req_body.get("advocateName"):
@@ -115,13 +117,14 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
         except Exception as e_exception:
             return func.HttpResponse(
                 body=json.dumps(
-                    {"status": False, "debugMessage": str(e_exception), "version": version}),
+                    {"status": False, "debugMessage": str(e_exception), "version": version, "code": 2}),
                 status_code=200
             )
 
         @ fire_and_forget
         def get_total_no_of_cases_wrapper():
             logger.info("get_highcourt_cases_by_name_wrapper")
+            start = cases_per_iteration
             try:
                 __location__ = f'{path}/{req_body.get("advocateName")}'
                 chrome_driver = create_driver(__location__)
@@ -135,8 +138,11 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                     data["number_of_establishments_in_court_complex"] = case_details["number_of_establishments_in_court_complex"]
                     data["number_of_cases"] = case_details["number_of_cases"]
                     logger.info(json.dumps(data))
+                    end = datetime.datetime.now()
+                    total = end - start
+
                     requests.post(url=req_body["callBackUrl"], timeout=10, json={
-                        "data": data, "request": {"body": req_body, "params": req_params}})
+                        "data": data, "request": {"body": req_body, "params": req_params, "time": total}})
                 else:
                     n = total_cases/cases_per_iteration
                     start = 0
@@ -153,8 +159,12 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                             requests.post(
                                 url="https://ecourtsapiservice-dev.azurewebsites.net/api/WebHandler?method=advocatecasesbynamepagination", timeout=1, json=req_body)
                         except Exception as e:
+                            tb = traceback.print_exc()
+                            logger.info(str(e), exc_info=True)
+                            end = datetime.datetime.now()
+                            total = end - start
                             requests.post(url=req_body["callBackUrl"], timeout=10, json={
-                                "error": str(e), "message": "Request Failed", "request": {"body": req_body, "params": req_params}})
+                                "error": str(e), "traceback": tb, "message": "Request Failed", "request": {"body": req_body, "params": req_params, "time": total, "code": 3}})
 
                         start = start + cases_per_iteration
                         stop = stop + cases_per_iteration
@@ -162,10 +172,18 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                         iteration = iteration + 1
                 chrome_driver.close()
                 chrome_driver.quit()
-            except Exception as e:
-                logger.info(str(e))
+                end = datetime.datetime.now()
+                total = end - start
                 requests.post(url=req_body["callBackUrl"], timeout=10, json={
-                    "error": str(e), "request": {"body": req_body, "params": req_params}})
+                    "data": data, "message": "Request made", "info": {"no_of _instance_made": iteration - 1, "time": total}})
+
+            except Exception as e:
+                logger.info(str(e), exc_info=True)
+                tb = traceback.print_exc()
+                end = datetime.datetime.now()
+                total = end - start
+                requests.post(url=req_body["callBackUrl"], timeout=10, json={
+                    "error": str(e), "traceback": tb, "request": {"body": req_body, "params": req_params, "time": total, "code": 4}})
         get_total_no_of_cases_wrapper()
         # sentry_sdk.capture_message("return")
         return func.HttpResponse(
@@ -180,7 +198,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
         except Exception as e_exception:
             return func.HttpResponse(
                 body=json.dumps(
-                    {"status": False, "debugMessage": str(e_exception), "version": version}),
+                    {"status": False, "debugMessage": str(e_exception), "version": version, "code": 5}),
                 status_code=200
             )
 
@@ -188,6 +206,8 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
 
         @fire_and_forget
         def get_highcourt_cases_by_name_wrapper():
+            start = datetime.datetime.now()
+
             try:
                 __location__ = f'{path}/{req_body["advocateName"]}/{req_body["iteration"]}'
                 chrome_driver = create_driver(__location__)  # open browser
@@ -208,14 +228,19 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                 cases["number_of_cases"] = case_details["number_of_cases"]
                 cases_data = {"start": req_body["start"],
                               "stop": req_body["stop"], "data": cases}
-                requests.post(url=req_body["callBackUrl"], timeout=10, json={
-                              "data": cases_data, "request": {"body": req_body, "params": req_params}})
                 chrome_driver.close()
                 chrome_driver.quit()
-            except Exception as e:
-                logger.info(str(e))
+                end = datetime.datetime.now()
+                total = end - start
                 requests.post(url=req_body["callBackUrl"], timeout=10, json={
-                    "error": str(e), "request": {"body": req_body, "params": req_params}})
+                              "data": cases_data, "request": {"body": req_body, "params": req_params, "time": total}})
+            except Exception as e:
+                logger.info(str(e), exc_info=True)
+                tb = traceback.print_exc()
+                end = datetime.datetime.now()
+                total = end - start
+                requests.post(url=req_body["callBackUrl"], timeout=10, json={
+                    "error": str(e), "traceback": tb, "request": {"body": req_body, "params": req_params, "time": total, "code": 6}})
         get_highcourt_cases_by_name_wrapper()
 
         return func.HttpResponse(
@@ -232,6 +257,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         # sentry_sdk.capture_exception(e_exception)
         return func.HttpResponse(
             body=json.dumps(
-                {"status": False, "debugMessage": str(e_exception), "version": version}),
+                {"status": False, "debugMessage": str(e_exception), "version": version, "code": 7}),
             status_code=200
         )

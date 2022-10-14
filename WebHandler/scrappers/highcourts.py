@@ -4,6 +4,7 @@ import logging
 import os
 import shutil
 from datetime import date
+import traceback
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -105,11 +106,11 @@ def get_no_of_cases(props):
                         }
                         fetched_data = True
                         is_failed_with_captach = False
-                        return {'status': False, 'data': {}, "debugMessage": "No data found"}
+                        return {'status': False, 'data': {}, "debugMessage": "No data found", "code": 1}
 
                 except Exception as e:
                     if counter_retry > 10:
-                        return {'status': False, 'data': {}, "debugMessage": "Maximun retries reached"}
+                        return {'status': False, 'data': {}, "debugMessage": "Maximun retries reached", "code": 2}
             if os.path.isfile(img_path):
                 os.remove(img_path)
         if not fetched_data:
@@ -123,13 +124,17 @@ def get_no_of_cases(props):
                 data = {
                     "number_of_establishments_in_court_complex": number_of_establishments_in_court_complex,
                     "number_of_cases": number_of_cases,
-                    "driver": driver
                 }
                 return data
             except Exception as e:
-                logger.info(str(e))
+                logger.info(str(e), exc_info=True)
+                tb = traceback.print_exc()
+                return {'status': False, 'error': str(e), "traceback": tb, "debugMessage": "Unable to scrape data", "code": 3}
+
     except Exception as e:
         logger.info(str(e), exc_info=True)
+        tb = traceback.print_exc()
+        return {'status': False, 'error': str(e), "traceback": tb, "debugMessage": "Unable to scrape data", "code": 4}
 
 
 def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, stop=None, logger=None):
@@ -151,6 +156,8 @@ def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, st
                 os.remove(f"{__location__}/display_pdf.pdf")
         except Exception as e:
             logger.error(str(e), exc_info=True)
+            tb = traceback.print_exc()
+            return {'status': False, 'error': str(e), "traceback": tb, "debugMessage": "Failed to upload file to blob", "code": 5}
 
     try:
         # case details
@@ -322,7 +329,7 @@ def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, st
 
                     except Exception as e:
                         # logger.error(exc_info=True)
-
+                        traceback.print_exc()
                         logger.info({'err': str(e), 'case_no': case_sl_no})
                 case_orders = {'status': True, 'data': case_orders_data,
                                'number_of_downloaded_files': order_no - 1}
@@ -331,6 +338,7 @@ def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, st
             except Exception as e:
                 logger.info(
                     {"error": str(e), 'case_no': case_sl_no}, exc_info=True)
+                traceback.print_exc()
                 case_orders = {'status': False, 'data': [],
                                'number_of_downloaded_files': 0}
 
@@ -397,4 +405,6 @@ def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, st
         return {"status": True, "data": data}
     except Exception as e_exception:
         logger.error(e_exception, exc_info=True)
-        return {'status': False, 'data': {}, "debugMessage": str(e_exception)}
+        tb = traceback.print_exc()
+
+        return {'status': False, 'data': {}, "debugMessage": str(e_exception), "traceback": tb "code": 6}
