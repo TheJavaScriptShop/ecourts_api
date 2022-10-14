@@ -128,13 +128,13 @@ def get_no_of_cases(props):
                 return data
             except Exception as e:
                 logger.info(str(e), exc_info=True)
-                traceback.print_exc()
-                return {'status': False, 'error': str(e), "debugMessage": "Unable to scrape data", "code": 3}
+                tb = traceback.print_exc()
+                return {'status': False, 'error': str(e), "traceback": tb, "debugMessage": "Unable to scrape data", "code": 3}
 
     except Exception as e:
         logger.info(str(e), exc_info=True)
-        traceback.print_exc()
-        return {'status': False, 'error': str(e), "debugMessage": "Unable to scrape data", "code": 4}
+        tb = traceback.print_exc()
+        return {'status': False, 'error': str(e), "traceback": tb, "debugMessage": "Unable to scrape data", "code": 4}
 
 
 def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, stop=None, logger=None):
@@ -156,8 +156,8 @@ def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, st
                 os.remove(f"{__location__}/display_pdf.pdf")
         except Exception as e:
             logger.error(str(e), exc_info=True)
-            traceback.print_exc()
-            return {'status': False, 'error': str(e), "debugMessage": "Failed to upload file to blob", "code": 5}
+            tb = traceback.print_exc()
+            return {'status': False, 'error': str(e), "traceback": tb, "debugMessage": "Failed to upload file to blob", "code": 5}
 
     try:
         # case details
@@ -405,6 +405,6 @@ def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, st
         return {"status": True, "data": data}
     except Exception as e_exception:
         logger.error(e_exception, exc_info=True)
-        traceback.print_exc()
+        tb = traceback.print_exc()
 
-        return {'status': False, 'data': {}, "debugMessage": str(e_exception), "code": 6}
+        return {'status': False, 'data': {}, "debugMessage": str(e_exception), "traceback": tb "code": 6}

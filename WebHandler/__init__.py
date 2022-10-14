@@ -90,7 +90,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
         except Exception as e_exception:
             return func.HttpResponse(
                 body=json.dumps(
-                    {"status": False, "debugMessage": str(e_exception), "version": version}),
+                    {"status": False, "debugMessage": str(e_exception), "version": version, "code": 1}),
                 status_code=200
             )
         if not req_body.get("advocateName"):
@@ -117,7 +117,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
         except Exception as e_exception:
             return func.HttpResponse(
                 body=json.dumps(
-                    {"status": False, "debugMessage": str(e_exception), "version": version}),
+                    {"status": False, "debugMessage": str(e_exception), "version": version, "code": 2}),
                 status_code=200
             )
 
@@ -159,12 +159,12 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                             requests.post(
                                 url="https://ecourtsapiservice-dev.azurewebsites.net/api/WebHandler?method=advocatecasesbynamepagination", timeout=1, json=req_body)
                         except Exception as e:
-                            traceback.print_exc()
+                            tb = traceback.print_exc()
                             logger.info(str(e), exc_info=True)
                             end = datetime.datetime.now()
                             total = end - start
                             requests.post(url=req_body["callBackUrl"], timeout=10, json={
-                                "error": str(e), "message": "Request Failed", "request": {"body": req_body, "params": req_params, "time": total}})
+                                "error": str(e), "traceback": tb, "message": "Request Failed", "request": {"body": req_body, "params": req_params, "time": total, "code": 3}})
 
                         start = start + cases_per_iteration
                         stop = stop + cases_per_iteration
@@ -179,11 +179,11 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
 
             except Exception as e:
                 logger.info(str(e), exc_info=True)
-                traceback.print_exc()
+                tb = traceback.print_exc()
                 end = datetime.datetime.now()
                 total = end - start
                 requests.post(url=req_body["callBackUrl"], timeout=10, json={
-                    "error": str(e), "request": {"body": req_body, "params": req_params, "time": total}})
+                    "error": str(e), "traceback": tb, "request": {"body": req_body, "params": req_params, "time": total, "code": 4}})
         get_total_no_of_cases_wrapper()
         # sentry_sdk.capture_message("return")
         return func.HttpResponse(
@@ -198,7 +198,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
         except Exception as e_exception:
             return func.HttpResponse(
                 body=json.dumps(
-                    {"status": False, "debugMessage": str(e_exception), "version": version}),
+                    {"status": False, "debugMessage": str(e_exception), "version": version, "code": 5}),
                 status_code=200
             )
 
@@ -236,11 +236,11 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                               "data": cases_data, "request": {"body": req_body, "params": req_params, "time": total}})
             except Exception as e:
                 logger.info(str(e), exc_info=True)
-                traceback.print_exc()
+                tb = traceback.print_exc()
                 end = datetime.datetime.now()
                 total = end - start
                 requests.post(url=req_body["callBackUrl"], timeout=10, json={
-                    "error": str(e), "request": {"body": req_body, "params": req_params, "time": total}})
+                    "error": str(e), "traceback": tb, "request": {"body": req_body, "params": req_params, "time": total, "code": 6}})
         get_highcourt_cases_by_name_wrapper()
 
         return func.HttpResponse(
@@ -257,6 +257,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         # sentry_sdk.capture_exception(e_exception)
         return func.HttpResponse(
             body=json.dumps(
-                {"status": False, "debugMessage": str(e_exception), "version": version}),
+                {"status": False, "debugMessage": str(e_exception), "version": version, "code": 7}),
             status_code=200
         )
