@@ -23,12 +23,9 @@ import time
 
 def get_display_board(driver):
     driver.get('https://tshc.gov.in/Hcdbs/displayboard.jsp')
-    # WebDriverWait(driver, 10).until(EC.element_to_be_clickable(
-    # (By.XPATH, "/html/body/div/div[1]/center/div/article/div/div/div[1]/ul/li[1]/a")))
-    # ipdb.set_trace()
     time.sleep(3)
 
     data = get_display_board_table_data_as_list(
-        driver, "/html/body/div/form/center/div[1]/table")
+        driver, "//table[@id='table1']")
     print(data)
     return data
