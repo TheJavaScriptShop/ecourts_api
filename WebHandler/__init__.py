@@ -19,7 +19,7 @@ from .scrappers.highcourts import get_highcourt_cases_by_name, get_no_of_cases
 #     traces_sample_rate=1.0
 # )
 
-version = "2.0.10"
+version = "2.0.11"
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
