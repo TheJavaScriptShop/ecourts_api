@@ -13,11 +13,11 @@ from ..utils.sel import get_display_board_table_data_as_list
 import time
 
 
-def get_display_board(driver):
-    driver.get('https://tshc.gov.in/Hcdbs/displayboard.jsp')
-    time.sleep(3)
+def get_display_board(driver, advocateName, highCourtId):
+    if highCourtId == "29":
+        driver.get('https://tshc.gov.in/Hcdbs/displayboard.jsp')
+        time.sleep(3)
 
-    data = get_display_board_table_data_as_list(
-        driver, "//table[@id='table1']")
-    print(data)
+        data = get_display_board_table_data_as_list(
+            driver, "//table[@id='table1']")
     return data

@@ -20,6 +20,7 @@ import requests
 
 from WebHandler.scrappers.highcourts import get_highcourt_cases_by_name, get_no_of_cases
 from WebHandler.scrappers.display_board import get_display_board
+from WebHandler.scrappers.cause_list import get_cause_list_data
 
 
 path = os.environ.get('DOWNLOAD_PATH')
@@ -93,15 +94,38 @@ def main():
         logger.info(data)
         return jsonify(data)
 
-    if request.args.get('method') == "displayboard":
+    if request.args.get('method') == "advocatecauselist":
         try:
             start = datetime.datetime.now()
+            body = request.json
             params = request.args
             chrome_driver = create_driver(__location__=None)  # open browser
-            data = get_display_board(chrome_driver)
+            data = get_cause_list_data(
+                chrome_driver, body["advocateName"], body["highCourtId"])
             data = {
                 "status": True,
                 "data": data,
+                "request": {"body": body, "params": params}
+            }
+            end = datetime.datetime.now()
+            total = end - start
+            return jsonify({"status": True, "debugMessage": "Received", "data": data, "total_time_taken": total.seconds})
+        except Exception as e:
+            end = datetime.datetime.now()
+            total = end - start
+            return jsonify({"status": False, "debugMessage": "Failed", "error": str(e), "total_time_taken": total.seconds})
+
+    if request.args.get('method') == "displayboard":
+        try:
+            start = datetime.datetime.now()
+            body = request.json
+            params = request.args
+            chrome_driver = create_driver(__location__=None)  # open browser
+            table_data = get_display_board(
+                chrome_driver, body["advocateName"], body["highCourtId"])
+            data = {
+                "status": True,
+                "data": table_data,
                 "request": {"params": params}
             }
             end = datetime.datetime.now()
