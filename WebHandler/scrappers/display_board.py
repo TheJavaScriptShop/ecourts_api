@@ -8,16 +8,8 @@ from selenium.webdriver.support.ui import Select
 from azure.storage.blob import BlobServiceClient
 from dotenv import load_dotenv
 
-from ..utils.sel import (
-    selenium_click_xpath, selenium_send_keys_xpath,
-    selenium_send_keys_id, selenium_get_text_xpath,
-    selenium_get_element_xpath, selenium_get_element_id,
-    selenium_get_element_class, selenium_find_element_css_selector,
-    selenium_click_class, selenium_click_id,
-    get_table_data_as_list, get_display_board_table_data_as_list
-)
+from ..utils.sel import get_display_board_table_data_as_list
 
-import ipdb
 import time
 
 
