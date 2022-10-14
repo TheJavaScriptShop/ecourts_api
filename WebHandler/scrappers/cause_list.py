@@ -15,6 +15,7 @@ from ..utils.sel import (
 import WebHandler.scrappers.constants as constants
 
 import time
+from datetime import datetime
 
 
 def get_cause_list_data(driver, advocateName, highCourtId):
@@ -34,4 +35,4 @@ def get_cause_list_data(driver, advocateName, highCourtId):
         data = get_display_board_table_data_as_list(driver, "//table")
         return data
     except Exception as e:
-        return {"message": 'No Data Found'}
+        return {"message": "No Data Found", "error": str(e), "datetime": datetime.now()}

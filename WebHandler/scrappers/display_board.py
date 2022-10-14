@@ -12,6 +12,7 @@ from ..utils.sel import get_display_board_table_data_as_list
 import WebHandler.scrappers.constants as constants
 
 import time
+from datetime import datetime
 
 
 def get_display_board(driver, advocateName, highCourtId):
@@ -25,4 +26,4 @@ def get_display_board(driver, advocateName, highCourtId):
             driver, "//table[@id='table1']")
         return data
     except Exception as e:
-        return {"message": "No Data Found"}
+        return {"message": "No Data Found", "error": str(e), "datetime": datetime.now()}
