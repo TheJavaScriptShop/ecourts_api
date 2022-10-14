@@ -6,6 +6,7 @@ import requests
 import threading
 import tempfile
 import datetime
+import traceback
 
 import azure.functions as func
 from selenium import webdriver
@@ -158,6 +159,8 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                             requests.post(
                                 url="https://ecourtsapiservice-dev.azurewebsites.net/api/WebHandler?method=advocatecasesbynamepagination", timeout=1, json=req_body)
                         except Exception as e:
+                            traceback.print_exc()
+                            logger.info(str(e), exc_info=True)
                             end = datetime.datetime.now()
                             total = end - start
                             requests.post(url=req_body["callBackUrl"], timeout=10, json={
@@ -175,7 +178,8 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                     "data": data, "message": "Request made", "info": {"no_of _instance_made": iteration - 1, "time": total}})
 
             except Exception as e:
-                logger.info(str(e))
+                logger.info(str(e), exc_info=True)
+                traceback.print_exc()
                 end = datetime.datetime.now()
                 total = end - start
                 requests.post(url=req_body["callBackUrl"], timeout=10, json={
@@ -231,7 +235,8 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                 requests.post(url=req_body["callBackUrl"], timeout=10, json={
                               "data": cases_data, "request": {"body": req_body, "params": req_params, "time": total}})
             except Exception as e:
-                logger.info(str(e))
+                logger.info(str(e), exc_info=True)
+                traceback.print_exc()
                 end = datetime.datetime.now()
                 total = end - start
                 requests.post(url=req_body["callBackUrl"], timeout=10, json={
