@@ -19,6 +19,8 @@ import threading
 import requests
 
 from WebHandler.scrappers.highcourts import get_highcourt_cases_by_name, get_no_of_cases
+from WebHandler.scrappers.display_board import get_display_board
+from WebHandler.scrappers.cause_list import get_cause_list_data
 
 
 path = os.environ.get('DOWNLOAD_PATH')
@@ -87,15 +89,76 @@ def main():
         if not body.get("callBackUrl"):
             is_valid_request = False
 
+    if request.args.get('method') == "advocatecauselist":
+        body = request.json
+        params = request.args
+        if not body.get("advocateName"):
+            is_valid_request = False
+        if not body.get("highCourtId"):
+            is_valid_request = False
+        if not body.get("benchCode"):
+            is_valid_request = False
+
+    if request.args.get('method') == "displayboard":
+        body = request.json
+        params = request.args
+        if not body.get("advocateName"):
+            is_valid_request = False
+        if not body.get("highCourtId"):
+            is_valid_request = False
+        if not body.get("benchCode"):
+            is_valid_request = False
+
     if not is_valid_request:
         data = {"status": False, "debugMessage": "Insufficient parameters"}
         logger.info(data)
         return jsonify(data)
 
+    if request.args.get('method') == "advocatecauselist":
+        try:
+            start = datetime.datetime.now()
+            body = request.json
+            params = request.args
+            chrome_driver = create_driver(__location__=None)  # open browser
+            data = get_cause_list_data(
+                chrome_driver, body["advocateName"], body["highCourtId"])
+            data = {
+                "status": True,
+                "data": data,
+                "request": {"body": body, "params": params}
+            }
+            end = datetime.datetime.now()
+            total = end - start
+            return jsonify({"status": True, "debugMessage": "Received", "data": data, "total_time_taken": total.seconds})
+        except Exception as e:
+            end = datetime.datetime.now()
+            total = end - start
+            return jsonify({"status": False, "debugMessage": "Request Failed", "error": str(e), "total_time_taken": total.seconds})
+
+    if request.args.get('method') == "displayboard":
+        try:
+            start = datetime.datetime.now()
+            body = request.json
+            params = request.args
+            chrome_driver = create_driver(__location__=None)  # open browser
+            table_data = get_display_board(
+                chrome_driver, body["advocateName"], body["highCourtId"])
+            data = {
+                "status": True,
+                "data": table_data,
+                "request": {"params": params}
+            }
+            end = datetime.datetime.now()
+            total = end - start
+            return jsonify({"status": True, "debugMessage": "Received", "data": data, "total_time_taken": total.seconds})
+        except Exception as e:
+            end = datetime.datetime.now()
+            total = end - start
+            return jsonify({"status": False, "debugMessage": "Request Failed", "error": str(e), "total_time_taken": total.seconds})
+
     if request.args.get('method') == "advocatecasesbyname":
         body = request.json
         params = request.args
-
         logger = logging.getLogger("initial")
         logger.setLevel(logging.DEBUG)
         sh = logging.StreamHandler()

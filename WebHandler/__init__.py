@@ -13,13 +13,15 @@ from selenium import webdriver
 # import sentry_sdk
 
 from .scrappers.highcourts import get_highcourt_cases_by_name, get_no_of_cases
+from .scrappers.display_board import get_display_board
+from .scrappers.cause_list import get_cause_list_data
 
 # sentry_sdk.init(
 #     dsn="https://7818402c6eff4a99a87db4ceaf0ce3e5@o1183470.ingest.sentry.io/6776130",
 #     traces_sample_rate=1.0
 # )
 
-version = "2.0.11"
+version = "2.1.0"
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -102,12 +104,119 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
         if not req_body.get("callBackUrl"):
             is_valid_request = False
 
+    if req_params.get("method") == "advocatecauselist":
+        req_body = {}
+        try:
+            req_body = req.get_json()
+        except Exception as e_exception:
+            return func.HttpResponse(
+                body=json.dumps(
+                    {"status": False, "debugMessage": str(e_exception), "version": version, "code": 2}),
+                status_code=200
+            )
+        if not req_body.get("advocateName"):
+            is_valid_request = False
+        if not req_body.get("highCourtId"):
+            is_valid_request = False
+        if not req_body.get("benchCode"):
+            is_valid_request = False
+
+    if req_params.get("method") == "displayboard":
+        req_body = {}
+        try:
+            req_body = req.get_json()
+        except Exception as e_exception:
+            return func.HttpResponse(
+                body=json.dumps(
+                    {"status": False, "debugMessage": str(e_exception), "version": version, "code": 3}),
+                status_code=200
+            )
+        if not req_body.get("advocateName"):
+            is_valid_request = False
+        if not req_body.get("highCourtId"):
+            is_valid_request = False
+        if not req_body.get("benchCode"):
+            is_valid_request = False
+
     if not is_valid_request:
         return func.HttpResponse(
             body=json.dumps(
-                {"status": False, "debugMessage": "Insufficient parameters", "version": version}),
+                {"status": False, "debugMessage": "Insufficient parameters", "version": version, "code": 4}),
             status_code=200
         )
+
+    if req_params.get('method') == "advocatecauselist":
+        try:
+            start = datetime.datetime.now()
+            req_body = {}
+            try:
+                req_body = req.get_json()
+            except Exception as e_exception:
+                return func.HttpResponse(
+                    body=json.dumps(
+                        {"status": False, "debugMessage": str(e_exception), "version": version, "code": 5}),
+                    status_code=200
+                )
+
+            chrome_driver = create_driver(__location__=None)  # open browse
+            data = get_cause_list_data(
+                chrome_driver, req_body["advocateName"], req_body["highCourtId"])
+            data = {
+                "status": True,
+                "data": data,
+                "request": {"body": req_body, "params": req_params}
+            }
+            end = datetime.datetime.now()
+            total = end - start
+            return func.HttpResponse(
+                body=json.dumps(
+                    {"status": True, "debugMessage": "Received", "data": data, "total_time_taken": total.seconds, "version": version}),
+                status_code=200
+            )
+        except Exception as e:
+            end = datetime.datetime.now()
+            total = end - start
+            return func.HttpResponse(
+                body=json.dumps(
+                    {"status": False, "debugMessage": "Request Failed", "error": str(e), "total_time_taken": total.seconds, "version": version, 'code': 6}),
+                status_code=200
+            )
+
+    if req_params.args.get('method') == "displayboard":
+        try:
+            start = datetime.datetime.now()
+            req_body = {}
+            try:
+                req_body = req.get_json()
+            except Exception as e_exception:
+                return func.HttpResponse(
+                    body=json.dumps(
+                        {"status": False, "debugMessage": str(e_exception), "version": version, "code": 7}),
+                    status_code=200
+                )
+            chrome_driver = create_driver(__location__=None)  # open browser
+            table_data = get_display_board(
+                chrome_driver, req_body["advocateName"], req_body["highCourtId"])
+            data = {
+                "status": True,
+                "data": table_data,
+                "request": {"params": req_params}
+            }
+            end = datetime.datetime.now()
+            total = end - start
+            return func.HttpResponse(
+                body=json.dumps(
+                    {"status": True, "debugMessage": "Received", "data": data, "total_time_taken": total.seconds, "version": version}),
+                status_code=200
+            )
+        except Exception as e:
+            end = datetime.datetime.now()
+            total = end - start
+            return func.HttpResponse(
+                body=json.dumps(
+                    {"status": False, "debugMessage": "Request Failed", "error": str(e), "total_time_taken": total.seconds, "version": version, 'code': 8}),
+                status_code=200
+            )
 
     if req_params.get("method") == "advocatecasesbyname":
 
@@ -117,7 +226,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
         except Exception as e_exception:
             return func.HttpResponse(
                 body=json.dumps(
-                    {"status": False, "debugMessage": str(e_exception), "version": version, "code": 2}),
+                    {"status": False, "debugMessage": str(e_exception), "version": version, "code": 9}),
                 status_code=200
             )
 
@@ -142,7 +251,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                     total = end - start
 
                     requests.post(url=req_body["callBackUrl"], timeout=10, json={
-                        "data": data, "request": {"body": req_body, "params": req_params, "time": total}})
+                        "data": data, "request": {"body": req_body, "params": req_params, "time": total.seconds, "version": version}})
                 else:
                     n = total_cases/cases_per_iteration
                     start = 0
@@ -164,7 +273,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                             end = datetime.datetime.now()
                             total = end - start
                             requests.post(url=req_body["callBackUrl"], timeout=10, json={
-                                "error": str(e), "traceback": tb, "message": "Request Failed", "request": {"body": req_body, "params": req_params, "time": total, "code": 3}})
+                                "error": str(e), "traceback": tb, "message": "Request Failed", "request": {"body": req_body, "params": req_params, "time": total.seconds, "code": 10}})
 
                         start = start + cases_per_iteration
                         stop = stop + cases_per_iteration
@@ -175,7 +284,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                 end = datetime.datetime.now()
                 total = end - start
                 requests.post(url=req_body["callBackUrl"], timeout=10, json={
-                    "data": data, "message": "Request made", "info": {"no_of _instance_made": iteration - 1, "time": total}})
+                    "data": data, "message": "Request made", "info": {"no_of _instance_made": iteration - 1, "time": total.seconds, 'version': version}})
 
             except Exception as e:
                 logger.info(str(e), exc_info=True)
@@ -183,7 +292,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                 end = datetime.datetime.now()
                 total = end - start
                 requests.post(url=req_body["callBackUrl"], timeout=10, json={
-                    "error": str(e), "traceback": tb, "request": {"body": req_body, "params": req_params, "time": total, "code": 4}})
+                    "error": str(e), "traceback": tb, "request": {"body": req_body, "params": req_params, "time": total.seconds, 'version': version, "code": 11}})
         get_total_no_of_cases_wrapper()
         # sentry_sdk.capture_message("return")
         return func.HttpResponse(
@@ -198,7 +307,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
         except Exception as e_exception:
             return func.HttpResponse(
                 body=json.dumps(
-                    {"status": False, "debugMessage": str(e_exception), "version": version, "code": 5}),
+                    {"status": False, "debugMessage": str(e_exception), "version": version, "code": 12}),
                 status_code=200
             )
 
@@ -233,14 +342,14 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                 end = datetime.datetime.now()
                 total = end - start
                 requests.post(url=req_body["callBackUrl"], timeout=10, json={
-                              "data": cases_data, "request": {"body": req_body, "params": req_params, "time": total}})
+                              "data": cases_data, "request": {"body": req_body, "params": req_params, "time": total.seconds, 'version': version}})
             except Exception as e:
                 logger.info(str(e), exc_info=True)
                 tb = traceback.print_exc()
                 end = datetime.datetime.now()
                 total = end - start
                 requests.post(url=req_body["callBackUrl"], timeout=10, json={
-                    "error": str(e), "traceback": tb, "request": {"body": req_body, "params": req_params, "time": total, "code": 6}})
+                    "error": str(e), "traceback": tb, "request": {"body": req_body, "params": req_params, "time": total.seconds, "version": version, "code": 13}})
         get_highcourt_cases_by_name_wrapper()
 
         return func.HttpResponse(
@@ -257,6 +366,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         # sentry_sdk.capture_exception(e_exception)
         return func.HttpResponse(
             body=json.dumps(
-                {"status": False, "debugMessage": str(e_exception), "version": version, "code": 7}),
+                {"status": False, "debugMessage": str(e_exception), "version": version, "code": 14}),
             status_code=200
         )
