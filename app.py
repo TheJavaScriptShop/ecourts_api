@@ -89,6 +89,26 @@ def main():
         if not body.get("callBackUrl"):
             is_valid_request = False
 
+    if request.args.get('method') == "advocatecauselist":
+        body = request.json
+        params = request.args
+        if not body.get("advocateName"):
+            is_valid_request = False
+        if not body.get("highCourtId"):
+            is_valid_request = False
+        if not body.get("benchCode"):
+            is_valid_request = False
+
+    if request.args.get('method') == "displayboard":
+        body = request.json
+        params = request.args
+        if not body.get("advocateName"):
+            is_valid_request = False
+        if not body.get("highCourtId"):
+            is_valid_request = False
+        if not body.get("benchCode"):
+            is_valid_request = False
+
     if not is_valid_request:
         data = {"status": False, "debugMessage": "Insufficient parameters"}
         logger.info(data)
