@@ -23,15 +23,15 @@ def get_cause_list_data(driver, advocateName, highCourtId):
         if not url:
             return {"status": False, "message": "invalid request"}
         driver.get(url)
-        time.sleep(2)
+        time.sleep(3)
         selenium_click_xpath(driver, "//input[@value='DAILY LIST']")
-        time.sleep(2)
+        time.sleep(3)
         selenium_click_xpath(driver, "//input[@value='ADVOCATE WISE']")
-        time.sleep(2)
+        time.sleep(3)
         selenium_send_keys_id(driver, "svalue", advocateName)
         selenium_click_xpath(driver, '//div[@id="advsearch"]/input[2]')
         time.sleep(3)
         data = get_display_board_table_data_as_list(driver, "//table")
         return data
     except Exception as e:
-        return {"status": False, "message": "Failed to fetch data", "error": str(e)}
+        return {"message": 'No Data Found'}

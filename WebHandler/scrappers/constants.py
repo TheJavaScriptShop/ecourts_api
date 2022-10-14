@@ -14,6 +14,7 @@ high_courts_codes = {
         'id': '2',
         'name': 'High Court of Andhra Pradesh',
         'causelist_url': 'http://distcourts.tap.nic.in/Hcdbs/search.do',
+        'display_board_url': 'http://distcourts.tap.nic.in/Hcdbs/displayboard.jsp',
         'bench': [
             {
                 'id': '1',

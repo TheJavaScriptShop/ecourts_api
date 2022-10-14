@@ -25,4 +25,4 @@ def get_display_board(driver, advocateName, highCourtId):
             driver, "//table[@id='table1']")
         return data
     except Exception as e:
-        return {"status": False, "message": "Failed to fetch data", "error": str(e)}
+        return {"message": "No Data Found"}
