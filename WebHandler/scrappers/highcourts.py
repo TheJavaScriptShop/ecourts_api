@@ -407,4 +407,4 @@ def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, st
         logger.error(e_exception, exc_info=True)
         tb = traceback.print_exc()
 
-        return {'status': False, 'data': {}, "debugMessage": str(e_exception), "traceback": tb "code": 6}
+        return {'status': False, 'data': {}, "debugMessage": str(e_exception), "traceback": tb, "code": 6}

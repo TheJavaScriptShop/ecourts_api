@@ -71,3 +71,17 @@ def get_table_data_as_list(driver, xpath):
                 {"data": [th.text for th in row.find_elements(by="xpath", value=".//th")]})
 
     return rows
+
+
+def get_display_board_table_data_as_list(driver, xpath):
+    rows = []
+    table = driver.find_element(by="xpath", value=xpath)
+    for row in table.find_elements(by="xpath", value='.//tr'):
+        if row.find_elements(by="xpath", value=".//td"):
+            rows.append(
+                [td.text for td in row.find_elements(by="xpath", value=".//td")])
+        if row.find_elements(by="xpath", value=".//th"):
+            rows.append(
+                [th.text for th in row.find_elements(by="xpath", value=".//th")])
+
+    return rows

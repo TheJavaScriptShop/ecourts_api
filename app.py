@@ -19,6 +19,7 @@ import threading
 import requests
 
 from WebHandler.scrappers.highcourts import get_highcourt_cases_by_name, get_no_of_cases
+from WebHandler.scrappers.display_board import get_display_board
 
 
 path = os.environ.get('DOWNLOAD_PATH')
@@ -49,7 +50,7 @@ def create_driver(__location__):
 
     options.add_experimental_option("prefs", prefs)
     driver = webdriver.Chrome(DRIVER_PATH, chrome_options=options)
-    driver.maximize_window()
+    # driver.maximize_window()
     return driver
 
 
@@ -92,10 +93,28 @@ def main():
         logger.info(data)
         return jsonify(data)
 
+    if request.args.get('method') == "displayboard":
+        try:
+            start = datetime.datetime.now()
+            params = request.args
+            chrome_driver = create_driver(__location__=None)  # open browser
+            data = get_display_board(chrome_driver)
+            data = {
+                "status": True,
+                "data": data,
+                "request": {"params": params}
+            }
+            end = datetime.datetime.now()
+            total = end - start
+            return jsonify({"status": True, "debugMessage": "Received", "data": data, "total_time_taken": total.seconds})
+        except Exception as e:
+            end = datetime.datetime.now()
+            total = end - start
+            return jsonify({"status": False, "debugMessage": "Failed", "error": str(e), "total_time_taken": total.seconds})
+
     if request.args.get('method') == "advocatecasesbyname":
         body = request.json
         params = request.args
-
         logger = logging.getLogger("initial")
         logger.setLevel(logging.DEBUG)
         sh = logging.StreamHandler()
