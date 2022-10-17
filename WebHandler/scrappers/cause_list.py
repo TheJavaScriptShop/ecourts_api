@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 
 from ..utils.sel import (
     selenium_click_xpath,
-    get_display_board_table_data_as_list, selenium_send_keys_id
+    get_cause_list_table_data_as_list, selenium_send_keys_id
 )
 import WebHandler.scrappers.constants as constants
 
@@ -32,7 +32,7 @@ def get_cause_list_data(driver, advocateName, highCourtId):
         selenium_send_keys_id(driver, "svalue", advocateName)
         selenium_click_xpath(driver, '//div[@id="advsearch"]/input[2]')
         time.sleep(3)
-        data = get_display_board_table_data_as_list(driver, "//table")
+        data = get_cause_list_table_data_as_list(driver, "//table")
         return data
     except Exception as e:
         return {"message": "No Data Found", "error": str(e), "datetime": datetime.now()}

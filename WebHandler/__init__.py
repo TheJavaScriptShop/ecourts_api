@@ -21,7 +21,7 @@ from .scrappers.cause_list import get_cause_list_data
 #     traces_sample_rate=1.0
 # )
 
-version = "2.1.0"
+version = "2.1.1"
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
