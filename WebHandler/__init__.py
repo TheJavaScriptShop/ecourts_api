@@ -182,7 +182,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                 status_code=200
             )
 
-    if req_params.args.get('method') == "displayboard":
+    if req_params.get('method') == "displayboard":
         try:
             start = datetime.datetime.now()
             req_body = {}
