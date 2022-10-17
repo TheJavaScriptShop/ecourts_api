@@ -21,7 +21,7 @@ from .scrappers.cause_list import get_cause_list_data
 #     traces_sample_rate=1.0
 # )
 
-version = "2.1.2"
+version = "2.1.3"
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -244,9 +244,11 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                     logger.info(json.dumps(data))
                     end_time = datetime.datetime.now()
                     total_time = end_time - start_time
-
-                    requests.post(url=req_body["callBackUrl"], timeout=10, json={
-                        "data": data, "request": {"body": req_body, "params": req_params, "start_time": start_time.isoformat(), "time": total_time.seconds, "version": version}})
+                    try:
+                        requests.post(url=req_body["callBackUrl"], timeout=10, json={
+                            "data": data, "request": {"body": req_body, "params": req_params, "start_time": start_time.isoformat(), "time": total_time.seconds, "version": version}})
+                    except:
+                        logger.info({"err_msg": "callback request failed"})
                 else:
                     n = total_cases/cases_per_iteration
                     start = 0
@@ -267,8 +269,12 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                             logger.info(str(e), exc_info=True)
                             end_time = datetime.datetime.now()
                             total_time = end_time - start_time
-                            requests.post(url=req_body["callBackUrl"], timeout=10, json={
-                                "error": str(e), "traceback": tb, "message": "Request Failed", "request": {"body": req_body, "params": req_params, "start_time": start_time.isoformat(), "time": total_time.seconds, "code": 10}})
+                            try:
+                                requests.post(url=req_body["callBackUrl"], timeout=10, json={
+                                    "error": str(e), "traceback": tb, "message": "Request Failed", "request": {"body": req_body, "params": req_params, "start_time": start_time.isoformat(), "time": total_time.seconds, "code": 10}})
+                            except:
+                                logger.info(
+                                    {"err_msg": "callback request failed"})
 
                         start = start + cases_per_iteration
                         stop = stop + cases_per_iteration
@@ -276,18 +282,18 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                         iteration = iteration + 1
                 chrome_driver.close()
                 chrome_driver.quit()
-                end_time = datetime.datetime.now()
-                total_time = end_time - start_time
-                requests.post(url=req_body["callBackUrl"], timeout=10, json={
-                    "data": data, "message": "Request made", "info": {"no_of _instance_made": iteration - 1, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version}})
 
             except Exception as e:
                 logger.info(str(e), exc_info=True)
                 tb = traceback.print_exc()
                 end_time = datetime.datetime.now()
                 total_time = end_time - start_time
-                requests.post(url=req_body["callBackUrl"], timeout=10, json={
-                    "error": str(e), "traceback": tb, "request": {"body": req_body, "params": req_params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, "code": 11}})
+                try:
+                    requests.post(url=req_body["callBackUrl"], timeout=10, json={
+                        "error": str(e), "traceback": tb, "request": {"body": req_body, "params": req_params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, "code": 11}})
+                except:
+                    logger.info({"err_msg": "callback request failed"})
+
         get_total_no_of_cases_wrapper()
         # sentry_sdk.capture_message("return")
         return func.HttpResponse(
@@ -308,7 +314,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
 
         logger.info("url request made")
 
-        @fire_and_forget
+        @ fire_and_forget
         def get_highcourt_cases_by_name_wrapper():
             start_time = datetime.datetime.now()
 
@@ -336,15 +342,23 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                 chrome_driver.quit()
                 end_time = datetime.datetime.now()
                 total_time = end_time - start_time
-                requests.post(url=req_body["callBackUrl"], timeout=10, json={
-                              "data": cases_data, "request": {"body": req_body, "params": req_params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version}})
+                try:
+                    requests.post(url=req_body["callBackUrl"], timeout=10, json={
+                        "data": cases_data, "request": {"body": req_body, "params": req_params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version}})
+                except:
+                    logger.info({"err_msg": "callback request failed"})
+
             except Exception as e:
                 logger.info(str(e), exc_info=True)
                 tb = traceback.print_exc()
                 end_time = datetime.datetime.now()
                 total_time = end_time - start_time
-                requests.post(url=req_body["callBackUrl"], timeout=10, json={
-                    "error": str(e), "traceback": tb, "request": {"body": req_body, "params": req_params, "start_time": start_time.isoformat(), "time": total_time.seconds, "version": version, "code": 13}})
+                try:
+                    requests.post(url=req_body["callBackUrl"], timeout=10, json={
+                        "error": str(e), "traceback": tb, "request": {"body": req_body, "params": req_params, "start_time": start_time.isoformat(), "time": total_time.seconds, "version": version, "code": 13}})
+                except:
+                    logger.info({"err_msg": "callback request failed"})
+
         get_highcourt_cases_by_name_wrapper()
 
         return func.HttpResponse(
