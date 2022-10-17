@@ -79,10 +79,16 @@ def get_display_board_table_data_as_list(driver, xpath):
     for row in table.find_elements(by="xpath", value='.//tr'):
         if row.find_elements(by="xpath", value=".//td"):
             rows.append(
-                [td.text for td in row.find_elements(by="xpath", value=".//td")])
+                [td.text for td in row.find_elements(by="xpath", value=".//td")[0:3]])
+            rows.append(
+                [td.text for td in row.find_elements(by="xpath", value=".//td")[3:6]])
+            rows.append(
+                [td.text for td in row.find_elements(by="xpath", value=".//td")[6:9]])
+            rows.append(
+                [td.text for td in row.find_elements(by="xpath", value=".//td")[9:12]])
         if row.find_elements(by="xpath", value=".//th"):
             rows.append(
-                [th.text for th in row.find_elements(by="xpath", value=".//th")])
+                [th.text for th in row.find_elements(by="xpath", value=".//th")[0:3]])
 
     return rows
 

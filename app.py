@@ -136,7 +136,7 @@ def main():
             params = request.args
             chrome_driver = create_driver(__location__=None)  # open browser
             table_data = get_display_board(
-                chrome_driver, body["advocateName"], body["highCourtId"])
+                chrome_driver, body["highCourtId"])
             data = {
                 "status": True,
                 "data": table_data,

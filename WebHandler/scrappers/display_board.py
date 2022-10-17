@@ -15,7 +15,7 @@ import time
 from datetime import datetime
 
 
-def get_display_board(driver, advocateName, highCourtId):
+def get_display_board(driver, highCourtId):
     try:
         url = constants.high_courts_codes[highCourtId]["display_board_url"]
         if not url:

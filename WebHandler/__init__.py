@@ -21,7 +21,7 @@ from .scrappers.cause_list import get_cause_list_data
 #     traces_sample_rate=1.0
 # )
 
-version = "2.1.1"
+version = "2.1.2"
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -190,7 +190,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                 )
             chrome_driver = create_driver(__location__=None)  # open browser
             table_data = get_display_board(
-                chrome_driver, req_body["advocateName"], req_body["highCourtId"])
+                chrome_driver, req_body["highCourtId"])
             data = {
                 "status": True,
                 "data": table_data,
@@ -227,6 +227,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
         @ fire_and_forget
         def get_total_no_of_cases_wrapper():
             logger.info("get_highcourt_cases_by_name_wrapper")
+            start_time = datetime.datetime.now()
             start = cases_per_iteration
             try:
                 __location__ = f'{path}/{req_body.get("advocateName")}'
