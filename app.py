@@ -96,17 +96,11 @@ def main():
             is_valid_request = False
         if not body.get("highCourtId"):
             is_valid_request = False
-        if not body.get("benchCode"):
-            is_valid_request = False
 
     if request.args.get('method') == "displayboard":
         body = request.json
         params = request.args
-        if not body.get("advocateName"):
-            is_valid_request = False
         if not body.get("highCourtId"):
-            is_valid_request = False
-        if not body.get("benchCode"):
             is_valid_request = False
 
     if not is_valid_request:
@@ -116,7 +110,7 @@ def main():
 
     if request.args.get('method') == "advocatecauselist":
         try:
-            start = datetime.datetime.now()
+            start_time = datetime.datetime.now()
             body = request.json
             params = request.args
             chrome_driver = create_driver(__location__=None)  # open browser
@@ -127,17 +121,17 @@ def main():
                 "data": data,
                 "request": {"body": body, "params": params}
             }
-            end = datetime.datetime.now()
-            total = end - start
-            return jsonify({"status": True, "debugMessage": "Received", "data": data, "total_time_taken": total.seconds})
+            end_time = datetime.datetime.now()
+            total_time = end_time - start_time
+            return jsonify({"status": True, "debugMessage": "Received", "data": data, "start_time": start_time, "total_time_taken": total_time.seconds})
         except Exception as e:
-            end = datetime.datetime.now()
-            total = end - start
-            return jsonify({"status": False, "debugMessage": "Request Failed", "error": str(e), "total_time_taken": total.seconds})
+            end_time = datetime.datetime.now()
+            total_time = end_time - start_time
+            return jsonify({"status": False, "debugMessage": "Request Failed", "error": str(e), "start_time": start_time, "total_time_taken": total_time.seconds})
 
     if request.args.get('method') == "displayboard":
         try:
-            start = datetime.datetime.now()
+            start_time = datetime.datetime.now()
             body = request.json
             params = request.args
             chrome_driver = create_driver(__location__=None)  # open browser
@@ -148,13 +142,13 @@ def main():
                 "data": table_data,
                 "request": {"params": params}
             }
-            end = datetime.datetime.now()
-            total = end - start
-            return jsonify({"status": True, "debugMessage": "Received", "data": data, "total_time_taken": total.seconds})
+            end_time = datetime.datetime.now()
+            total_time = end_time - start_time
+            return jsonify({"status": True, "debugMessage": "Received", "data": data, "start_time": start_time, "total_time_taken": total_time.seconds})
         except Exception as e:
-            end = datetime.datetime.now()
-            total = end - start
-            return jsonify({"status": False, "debugMessage": "Request Failed", "error": str(e), "total_time_taken": total.seconds})
+            end_time = datetime.datetime.now()
+            total_time = end_time - start_time
+            return jsonify({"status": False, "debugMessage": "Request Failed", "error": str(e), "start_time": start_time, "total_time_taken": total_time.seconds})
 
     if request.args.get('method') == "advocatecasesbyname":
         body = request.json

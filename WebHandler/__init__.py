@@ -21,7 +21,7 @@ from .scrappers.cause_list import get_cause_list_data
 #     traces_sample_rate=1.0
 # )
 
-version = "2.1.0"
+version = "2.1.1"
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -118,8 +118,6 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
             is_valid_request = False
         if not req_body.get("highCourtId"):
             is_valid_request = False
-        if not req_body.get("benchCode"):
-            is_valid_request = False
 
     if req_params.get("method") == "displayboard":
         req_body = {}
@@ -131,11 +129,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                     {"status": False, "debugMessage": str(e_exception), "version": version, "code": 3}),
                 status_code=200
             )
-        if not req_body.get("advocateName"):
-            is_valid_request = False
         if not req_body.get("highCourtId"):
-            is_valid_request = False
-        if not req_body.get("benchCode"):
             is_valid_request = False
 
     if not is_valid_request:
@@ -147,7 +141,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
 
     if req_params.get('method') == "advocatecauselist":
         try:
-            start = datetime.datetime.now()
+            start_time = datetime.datetime.now()
             req_body = {}
             try:
                 req_body = req.get_json()
@@ -166,25 +160,25 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                 "data": data,
                 "request": {"body": req_body, "params": req_params}
             }
-            end = datetime.datetime.now()
-            total = end - start
+            end_time = datetime.datetime.now()
+            total_time = end_time - start_time
             return func.HttpResponse(
                 body=json.dumps(
-                    {"status": True, "debugMessage": "Received", "data": data, "total_time_taken": total.seconds, "version": version}),
+                    {"status": True, "debugMessage": "Received", "data": data, "start_time": start_time, "total_time_taken": total_time.seconds, "version": version}),
                 status_code=200
             )
         except Exception as e:
-            end = datetime.datetime.now()
-            total = end - start
+            end_time = datetime.datetime.now()
+            total_time = end_time - start_time
             return func.HttpResponse(
                 body=json.dumps(
-                    {"status": False, "debugMessage": "Request Failed", "error": str(e), "total_time_taken": total.seconds, "version": version, 'code': 6}),
+                    {"status": False, "debugMessage": "Request Failed", "error": str(e), "start_time": start_time, "total_time_taken": total_time.seconds, "version": version, 'code': 6}),
                 status_code=200
             )
 
-    if req_params.args.get('method') == "displayboard":
+    if req_params.get('method') == "displayboard":
         try:
-            start = datetime.datetime.now()
+            start_time = datetime.datetime.now()
             req_body = {}
             try:
                 req_body = req.get_json()
@@ -202,19 +196,19 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                 "data": table_data,
                 "request": {"params": req_params}
             }
-            end = datetime.datetime.now()
-            total = end - start
+            end_time = datetime.datetime.now()
+            total_time = end_time - start_time
             return func.HttpResponse(
                 body=json.dumps(
-                    {"status": True, "debugMessage": "Received", "data": data, "total_time_taken": total.seconds, "version": version}),
+                    {"status": True, "debugMessage": "Received", "data": data, "start_time": start_time, "total_time_taken": total_time.seconds, "version": version}),
                 status_code=200
             )
         except Exception as e:
-            end = datetime.datetime.now()
-            total = end - start
+            end_time = datetime.datetime.now()
+            total_time = end_time - start_time
             return func.HttpResponse(
                 body=json.dumps(
-                    {"status": False, "debugMessage": "Request Failed", "error": str(e), "total_time_taken": total.seconds, "version": version, 'code': 8}),
+                    {"status": False, "debugMessage": "Request Failed", "error": str(e), "start_time": start_time, "time_time_taken": total_time.seconds, "version": version, 'code': 8}),
                 status_code=200
             )
 
@@ -247,11 +241,11 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                     data["number_of_establishments_in_court_complex"] = case_details["number_of_establishments_in_court_complex"]
                     data["number_of_cases"] = case_details["number_of_cases"]
                     logger.info(json.dumps(data))
-                    end = datetime.datetime.now()
-                    total = end - start
+                    end_time = datetime.datetime.now()
+                    total_time = end_time - start_time
 
                     requests.post(url=req_body["callBackUrl"], timeout=10, json={
-                        "data": data, "request": {"body": req_body, "params": req_params, "time": total.seconds, "version": version}})
+                        "data": data, "request": {"body": req_body, "params": req_params, "start_time": start_time, "time": total_time.seconds, "version": version}})
                 else:
                     n = total_cases/cases_per_iteration
                     start = 0
@@ -270,10 +264,10 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                         except Exception as e:
                             tb = traceback.print_exc()
                             logger.info(str(e), exc_info=True)
-                            end = datetime.datetime.now()
-                            total = end - start
+                            end_time = datetime.datetime.now()
+                            total_time = end_time - start_time
                             requests.post(url=req_body["callBackUrl"], timeout=10, json={
-                                "error": str(e), "traceback": tb, "message": "Request Failed", "request": {"body": req_body, "params": req_params, "time": total.seconds, "code": 10}})
+                                "error": str(e), "traceback": tb, "message": "Request Failed", "request": {"body": req_body, "params": req_params, "start_time": start_time, "time": total_time.seconds, "code": 10}})
 
                         start = start + cases_per_iteration
                         stop = stop + cases_per_iteration
@@ -281,18 +275,18 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                         iteration = iteration + 1
                 chrome_driver.close()
                 chrome_driver.quit()
-                end = datetime.datetime.now()
-                total = end - start
+                end_time = datetime.datetime.now()
+                total_time = end_time - start_time
                 requests.post(url=req_body["callBackUrl"], timeout=10, json={
-                    "data": data, "message": "Request made", "info": {"no_of _instance_made": iteration - 1, "time": total.seconds, 'version': version}})
+                    "data": data, "message": "Request made", "info": {"no_of _instance_made": iteration - 1, "start_time": start_time, "time": total_time.seconds, 'version': version}})
 
             except Exception as e:
                 logger.info(str(e), exc_info=True)
                 tb = traceback.print_exc()
-                end = datetime.datetime.now()
-                total = end - start
+                end_time = datetime.datetime.now()
+                total_time = end_time - start_time
                 requests.post(url=req_body["callBackUrl"], timeout=10, json={
-                    "error": str(e), "traceback": tb, "request": {"body": req_body, "params": req_params, "time": total.seconds, 'version': version, "code": 11}})
+                    "error": str(e), "traceback": tb, "request": {"body": req_body, "params": req_params, "start_time": start_time, "time": total_time.seconds, 'version': version, "code": 11}})
         get_total_no_of_cases_wrapper()
         # sentry_sdk.capture_message("return")
         return func.HttpResponse(
@@ -315,7 +309,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
 
         @fire_and_forget
         def get_highcourt_cases_by_name_wrapper():
-            start = datetime.datetime.now()
+            start_time = datetime.datetime.now()
 
             try:
                 __location__ = f'{path}/{req_body["advocateName"]}/{req_body["iteration"]}'
@@ -339,17 +333,17 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                               "stop": req_body["stop"], "data": cases}
                 chrome_driver.close()
                 chrome_driver.quit()
-                end = datetime.datetime.now()
-                total = end - start
+                end_time = datetime.datetime.now()
+                total_time = end_time - start_time
                 requests.post(url=req_body["callBackUrl"], timeout=10, json={
-                              "data": cases_data, "request": {"body": req_body, "params": req_params, "time": total.seconds, 'version': version}})
+                              "data": cases_data, "request": {"body": req_body, "params": req_params, "start_time": start_time, "time": total_time.seconds, 'version': version}})
             except Exception as e:
                 logger.info(str(e), exc_info=True)
                 tb = traceback.print_exc()
-                end = datetime.datetime.now()
-                total = end - start
+                end_time = datetime.datetime.now()
+                total_time = end_time - start_time
                 requests.post(url=req_body["callBackUrl"], timeout=10, json={
-                    "error": str(e), "traceback": tb, "request": {"body": req_body, "params": req_params, "time": total.seconds, "version": version, "code": 13}})
+                    "error": str(e), "traceback": tb, "request": {"body": req_body, "params": req_params, "start_time": start_time, "time": total_time.seconds, "version": version, "code": 13}})
         get_highcourt_cases_by_name_wrapper()
 
         return func.HttpResponse(
