@@ -118,8 +118,6 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
             is_valid_request = False
         if not req_body.get("highCourtId"):
             is_valid_request = False
-        if not req_body.get("benchCode"):
-            is_valid_request = False
 
     if req_params.get("method") == "displayboard":
         req_body = {}
@@ -131,11 +129,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                     {"status": False, "debugMessage": str(e_exception), "version": version, "code": 3}),
                 status_code=200
             )
-        if not req_body.get("advocateName"):
-            is_valid_request = False
         if not req_body.get("highCourtId"):
-            is_valid_request = False
-        if not req_body.get("benchCode"):
             is_valid_request = False
 
     if not is_valid_request:
