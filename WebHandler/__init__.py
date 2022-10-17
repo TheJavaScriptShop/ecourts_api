@@ -164,7 +164,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
             total_time = end_time - start_time
             return func.HttpResponse(
                 body=json.dumps(
-                    {"status": True, "debugMessage": "Received", "data": data, "start_time": start_time, "total_time_taken": total_time.seconds, "version": version}),
+                    {"status": True, "debugMessage": "Received", "data": data, "start_time": start_time.isoformat(), "total_time_taken": total_time.seconds, "version": version}),
                 status_code=200
             )
         except Exception as e:
@@ -172,7 +172,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
             total_time = end_time - start_time
             return func.HttpResponse(
                 body=json.dumps(
-                    {"status": False, "debugMessage": "Request Failed", "error": str(e), "start_time": start_time, "total_time_taken": total_time.seconds, "version": version, 'code': 6}),
+                    {"status": False, "debugMessage": "Request Failed", "error": str(e), "start_time": start_time.isoformat(), "total_time_taken": total_time.seconds, "version": version, 'code': 6}),
                 status_code=200
             )
 
@@ -200,7 +200,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
             total_time = end_time - start_time
             return func.HttpResponse(
                 body=json.dumps(
-                    {"status": True, "debugMessage": "Received", "data": data, "start_time": start_time, "total_time_taken": total_time.seconds, "version": version}),
+                    {"status": True, "debugMessage": "Received", "data": data, "start_time": start_time.isoformat(), "total_time_taken": total_time.seconds, "version": version}),
                 status_code=200
             )
         except Exception as e:
@@ -208,7 +208,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
             total_time = end_time - start_time
             return func.HttpResponse(
                 body=json.dumps(
-                    {"status": False, "debugMessage": "Request Failed", "error": str(e), "start_time": start_time, "time_time_taken": total_time.seconds, "version": version, 'code': 8}),
+                    {"status": False, "debugMessage": "Request Failed", "error": str(e), "start_time": start_time.isoformat(), "time_time_taken": total_time.seconds, "version": version, 'code': 8}),
                 status_code=200
             )
 
@@ -245,7 +245,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                     total_time = end_time - start_time
 
                     requests.post(url=req_body["callBackUrl"], timeout=10, json={
-                        "data": data, "request": {"body": req_body, "params": req_params, "start_time": start_time, "time": total_time.seconds, "version": version}})
+                        "data": data, "request": {"body": req_body, "params": req_params, "start_time": start_time.isoformat(), "time": total_time.seconds, "version": version}})
                 else:
                     n = total_cases/cases_per_iteration
                     start = 0
@@ -267,7 +267,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                             end_time = datetime.datetime.now()
                             total_time = end_time - start_time
                             requests.post(url=req_body["callBackUrl"], timeout=10, json={
-                                "error": str(e), "traceback": tb, "message": "Request Failed", "request": {"body": req_body, "params": req_params, "start_time": start_time, "time": total_time.seconds, "code": 10}})
+                                "error": str(e), "traceback": tb, "message": "Request Failed", "request": {"body": req_body, "params": req_params, "start_time": start_time.isoformat(), "time": total_time.seconds, "code": 10}})
 
                         start = start + cases_per_iteration
                         stop = stop + cases_per_iteration
@@ -278,7 +278,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                 end_time = datetime.datetime.now()
                 total_time = end_time - start_time
                 requests.post(url=req_body["callBackUrl"], timeout=10, json={
-                    "data": data, "message": "Request made", "info": {"no_of _instance_made": iteration - 1, "start_time": start_time, "time": total_time.seconds, 'version': version}})
+                    "data": data, "message": "Request made", "info": {"no_of _instance_made": iteration - 1, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version}})
 
             except Exception as e:
                 logger.info(str(e), exc_info=True)
@@ -286,7 +286,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                 end_time = datetime.datetime.now()
                 total_time = end_time - start_time
                 requests.post(url=req_body["callBackUrl"], timeout=10, json={
-                    "error": str(e), "traceback": tb, "request": {"body": req_body, "params": req_params, "start_time": start_time, "time": total_time.seconds, 'version': version, "code": 11}})
+                    "error": str(e), "traceback": tb, "request": {"body": req_body, "params": req_params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, "code": 11}})
         get_total_no_of_cases_wrapper()
         # sentry_sdk.capture_message("return")
         return func.HttpResponse(
@@ -336,14 +336,14 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                 end_time = datetime.datetime.now()
                 total_time = end_time - start_time
                 requests.post(url=req_body["callBackUrl"], timeout=10, json={
-                              "data": cases_data, "request": {"body": req_body, "params": req_params, "start_time": start_time, "time": total_time.seconds, 'version': version}})
+                              "data": cases_data, "request": {"body": req_body, "params": req_params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version}})
             except Exception as e:
                 logger.info(str(e), exc_info=True)
                 tb = traceback.print_exc()
                 end_time = datetime.datetime.now()
                 total_time = end_time - start_time
                 requests.post(url=req_body["callBackUrl"], timeout=10, json={
-                    "error": str(e), "traceback": tb, "request": {"body": req_body, "params": req_params, "start_time": start_time, "time": total_time.seconds, "version": version, "code": 13}})
+                    "error": str(e), "traceback": tb, "request": {"body": req_body, "params": req_params, "start_time": start_time.isoformat(), "time": total_time.seconds, "version": version, "code": 13}})
         get_highcourt_cases_by_name_wrapper()
 
         return func.HttpResponse(
