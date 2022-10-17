@@ -90,7 +90,7 @@ def get_display_board_table_data_as_list(driver, xpath):
 def get_cause_list_table_data_as_list(driver, xpath):
     rows = []
     table = driver.find_element(by="xpath", value=xpath)
-    for row in table.find_elements(by="xpath", value='.//tr'):
+    for row in table.find_elements(by="xpath", value='.//tbody'):
         if row.find_elements(by="xpath", value=".//td"):
             rows.append(
                 [td.text for td in row.find_elements(by="xpath", value=".//td")])
