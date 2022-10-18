@@ -21,6 +21,7 @@ import requests
 from WebHandler.scrappers.highcourts import get_highcourt_cases_by_name, get_no_of_cases
 from WebHandler.scrappers.display_board import get_display_board
 from WebHandler.scrappers.cause_list import get_cause_list_data
+from WebHandler.scrappers.districtcourts import get_no_of_cases_district_court, get_highcourt_cases_by_name_district_court
 
 
 path = os.environ.get('DOWNLOAD_PATH')
@@ -31,7 +32,7 @@ def create_driver(__location__):
     DRIVER_PATH = os.environ.get('DRIVER_PATH')
     options.add_argument("--disable-extensions")
     options.add_argument("--disable-infobars")
-    options.add_argument("--headless")
+    # options.add_argument("--headless")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--no-sandbox")
     options.add_argument("--window-size=1700x800")
@@ -85,6 +86,20 @@ def main():
         if not body.get("highCourtId"):
             is_valid_request = False
         if not body.get("benchCode"):
+            is_valid_request = False
+        if not body.get("callBackUrl"):
+            is_valid_request = False
+
+    if request.args.get('method') == "districtcourt_advocatecasesbyname":
+        body = request.json
+        params = request.args
+        if not body.get("advocateName"):
+            is_valid_request = False
+        if not body.get("state_id"):
+            is_valid_request = False
+        if not body.get("district_id"):
+            is_valid_request = False
+        if not body.get("court_complex_id"):
             is_valid_request = False
         if not body.get("callBackUrl"):
             is_valid_request = False
@@ -264,6 +279,59 @@ def main():
                 requests.post(url=body["callBackUrl"], timeout=10, json={
                     "error": str(e), "request": {"body": body, "params": params}})
         get_highcourt_cases_by_name_wrapper()
+        data = {
+            "status": True,
+            "debugMessage": "Request Received and processing",
+            "request": {"body": body, "params": params}
+        }
+        return jsonify({"status": True, "debugMessage": "Received", "data": data})
+
+    if request.args.get('method') == "districtcourt_advocatecasesbyname":
+        body = request.json
+        params = request.args
+        logger = logging.getLogger("initial")
+        logger.setLevel(logging.DEBUG)
+        sh = logging.StreamHandler()
+        sh.setLevel(logging.DEBUG)
+        logger.addHandler(sh)
+
+        fh = logging.FileHandler('local/logger/initial.log', mode='w')
+        fh.setLevel(logging.DEBUG)
+        logger.addHandler(fh)
+
+        @ fire_and_forget
+        def get_total_no_of_cases_wrapper():
+            try:
+                __location__ = f'{path}/{body["advocateName"]}'
+                chrome_driver = create_driver(
+                    __location__=None)  # open browser
+                get_no_of_cases_props = {
+                    "driver": chrome_driver,
+                    "advocateName": body["advocateName"],
+                    "district_id": body["district_id"],
+                    "state_id": body["state_id"],
+                    "court_complex_id": body["court_complex_id"],
+                    "logger": logger,
+                    "location": __location__
+                }
+                case_details = get_no_of_cases_district_court(
+                    get_no_of_cases_props)
+                total_cases = int(case_details["number_of_cases"][23:])
+                logger.info({"total_cases": total_cases})
+                data = get_highcourt_cases_by_name_district_court(
+                    chrome_driver, body["advocateName"], __location__, logger)
+                data["number_of_establishments_in_court_complex"] = case_details["number_of_establishments_in_court_complex"]
+                data["number_of_cases"] = case_details["number_of_cases"]
+                requests.post(url=body["callBackUrl"], timeout=10, json={
+                    "data": data, "request": {"body": body, "params": params}})
+                chrome_driver.close()
+                chrome_driver.quit()
+            except Exception as e:
+                logger.info(str(e))
+                requests.post(url=body["callBackUrl"], timeout=10, json={
+                    "error": str(e), "request": {"body": body, "params": params}})
+
+        get_total_no_of_cases_wrapper()
         data = {
             "status": True,
             "debugMessage": "Request Received and processing",

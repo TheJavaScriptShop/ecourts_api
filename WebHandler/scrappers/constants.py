@@ -24,3 +24,37 @@ high_courts_codes = {
     },
 
 }
+
+district_courts_codes = {
+    "29": {
+        'id': '29',
+        'name': 'Telangana',
+        'districts': {
+            '1': {
+                'id': '1',
+                'name': 'Adilabad',
+                'court_complex': {}
+            },
+            '2': {
+                'id': '2',
+                'name': 'Hyderabad Central',
+                'court_complex': {}
+            },
+            '3': {
+                'id': '3',
+                'name': 'Karimnagar',
+                'court_complex': {}
+            },
+            '4': {
+                'id': '4',
+                'name': 'Khammam',
+                'court_complex': {}
+            },
+            '5': {
+                'id': '5',
+                'name': 'Mahabubnagar',
+                'court_complex': {}
+            },
+        }
+    }
+}
