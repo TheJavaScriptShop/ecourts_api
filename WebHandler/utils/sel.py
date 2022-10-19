@@ -99,16 +99,11 @@ def get_cause_list_table_data_as_list(driver, xpath):
     i = 0
     rows = []
     for tbody in table.find_elements(by="xpath", value='.//tbody'):
-        if i == 0:
-            rows = []
-        elif i % 2 == 0:
-            table_data.append(rows)
-            rows = []
 
         for row in tbody.find_elements(by="xpath", value='.//tr'):
             if row.find_elements(by="xpath", value=".//td"):
                 rows.append(
-                    [td.text for td in tbody.find_elements(by="xpath", value=".//td")])
+                    [td.text for td in row.find_elements(by="xpath", value=".//td")])
             if row.find_elements(by="xpath", value=".//th"):
                 if len(row.find_elements(by="xpath", value=".//th")) > 1:
                     rows.append(
@@ -116,7 +111,10 @@ def get_cause_list_table_data_as_list(driver, xpath):
                 else:
                     for th in row.find_elements(by="xpath", value=".//th"):
                         rows.append(th.text)
+
+        if i % 2 == 1:
+            table_data.append(rows)
+            rows = []
         i = i+1
-    table_data.append(rows)
 
     return table_data
