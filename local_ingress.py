@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request
+import logging
 
 
 app = Flask(__name__)
@@ -6,8 +7,18 @@ app = Flask(__name__)
 
 @app.route("/", methods=["POST"])
 def ingress():
+    logger = logging.getLogger("initial")
+    logger.setLevel(logging.DEBUG)
+    sh = logging.StreamHandler()
+    sh.setLevel(logging.DEBUG)
+    logger.addHandler(sh)
+    fh = logging.FileHandler(
+        f'local/logger/callback.log', mode='w')
+    fh.setLevel(logging.DEBUG)
+    logger.addHandler(fh)
     body = request.json
-    print(body.request)
+    print(body["request"])
+    logger.info(body)
     return jsonify({"status": True, "debugMessage": "Received"})
 
 
