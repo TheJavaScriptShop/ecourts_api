@@ -15,6 +15,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import Select
 from azure.storage.blob import BlobServiceClient
 from dotenv import load_dotenv
+from sentry_sdk import capture_exception
 
 from ..utils.sel import (
     selenium_click_xpath, selenium_send_keys_xpath,
@@ -132,6 +133,7 @@ def get_no_of_cases(props):
                 return {'status': False, 'error': str(e), "traceback": tb, "debugMessage": "Unable to scrape data", "code": 3}
 
     except Exception as e:
+        capture_exception(e)
         logger.info(str(e), exc_info=True)
         tb = traceback.print_exc()
         return {'status': False, 'error': str(e), "traceback": tb, "debugMessage": "Unable to scrape data", "code": 4}
@@ -157,6 +159,7 @@ def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, st
         except Exception as e:
             logger.error(str(e), exc_info=True)
             tb = traceback.print_exc()
+            capture_exception(e)
             return {'status': False, 'error': str(e), "traceback": tb, "debugMessage": "Failed to upload file to blob", "code": 5}
 
     try:
@@ -406,5 +409,5 @@ def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, st
     except Exception as e_exception:
         logger.error(e_exception, exc_info=True)
         tb = traceback.print_exc()
-
+        capture_exception(e)
         return {'status': False, 'data': {}, "debugMessage": str(e_exception), "traceback": tb, "code": 6}

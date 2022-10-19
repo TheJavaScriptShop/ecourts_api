@@ -11,7 +11,7 @@ import traceback
 import azure.functions as func
 from selenium import webdriver
 import sentry_sdk
-
+from sentry_sdk import capture_exception
 from .scrappers.highcourts import get_highcourt_cases_by_name, get_no_of_cases
 from .scrappers.display_board import get_display_board
 from .scrappers.cause_list import get_cause_list_data
@@ -170,6 +170,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
         except Exception as e:
             end_time = datetime.datetime.now()
             total_time = end_time - start_time
+            capture_exception(e)
             return func.HttpResponse(
                 body=json.dumps(
                     {"status": False, "debugMessage": "Request Failed", "error": str(e), "start_time": start_time.isoformat(), "total_time_taken": total_time.seconds, "version": version, 'code': 6}),
@@ -206,6 +207,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
         except Exception as e:
             end_time = datetime.datetime.now()
             total_time = end_time - start_time
+            capture_exception(e)
             return func.HttpResponse(
                 body=json.dumps(
                     {"status": False, "debugMessage": "Request Failed", "error": str(e), "start_time": start_time.isoformat(), "time_time_taken": total_time.seconds, "version": version, 'code': 8}),
@@ -288,6 +290,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                 tb = traceback.print_exc()
                 end_time = datetime.datetime.now()
                 total_time = end_time - start_time
+                capture_exception(e)
                 try:
                     requests.post(url=req_body["callBackUrl"], timeout=10, json={
                         "error": str(e), "traceback": tb, "request": {"body": req_body, "params": req_params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, "code": 11}})
@@ -353,6 +356,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                 tb = traceback.print_exc()
                 end_time = datetime.datetime.now()
                 total_time = end_time - start_time
+                capture_exception(e)
                 try:
                     requests.post(url=req_body["callBackUrl"], timeout=10, json={
                         "error": str(e), "traceback": tb, "request": {"body": req_body, "params": req_params, "start_time": start_time.isoformat(), "time": total_time.seconds, "version": version, "code": 13}})
@@ -373,6 +377,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         return main_handler(req)
     except Exception as e_exception:
         # sentry_sdk.capture_exception(e_exception)
+        capture_exception(e)
         return func.HttpResponse(
             body=json.dumps(
                 {"status": False, "debugMessage": str(e_exception), "version": version, "code": 14}),

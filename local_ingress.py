@@ -7,7 +7,7 @@ app = Flask(__name__)
 @app.route("/", methods=["POST"])
 def ingress():
     body = request.json
-    print(body)
+    print(body.request)
     return jsonify({"status": True, "debugMessage": "Received"})
 
 
