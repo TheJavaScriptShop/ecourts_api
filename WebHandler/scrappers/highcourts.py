@@ -409,5 +409,5 @@ def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, st
     except Exception as e_exception:
         logger.error(e_exception, exc_info=True)
         tb = traceback.print_exc()
-        capture_exception(e)
+        capture_exception(e_exception)
         return {'status': False, 'data': {}, "debugMessage": str(e_exception), "traceback": tb, "code": 6}

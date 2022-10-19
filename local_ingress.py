@@ -9,9 +9,6 @@ app = Flask(__name__)
 def ingress():
     logger = logging.getLogger("initial")
     logger.setLevel(logging.DEBUG)
-    sh = logging.StreamHandler()
-    sh.setLevel(logging.DEBUG)
-    logger.addHandler(sh)
     fh = logging.FileHandler(
         f'local/logger/callback.log', mode='w')
     fh.setLevel(logging.DEBUG)
