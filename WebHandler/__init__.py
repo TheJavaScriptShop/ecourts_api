@@ -10,16 +10,16 @@ import traceback
 
 import azure.functions as func
 from selenium import webdriver
-# import sentry_sdk
+import sentry_sdk
 
 from .scrappers.highcourts import get_highcourt_cases_by_name, get_no_of_cases
 from .scrappers.display_board import get_display_board
 from .scrappers.cause_list import get_cause_list_data
 
-# sentry_sdk.init(
-#     dsn="https://7818402c6eff4a99a87db4ceaf0ce3e5@o1183470.ingest.sentry.io/6776130",
-#     traces_sample_rate=1.0
-# )
+sentry_sdk.init(
+    dsn="https://94c7a2c09b7140a9ac611581cfb3b33a@o4504008607924224.ingest.sentry.io/4504008615460864",
+    traces_sample_rate=1.0
+)
 
 version = "2.1.3"
 
