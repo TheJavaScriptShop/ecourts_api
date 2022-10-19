@@ -35,4 +35,4 @@ def get_cause_list_data(driver, advocateName, highCourtId):
         data = get_cause_list_table_data_as_list(driver, "//table")
         return data
     except Exception as e:
-        return {"message": "No Data Found", "error": str(e), "datetime": datetime.now()}
+        return {"message": "No Data Found", "error": str(e), "datetime": datetime.now().isoformat()}

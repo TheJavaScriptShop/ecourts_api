@@ -26,4 +26,4 @@ def get_display_board(driver, highCourtId):
             driver, "//table[@id='table1']")
         return data
     except Exception as e:
-        return {"message": "No Data Found", "error": str(e), "datetime": datetime.now()}
+        return {"message": "No Data Found", "error": str(e), "datetime": datetime.now().isoformat()}
