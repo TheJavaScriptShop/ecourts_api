@@ -316,14 +316,13 @@ def main():
                 }
                 case_details = get_no_of_cases_district_court(
                     get_no_of_cases_props)
-                total_cases = int(case_details["number_of_cases"][23:])
-                logger.info({"total_cases": total_cases})
-                data = get_highcourt_cases_by_name_district_court(
-                    chrome_driver, body["advocateName"], __location__, logger)
-                data["number_of_establishments_in_court_complex"] = case_details["number_of_establishments_in_court_complex"]
-                data["number_of_cases"] = case_details["number_of_cases"]
+                cases = get_highcourt_cases_by_name_district_court(
+                    chrome_driver, logger)
+                cases["number_of_establishments_in_court_complex"] = case_details["number_of_establishments_in_court_complex"]
+                cases["number_of_cases"] = case_details["number_of_cases"]
+                cases_data = {"data": cases}
                 requests.post(url=body["callBackUrl"], timeout=10, json={
-                    "data": data, "request": {"body": body, "params": params}})
+                              "data": cases_data, "request": {"body": body, "params": params}})
                 chrome_driver.close()
                 chrome_driver.quit()
             except Exception as e:
