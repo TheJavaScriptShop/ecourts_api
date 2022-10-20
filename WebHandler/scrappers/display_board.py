@@ -22,10 +22,12 @@ def get_display_board(driver, highCourtId):
             return {"status": False, "message": "Invalid request"}
         driver.get(url)
         time.sleep(3)
-        if "SESSION ENDED" in selenium_get_text_xpath(driver, '/html/body/div[2]/form/center/table/tbody/tr/td/h1/font'):
-            return {"message": "SESSION ENDED"}
-        data = get_display_board_table_data_as_list(
-            driver, "//table[@id='table1']")
+        try:
+            data = get_display_board_table_data_as_list(
+                driver, "//table[@id='table1']")
+        except:
+            if "SESSION ENDED" in selenium_get_text_xpath(driver, '/html/body/div[2]/form/center/table/tbody/tr/td/h1/font'):
+                return {"message": "SESSION ENDED"}
         return data
     except Exception as e:
         return {"message": "No Data Found", "error": str(e), "datetime": datetime.now().isoformat()}
