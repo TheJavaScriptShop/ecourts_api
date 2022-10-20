@@ -35,7 +35,6 @@ if os.environ.get("APP_ENV") == "local":
 
 def get_no_of_cases_district_court(props):
     is_failed_with_captach = True
-    fetched_data = False
     driver = props["driver"]
     logger = props["logger"]
     advoc_name = props["advocateName"]
@@ -92,50 +91,41 @@ def get_no_of_cases_district_court(props):
             is_failed_with_captach = False
             try:
                 failure_text = selenium_get_text_xpath(
-                    driver, '//*[@id="errSpan1"]')
+                    driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[24]/p')
                 logger.info(failure_text)
-                if 'THERE IS AN ERROR' in failure_text:
+                if 'Invalid Captcha' in failure_text:
                     is_failed_with_captach = True
             except:
                 try:
                     failure_text_other_page = selenium_get_text_xpath(
-                        driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[26]/p')
+                        driver, '/html/body/div[2]/div/div/div[1]')
                     logger.info(failure_text_other_page)
                     is_failed_with_captach = True
-
-                    if 'Record Not Found' in failure_text_other_page:
-                        data = {
-                            "number_of_establishments_in_court_complex": 0,
-                            "number_of_cases": 0,
-                            "case_list": [],
-                            'case_details': [],
-                        }
-                        fetched_data = True
-                        is_failed_with_captach = False
-                        return {'status': False, 'data': {}, "debugMessage": "No data found", "code": 1}
+                    selenium_click_xpath(
+                        driver, '/html/body/div[2]/div/div/div[2]/button')
 
                 except Exception as e:
                     if counter_retry > 10:
                         return {'status': False, 'data': {}, "debugMessage": "Maximun retries reached", "code": 2}
             if os.path.isfile(img_path):
                 os.remove(img_path)
-        if not fetched_data:
-            try:
-                number_of_establishments_in_court_complex = selenium_get_text_xpath(
-                    driver, '//*[@id="showList2"]/div[1]/h3')
-                logger.info(number_of_establishments_in_court_complex)
-                number_of_cases = selenium_get_text_xpath(
-                    driver, '//*[@id="showList2"]/div[1]/h4')
-                logger.info(number_of_cases)
-                data = {
-                    "number_of_establishments_in_court_complex": number_of_establishments_in_court_complex,
-                    "number_of_cases": number_of_cases,
-                }
-                return data
-            except Exception as e:
-                logger.info(str(e), exc_info=True)
-                tb = traceback.print_exc()
-                return {'status': False, 'error': str(e), "traceback": tb, "debugMessage": "Unable to scrape data", "code": 3}
+        try:
+
+            number_of_establishments_in_court_complex = selenium_get_text_xpath(
+                driver, '//*[@id="showList2"]/div[1]/h3')
+            logger.info(number_of_establishments_in_court_complex)
+            number_of_cases = selenium_get_text_xpath(
+                driver, '//*[@id="showList2"]/div[1]/h4')
+            logger.info(number_of_cases)
+            data = {
+                "number_of_establishments_in_court_complex": number_of_establishments_in_court_complex,
+                "number_of_cases": number_of_cases,
+            }
+            return data
+        except Exception as e:
+            logger.info(str(e), exc_info=True)
+            tb = traceback.print_exc()
+            return {'status': False, 'error': str(e), "traceback": tb, "debugMessage": "Unable to scrape data", "code": 3}
 
     except Exception as e:
         logger.info(str(e), exc_info=True)
