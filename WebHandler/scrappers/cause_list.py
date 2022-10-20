@@ -32,9 +32,13 @@ def get_cause_list_data(driver, advocateName, highCourtId):
         selenium_send_keys_id(driver, "svalue", advocateName)
         selenium_click_xpath(driver, '//div[@id="advsearch"]/input[2]')
         time.sleep(3)
-        if 'No list available' in selenium_get_text_xpath(driver, 'html/body'):
-            return {"message": "No list available"}
-        data = get_cause_list_table_data_as_list(driver, "//table")
+
+        try:
+            data = get_cause_list_table_data_as_list(driver, "//table")
+        except:
+            if 'No list available' in selenium_get_text_xpath(driver, 'html/body'):
+                return {"message": "No list available"}
+
         return data
     except Exception as e:
         return {"message": "No Data Found", "error": str(e), "datetime": datetime.now().isoformat()}
