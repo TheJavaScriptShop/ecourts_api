@@ -54,7 +54,7 @@ def get_no_of_cases_district_court(props):
             selenium_click_id(driver, 'leftPaneMenuCS')
             logger.info("Successfully clicked")
             selenium_click_xpath(
-                driver, '/html/body/div[2]/div/div/div[2]/button')
+                driver, '/html/body/div[9]/div/div/div[1]/button')
             time.sleep(3)
             logger.info("ok clicked")
             state_select = Select(
@@ -72,41 +72,37 @@ def get_no_of_cases_district_court(props):
             time.sleep(3)
             court_select.select_by_value(court_complex_id)
             logger.info("court code selected")
-            selenium_click_id(driver, 'CSAdvName')
+            selenium_click_id(driver, 'advname-tabMenu')
             logger.info("hypelink clicked")
+            time.sleep(3)
             selenium_send_keys_xpath(
-                driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[14]/div[2]/div[2]/input', advoc_name)
+                driver, '//input[@id="advocate_name"]', advoc_name)
             logger.info("names sent")
             time.sleep(3)
 
             captcha_xpath = '//*[@id="captcha_image"]'
+
+            # captcha_element.screenshot(img_path)
             get_captcha(driver, img_path, captcha_xpath)
             text = get_text_from_captcha(
-                driver, img_path, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/span/div/div[1]/div[1]/img', captcha_xpath)
+                driver, img_path, '/html/body/div[1]/div/main/div[2]/div/div/div[4]/div[1]/form/div[2]/div/div/div/img', captcha_xpath)
             time.sleep(3)
             selenium_click_xpath(
-                driver, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/span/div/div[2]/label")
-            selenium_send_keys_xpath(driver, '//*[@id="captcha"]', text)
-            selenium_click_xpath(driver, '//*[@class="Gobtn"]')
+                driver, "//input[@id='adv_captcha_code']")
+            selenium_send_keys_xpath(
+                driver, '//input[@id="adv_captcha_code"]', text)
+            selenium_click_xpath(
+                driver, '/html/body/div[1]/div/main/div[2]/div/div/div[4]/div[1]/form/div[3]/div[2]/button')
             is_failed_with_captach = False
             try:
                 failure_text = selenium_get_text_xpath(
-                    driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[24]/p')
+                    driver, '/html/body/div[9]/div/div/div[2]/div/div[1]')
                 logger.info(failure_text)
                 if 'Invalid Captcha' in failure_text:
                     is_failed_with_captach = True
-            except:
-                try:
-                    failure_text_other_page = selenium_get_text_xpath(
-                        driver, '/html/body/div[2]/div/div/div[1]')
-                    logger.info(failure_text_other_page)
-                    is_failed_with_captach = True
-                    selenium_click_xpath(
-                        driver, '/html/body/div[2]/div/div/div[2]/button')
-
-                except Exception as e:
-                    if counter_retry > 10:
-                        return {'status': False, 'data': {}, "debugMessage": "Maximun retries reached", "code": 2}
+            except Exception as e:
+                if counter_retry > 10:
+                    return {'status': False, 'data': {}, "debugMessage": "Maximun retries reached", "code": 2}
             if os.path.isfile(img_path):
                 os.remove(img_path)
         try:
