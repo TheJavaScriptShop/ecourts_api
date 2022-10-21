@@ -50,8 +50,10 @@ def get_no_of_cases_district_court(props):
         while is_failed_with_captach:
             counter_retry += 1
             driver.get('https://services.ecourts.gov.in/ecourtindia_v6/#')
+            time.sleep(3)
             selenium_click_id(driver, 'leftPaneMenuCS')
             logger.info("Successfully clicked")
+            time.sleep(3)
             selenium_click_xpath(
                 driver, '/html/body/div[9]/div/div/div[1]/button')
             time.sleep(3)
@@ -79,7 +81,7 @@ def get_no_of_cases_district_court(props):
             logger.info("names sent")
             time.sleep(3)
 
-            captcha_xpath = '//*[@id="captcha_image"]'
+            captcha_xpath = '//div[@id="div_captcha_adv"]//img[@id="captcha_image"]'
 
             # captcha_element.screenshot(img_path)
             img_path = f"{name}-image.png"
