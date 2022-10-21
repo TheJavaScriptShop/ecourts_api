@@ -222,7 +222,7 @@ def get_highcourt_cases_by_name_district_court(driver, logger):
             # acts
             try:
                 acts_data = get_table_data_as_list(
-                    driver, '//table[@id="act_table"]')
+                    driver, '//table[@id="acts_table"]')
                 acts = {'status': True, 'data': acts_data}
                 logger.info(f'{case_sl_no} acts')
 
