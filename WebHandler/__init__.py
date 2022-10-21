@@ -21,7 +21,7 @@ sentry_sdk.init(
     traces_sample_rate=1.0
 )
 
-version = "2.2.1"
+version = "2.2.2"
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -90,6 +90,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
         try:
             req_body = req.get_json()
         except Exception as e_exception:
+            capture_exception(e_exception)
             return func.HttpResponse(
                 body=json.dumps(
                     {"status": False, "debugMessage": str(e_exception), "version": version, "code": 1}),
@@ -109,6 +110,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
         try:
             req_body = req.get_json()
         except Exception as e_exception:
+            capture_exception(e_exception)
             return func.HttpResponse(
                 body=json.dumps(
                     {"status": False, "debugMessage": str(e_exception), "version": version, "code": 2}),
@@ -124,6 +126,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
         try:
             req_body = req.get_json()
         except Exception as e_exception:
+            capture_exception(e_exception)
             return func.HttpResponse(
                 body=json.dumps(
                     {"status": False, "debugMessage": str(e_exception), "version": version, "code": 3}),
@@ -146,6 +149,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
             try:
                 req_body = req.get_json()
             except Exception as e_exception:
+                capture_exception(e_exception)
                 return func.HttpResponse(
                     body=json.dumps(
                         {"status": False, "debugMessage": str(e_exception), "version": version, "code": 5}),
@@ -184,6 +188,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
             try:
                 req_body = req.get_json()
             except Exception as e_exception:
+                capture_exception(e_exception)
                 return func.HttpResponse(
                     body=json.dumps(
                         {"status": False, "debugMessage": str(e_exception), "version": version, "code": 7}),
@@ -220,6 +225,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
         try:
             req_body = req.get_json()
         except Exception as e_exception:
+            capture_exception(e_exception)
             return func.HttpResponse(
                 body=json.dumps(
                     {"status": False, "debugMessage": str(e_exception), "version": version, "code": 9}),
@@ -249,7 +255,8 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                     try:
                         requests.post(url=req_body["callBackUrl"], timeout=10, json={
                             "data": data, "request": {"body": req_body, "params": req_params, "start_time": start_time.isoformat(), "time": total_time.seconds, "version": version}})
-                    except:
+                    except Exception as e_exception:
+                        capture_exception(e_exception)
                         logger.info({"err_msg": "callback request failed"})
                 else:
                     n = total_cases/cases_per_iteration
@@ -271,10 +278,12 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                             logger.info(str(e), exc_info=True)
                             end_time = datetime.datetime.now()
                             total_time = end_time - start_time
+                            capture_exception(e)
                             try:
                                 requests.post(url=req_body["callBackUrl"], timeout=10, json={
                                     "error": str(e), "traceback": tb, "message": "Request Failed", "request": {"body": req_body, "params": req_params, "start_time": start_time.isoformat(), "time": total_time.seconds, "code": 10}})
-                            except:
+                            except Exception as e:
+                                capture_exception(e)
                                 logger.info(
                                     {"err_msg": "callback request failed"})
 
@@ -294,7 +303,8 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                 try:
                     requests.post(url=req_body["callBackUrl"], timeout=10, json={
                         "error": str(e), "traceback": tb, "request": {"body": req_body, "params": req_params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, "code": 11}})
-                except:
+                except Exception as e:
+                    capture_exception(e)
                     logger.info({"err_msg": "callback request failed"})
 
         get_total_no_of_cases_wrapper()
@@ -309,6 +319,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
         try:
             req_body = req.get_json()
         except Exception as e_exception:
+            capture_exception(e_exception)
             return func.HttpResponse(
                 body=json.dumps(
                     {"status": False, "debugMessage": str(e_exception), "version": version, "code": 12}),
@@ -348,7 +359,8 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                 try:
                     requests.post(url=req_body["callBackUrl"], timeout=10, json={
                         "data": cases_data, "request": {"body": req_body, "params": req_params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version}})
-                except:
+                except Exception as e:
+                    capture_exception(e)
                     logger.info({"err_msg": "callback request failed"})
 
             except Exception as e:
@@ -360,7 +372,8 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                 try:
                     requests.post(url=req_body["callBackUrl"], timeout=10, json={
                         "error": str(e), "traceback": tb, "request": {"body": req_body, "params": req_params, "start_time": start_time.isoformat(), "time": total_time.seconds, "version": version, "code": 13}})
-                except:
+                except Exception as e:
+                    capture_exception(e)
                     logger.info({"err_msg": "callback request failed"})
 
         get_highcourt_cases_by_name_wrapper()
