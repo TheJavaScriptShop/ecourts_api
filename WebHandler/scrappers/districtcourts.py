@@ -42,7 +42,6 @@ def get_no_of_cases_district_court(props):
     state_id = props["state_id"]
     court_complex_id = props["court_complex_id"]
     name = "".join(ch for ch in advoc_name if ch.isalnum())
-    img_path = f"{name}-image.png"
 
     if props.get("iteration"):
         img_path = f'{name}-img-{props["iteration"]}.png'
@@ -74,7 +73,7 @@ def get_no_of_cases_district_court(props):
             logger.info("court code selected")
             selenium_click_id(driver, 'advname-tabMenu')
             logger.info("hypelink clicked")
-            time.sleep(3)
+            time.sleep(10)
             selenium_send_keys_xpath(
                 driver, '//input[@id="advocate_name"]', advoc_name)
             logger.info("names sent")
@@ -83,6 +82,7 @@ def get_no_of_cases_district_court(props):
             captcha_xpath = '//*[@id="captcha_image"]'
 
             # captcha_element.screenshot(img_path)
+            img_path = f"{name}-image.png"
             get_captcha(driver, img_path, captcha_xpath)
             text = get_text_from_captcha(
                 driver, img_path, '/html/body/div[1]/div/main/div[2]/div/div/div[4]/div[1]/form/div[2]/div/div/div/img', captcha_xpath)
