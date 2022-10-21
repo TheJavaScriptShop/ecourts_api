@@ -132,11 +132,9 @@ def get_no_of_cases_district_court(props):
 
 
 def get_highcourt_cases_by_name_district_court(driver, logger):
-    logger.info("entered")
 
     try:
         # case details
-        logger.info("entered try")
         view_element = selenium_get_element_id(driver, 'dispTable')
 
         driver.execute_script(
@@ -145,7 +143,7 @@ def get_highcourt_cases_by_name_district_court(driver, logger):
         time.sleep(3)
         # list of case
         case_list = get_table_data_as_list(
-            driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[43]/table')
+            driver, '/html/body/div[1]/div/main/div[2]/div/div/div[4]/div[1]/form/div[4]/table')
         data = {
             "case_list": case_list,
             'case_details': [],
@@ -155,7 +153,7 @@ def get_highcourt_cases_by_name_district_court(driver, logger):
         case_details_list = []
         case_sl_no = 1
         case_links = driver.find_elements(
-            by="xpath", value='/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[43]/table/tbody/tr/td[5]/a')
+            by="xpath", value='/html/body/div[1]/div/main/div[2]/div/div/div[4]/div[1]/form/div[4]/table/tbody/tr/td[5]/a')
 
         total_downloaded_files = 0
         for link in case_links:
@@ -197,7 +195,7 @@ def get_highcourt_cases_by_name_district_court(driver, logger):
             # case status
             try:
                 case_status_data = get_table_data_as_list(
-                    driver, '//*[@class="case_details_table"]/table')
+                    driver, '//table[@class="case_status_table"]')
                 case_status = {'status': True, 'data': case_status_data}
                 logger.info(f'{case_sl_no} case status')
 
@@ -205,8 +203,8 @@ def get_highcourt_cases_by_name_district_court(driver, logger):
                 case_status = {'status': False, 'data': []}
             # paa = petitioned and advocate
             try:
-                case_paa_data = selenium_get_text_xpath(
-                    driver, '//span[@class="Petitioner_Advocate_table"]')
+                case_paa_data = get_table_data_as_list(
+                    driver, '//table[@class="Petitioner_Advocate_table"]')
                 case_paa = {'status': True, 'data': case_paa_data}
                 logger.info(f'{case_sl_no} paa')
 
@@ -214,8 +212,8 @@ def get_highcourt_cases_by_name_district_court(driver, logger):
                 case_paa = {'status': False, 'data': []}
             # raa = respondent and advocate
             try:
-                case_raa_data = selenium_get_text_xpath(
-                    driver, '//span[@class="Respondent_Advocate_table"]')
+                case_raa_data = get_table_data_as_list(
+                    driver, '//table[@class="Respondent_Advocate_table"]')
                 case_raa = {'status': True, 'data': case_raa_data}
                 logger.info(f'{case_sl_no} raa')
 
@@ -230,6 +228,16 @@ def get_highcourt_cases_by_name_district_court(driver, logger):
 
             except:
                 acts = {'status': False, 'data': []}
+
+            # FIR Details
+            try:
+                fir_details_data = get_table_data_as_list(
+                    driver, '//table[@class="FIR_details_table"]')
+                fir_details = {'status': True, 'data': fir_details_data}
+                logger.info(f'{case_sl_no} FIR details')
+
+            except:
+                fir_details = {'status': False, 'data': []}
 
             # history
             try:
@@ -247,6 +255,7 @@ def get_highcourt_cases_by_name_district_court(driver, logger):
                 "paa": case_paa,
                 "raa": case_raa,
                 "acts": acts,
+                "fir_details": fir_details,
                 "history": case_history,
             }
             case_details_list.append(details)
