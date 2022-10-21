@@ -320,9 +320,8 @@ def main():
                     chrome_driver, logger)
                 cases["number_of_establishments_in_court_complex"] = case_details["number_of_establishments_in_court_complex"]
                 cases["number_of_cases"] = case_details["number_of_cases"]
-                cases_data = {"data": cases}
                 requests.post(url=body["callBackUrl"], timeout=10, json={
-                              "data": cases_data, "request": {"body": body, "params": params}})
+                              "data": cases, "request": {"body": body, "params": params}})
                 chrome_driver.close()
                 chrome_driver.quit()
             except Exception as e:
