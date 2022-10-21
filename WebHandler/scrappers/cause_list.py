@@ -7,6 +7,8 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import Select
 from azure.storage.blob import BlobServiceClient
 from dotenv import load_dotenv
+from sentry_sdk import capture_exception
+
 
 from ..utils.sel import (
     selenium_click_xpath,
@@ -35,10 +37,12 @@ def get_cause_list_data(driver, advocateName, highCourtId):
 
         try:
             data = get_cause_list_table_data_as_list(driver, "//table")
-        except:
+        except Exception as e:
+            capture_exception(e)
             if 'No list available' in selenium_get_text_xpath(driver, 'html/body'):
                 return {"message": "No list available"}
 
         return data
     except Exception as e:
+        capture_exception(e)
         return {"message": "No Data Found", "error": str(e), "datetime": datetime.now().isoformat()}
