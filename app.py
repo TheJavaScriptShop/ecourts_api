@@ -17,7 +17,9 @@ import ipdb
 import logging
 import threading
 import requests
+import sentry_sdk
 
+from sentry_sdk import capture_exception
 from WebHandler.scrappers.highcourts import get_highcourt_cases_by_name, get_no_of_cases
 from WebHandler.scrappers.display_board import get_display_board
 from WebHandler.scrappers.cause_list import get_cause_list_data
@@ -25,6 +27,11 @@ from WebHandler.scrappers.districtcourts import get_no_of_cases_district_court, 
 
 
 path = os.environ.get('DOWNLOAD_PATH')
+
+sentry_sdk.init(
+    dsn="https://94c7a2c09b7140a9ac611581cfb3b33a@o4504008607924224.ingest.sentry.io/4504008615460864",
+    traces_sample_rate=1.0
+)
 
 
 def create_driver(__location__):
@@ -142,6 +149,7 @@ def main():
         except Exception as e:
             end_time = datetime.datetime.now()
             total_time = end_time - start_time
+            capture_exception(e)
             return jsonify({"status": False, "debugMessage": "Request Failed", "error": str(e), "start_time": start_time, "total_time_taken": total_time.seconds})
 
     if request.args.get('method') == "displayboard":
@@ -163,6 +171,7 @@ def main():
         except Exception as e:
             end_time = datetime.datetime.now()
             total_time = end_time - start_time
+            capture_exception(e)
             return jsonify({"status": False, "debugMessage": "Request Failed", "error": str(e), "start_time": start_time, "total_time_taken": total_time.seconds})
 
     if request.args.get('method') == "advocatecasesbyname":
@@ -222,6 +231,7 @@ def main():
                 chrome_driver.quit()
             except Exception as e:
                 logger.info(str(e))
+                capture_exception(e)
                 requests.post(url=body["callBackUrl"], timeout=10, json={
                     "error": str(e), "request": {"body": body, "params": params}})
 
@@ -276,6 +286,7 @@ def main():
                 chrome_driver.quit()
             except Exception as e:
                 logger.info(str(e))
+                capture_exception(e)
                 requests.post(url=body["callBackUrl"], timeout=10, json={
                     "error": str(e), "request": {"body": body, "params": params}})
         get_highcourt_cases_by_name_wrapper()

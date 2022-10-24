@@ -15,6 +15,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import Select
 from azure.storage.blob import BlobServiceClient
 from dotenv import load_dotenv
+from sentry_sdk import capture_exception
 
 from ..utils.sel import (
     selenium_click_xpath, selenium_send_keys_xpath,
@@ -90,7 +91,7 @@ def get_no_of_cases(props):
                 logger.info(failure_text)
                 if 'THERE IS AN ERROR' in failure_text:
                     is_failed_with_captach = True
-            except:
+            except Exception as e_exception:
                 try:
                     failure_text_other_page = selenium_get_text_xpath(
                         driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[26]/p')
@@ -106,9 +107,11 @@ def get_no_of_cases(props):
                         }
                         fetched_data = True
                         is_failed_with_captach = False
+                        capture_exception(e_exception)
                         return {'status': False, 'data': {}, "debugMessage": "No data found", "code": 1}
 
                 except Exception as e:
+                    capture_exception(e)
                     if counter_retry > 10:
                         return {'status': False, 'data': {}, "debugMessage": "Maximun retries reached", "code": 2}
             if os.path.isfile(img_path):
@@ -128,10 +131,12 @@ def get_no_of_cases(props):
                 return data
             except Exception as e:
                 logger.info(str(e), exc_info=True)
+                capture_exception(e)
                 tb = traceback.print_exc()
                 return {'status': False, 'error': str(e), "traceback": tb, "debugMessage": "Unable to scrape data", "code": 3}
 
     except Exception as e:
+        capture_exception(e)
         logger.info(str(e), exc_info=True)
         tb = traceback.print_exc()
         return {'status': False, 'error': str(e), "traceback": tb, "debugMessage": "Unable to scrape data", "code": 4}
@@ -157,6 +162,7 @@ def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, st
         except Exception as e:
             logger.error(str(e), exc_info=True)
             tb = traceback.print_exc()
+            capture_exception(e)
             return {'status': False, 'error': str(e), "traceback": tb, "debugMessage": "Failed to upload file to blob", "code": 5}
 
     try:
@@ -406,5 +412,5 @@ def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, st
     except Exception as e_exception:
         logger.error(e_exception, exc_info=True)
         tb = traceback.print_exc()
-
+        capture_exception(e_exception)
         return {'status': False, 'data': {}, "debugMessage": str(e_exception), "traceback": tb, "code": 6}
