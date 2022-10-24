@@ -126,13 +126,13 @@ def get_no_of_cases_district_court(props):
             logger.info(data)
             return data
         except Exception as e:
-            capture_exception(e_exception)
+            capture_exception(e)
             logger.info(str(e), exc_info=True)
             tb = traceback.print_exc()
             return {'status': False, 'error': str(e), "traceback": tb, "debugMessage": "Unable to scrape data", "code": 3}
 
     except Exception as e:
-        capture_exception(e_exception)
+        capture_exception(e)
         logger.info(str(e), exc_info=True)
         tb = traceback.print_exc()
         return {'status': False, 'error': str(e), "traceback": tb, "debugMessage": "Unable to scrape data", "code": 4}
