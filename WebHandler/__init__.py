@@ -420,10 +420,12 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
 
         @ fire_and_forget
         def get_total_no_of_cases_wrapper():
+            logger.info("get_highcourt_cases_by_name_wrapper")
+            start_time = datetime.datetime.now()
+            start = cases_per_iteration
             try:
-                __location__ = f'{path}/{req_body["advocateName"]}'
-                chrome_driver = create_driver(
-                    __location__=None)  # open browser
+                __location__ = f'{path}/{req_body.get("advocateName")}'
+                chrome_driver = create_driver(__location__)
                 get_no_of_cases_props = {
                     "driver": chrome_driver,
                     "advocateName": req_body["advocateName"],
@@ -435,30 +437,141 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                 }
                 case_details = get_no_of_cases_district_court(
                     get_no_of_cases_props)
-                cases = get_highcourt_cases_by_name_district_court(
-                    chrome_driver, logger)
-                cases["number_of_establishments_in_court_complex"] = case_details["number_of_establishments_in_court_complex"]
-                cases["number_of_cases"] = case_details["number_of_cases"]
-                try:
-                    requests.post(url=req_body["callBackUrl"], timeout=10, json={
-                        "data": cases, "request": {"body": req_body, "params": req_params, "start_time": start_time.isoformat(), "time": total_time.seconds, "version": version}})
-                except Exception as e_exception:
-                    capture_exception(e_exception)
-                    logger.info({"err_msg": "callback request failed"})
+                total_cases = int(case_details["number_of_cases"][23:])
+                if total_cases <= cases_per_iteration:
+                    data = get_highcourt_cases_by_name_district_court(
+                        chrome_driver, logger)
+                    data["number_of_establishments_in_court_complex"] = case_details["number_of_establishments_in_court_complex"]
+                    data["number_of_cases"] = case_details["number_of_cases"]
+                    logger.info(json.dumps(data))
+                    end_time = datetime.datetime.now()
+                    total_time = end_time - start_time
+                    try:
+                        requests.post(url=req_body["callBackUrl"], timeout=10, json={
+                            "data": data, "request": {"body": req_body, "params": req_params, "start_time": start_time.isoformat(), "time": total_time.seconds, "version": version}})
+                    except Exception as e_exception:
+                        capture_exception(e_exception)
+                        logger.info({"err_msg": "callback request failed"})
+                else:
+                    n = total_cases/cases_per_iteration
+                    start = 0
+                    stop = cases_per_iteration
+                    iteration = 1
+                    while (n > 0):
+                        req_body["start"] = start
+                        req_body["iteration"] = iteration
+                        if stop > total_cases:
+                            req_body["stop"] = total_cases
+                        else:
+                            req_body["stop"] = stop
+                        try:
+                            requests.post(
+                                url="https://ecourtsapiservice-dev.azurewebsites.net/api/WebHandler?method=districtcourt_advocatecasesbynamepagination", timeout=1, json=req_body)
+                        except Exception as e:
+                            tb = traceback.print_exc()
+                            logger.info(str(e), exc_info=True)
+                            end_time = datetime.datetime.now()
+                            total_time = end_time - start_time
+                            capture_exception(e)
+                            try:
+                                requests.post(url=req_body["callBackUrl"], timeout=10, json={
+                                    "error": str(e), "traceback": tb, "message": "Request Failed", "request": {"body": req_body, "params": req_params, "start_time": start_time.isoformat(), "time": total_time.seconds, "code": 10}})
+                            except Exception as e:
+                                capture_exception(e)
+                                logger.info(
+                                    {"err_msg": "callback request failed"})
+
+                        start = start + cases_per_iteration
+                        stop = stop + cases_per_iteration
+                        n = n - 1
+                        iteration = iteration + 1
                 chrome_driver.close()
                 chrome_driver.quit()
-            except Exception as e:
-                logger.info(str(e))
-                capture_exception(e)
 
+            except Exception as e:
+                logger.info(str(e), exc_info=True)
+                tb = traceback.print_exc()
+                end_time = datetime.datetime.now()
+                total_time = end_time - start_time
+                capture_exception(e)
                 try:
                     requests.post(url=req_body["callBackUrl"], timeout=10, json={
-                        "error": str(e), "request": {"body": req_body, "params": req_params}})
-                except Exception as e_exception:
-                    capture_exception(e_exception)
+                        "error": str(e), "traceback": tb, "request": {"body": req_body, "params": req_params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, "code": 11}})
+                except Exception as e:
+                    capture_exception(e)
                     logger.info({"err_msg": "callback request failed"})
 
         get_total_no_of_cases_wrapper()
+        return func.HttpResponse(
+            body=json.dumps(
+                {"status": True, "debugMessage": "Request Received and processing", "request": {"body": req_body, "params": req_params, "version": version}}),
+        )
+
+    if req_params.get("method") == "districtcourt_advocatecasesbynamepagination":
+        req_body = {}
+        try:
+            req_body = req.get_json()
+        except Exception as e_exception:
+            capture_exception(e_exception)
+            return func.HttpResponse(
+                body=json.dumps(
+                    {"status": False, "debugMessage": str(e_exception), "version": version, "code": 12}),
+                status_code=200
+            )
+
+        logger.info("url request made")
+
+        @ fire_and_forget
+        def get_highcourt_cases_by_name_wrapper():
+            start_time = datetime.datetime.now()
+
+            try:
+                __location__ = f'{path}/{req_body["advocateName"]}/{req_body["iteration"]}'
+                chrome_driver = create_driver(__location__)  # open browser
+                get_no_of_cases_pagination_props = {
+                    "driver": chrome_driver,
+                    "advocateName": req_body["advocateName"],
+                    "district_id": req_body["district_id"],
+                    "state_id": req_body["state_id"],
+                    "court_complex_id": req_body["court_complex_id"],
+                    "logger": logger,
+                    "iteration": req_body["iteration"],
+                    "location": __location__
+                }
+                case_details = get_no_of_cases_district_court(
+                    get_no_of_cases_pagination_props)
+                cases = get_highcourt_cases_by_name_district_court(
+                    chrome_driver, logger, req_body["start"], req_body["stop"])
+                cases["number_of_establishments_in_court_complex"] = case_details["number_of_establishments_in_court_complex"]
+                cases["number_of_cases"] = case_details["number_of_cases"]
+                cases_data = {"start": req_body["start"],
+                              "stop": req_body["stop"], "data": cases}
+                chrome_driver.close()
+                chrome_driver.quit()
+                end_time = datetime.datetime.now()
+                total_time = end_time - start_time
+                try:
+                    requests.post(url=req_body["callBackUrl"], timeout=10, json={
+                        "data": cases_data, "request": {"body": req_body, "params": req_params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version}})
+                except Exception as e:
+                    capture_exception(e)
+                    logger.info({"err_msg": "callback request failed"})
+
+            except Exception as e:
+                logger.info(str(e), exc_info=True)
+                tb = traceback.print_exc()
+                end_time = datetime.datetime.now()
+                total_time = end_time - start_time
+                capture_exception(e)
+                try:
+                    requests.post(url=req_body["callBackUrl"], timeout=10, json={
+                        "error": str(e), "traceback": tb, "request": {"body": req_body, "params": req_params, "start_time": start_time.isoformat(), "time": total_time.seconds, "version": version, "code": 13}})
+                except Exception as e:
+                    capture_exception(e)
+                    logger.info({"err_msg": "callback request failed"})
+
+        get_highcourt_cases_by_name_wrapper()
+
         return func.HttpResponse(
             body=json.dumps(
                 {"status": True, "debugMessage": "Request Received and processing", "request": {"body": req_body, "params": req_params, "version": version}}),

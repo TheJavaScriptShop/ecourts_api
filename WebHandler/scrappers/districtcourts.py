@@ -50,7 +50,7 @@ def get_no_of_cases_district_court(props):
         while is_failed_with_captach:
             counter_retry += 1
             driver.get('https://services.ecourts.gov.in/ecourtindia_v6/#')
-            time.sleep(3)
+            time.sleep(5)
             selenium_click_id(driver, 'leftPaneMenuCS')
             logger.info("Successfully clicked")
             time.sleep(3)
@@ -133,7 +133,7 @@ def get_no_of_cases_district_court(props):
         return {'status': False, 'error': str(e), "traceback": tb, "debugMessage": "Unable to scrape data", "code": 4}
 
 
-def get_highcourt_cases_by_name_district_court(driver, logger):
+def get_highcourt_cases_by_name_district_court(driver, logger, start=None, stop=None):
 
     try:
         # case details
@@ -156,7 +156,9 @@ def get_highcourt_cases_by_name_district_court(driver, logger):
         case_sl_no = 1
         case_links = driver.find_elements(
             by="xpath", value='/html/body/div[1]/div/main/div[2]/div/div/div[4]/div[1]/form/div[4]/table/tbody/tr/td[5]/a')
-
+        if start is not None and stop is not None:
+            case_links = case_links[start:stop]
+            case_sl_no = start + 1
         for link in case_links:
             logger.info(link)
             logger.info(f'case no: {case_sl_no}')

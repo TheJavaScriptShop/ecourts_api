@@ -145,7 +145,6 @@ def get_no_of_cases(props):
 def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, stop=None, logger=None):
     def wait_for_download_and_rename(blob_path):
         try:
-            # time.sleep(5)
             blob_service_client = BlobServiceClient.from_connection_string(
                 os.environ.get('BLOB_STORAGE_CONTAINER'))
             blob_client = blob_service_client.get_blob_client(
@@ -156,7 +155,6 @@ def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, st
                         blob_client.upload_blob(data, overwrite=True)
                     break
 
-            # time.sleep(3)
             if os.path.isfile(f"{__location__}/display_pdf.pdf"):
                 os.remove(f"{__location__}/display_pdf.pdf")
         except Exception as e:
