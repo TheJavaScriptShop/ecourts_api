@@ -5,6 +5,8 @@ import os
 import shutil
 from datetime import date
 import traceback
+from sentry_sdk import capture_exception
+
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -103,6 +105,7 @@ def get_no_of_cases_district_court(props):
                 if 'Invalid Captcha' in failure_text:
                     is_failed_with_captach = True
             except Exception as e:
+                capture_exception(e)
                 if counter_retry > 10:
                     return {'status': False, 'data': {}, "debugMessage": "Maximun retries reached", "code": 2}
             if os.path.isfile(img_path):
@@ -123,11 +126,13 @@ def get_no_of_cases_district_court(props):
             logger.info(data)
             return data
         except Exception as e:
+            capture_exception(e_exception)
             logger.info(str(e), exc_info=True)
             tb = traceback.print_exc()
             return {'status': False, 'error': str(e), "traceback": tb, "debugMessage": "Unable to scrape data", "code": 3}
 
     except Exception as e:
+        capture_exception(e_exception)
         logger.info(str(e), exc_info=True)
         tb = traceback.print_exc()
         return {'status': False, 'error': str(e), "traceback": tb, "debugMessage": "Unable to scrape data", "code": 4}
@@ -285,6 +290,7 @@ def get_highcourt_cases_by_name_district_court(driver, logger, start=None, stop=
         logger.info({"status": True, "data": data})
         return {"status": True, "data": data}
     except Exception as e_exception:
+        capture_exception(e_exception)
         logger.info("entered except")
         logger.info(e_exception, exc_info=True)
         tb = traceback.print_exc()
