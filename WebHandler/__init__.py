@@ -261,7 +261,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
             start_time = datetime.datetime.now()
             start = cases_per_iteration
             try:
-                __location__ = f'{path}/{req_body.get("advocateName")}'
+                __location__ = f'{path}/highcourt/{req_body.get("advocateName")}'
                 chrome_driver = create_driver(__location__)
                 get_no_of_cases_props = {"driver": chrome_driver,
                                          "advocateName": req_body["advocateName"], "highCourtId": req_body["highCourtId"], "benchCode": req_body["benchCode"], "logger": logger, "location": __location__}
@@ -356,7 +356,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
             start_time = datetime.datetime.now()
 
             try:
-                __location__ = f'{path}/{req_body["advocateName"]}/{req_body["iteration"]}'
+                __location__ = f'{path}/highcourt/{req_body["advocateName"]}/{req_body["iteration"]}'
                 chrome_driver = create_driver(__location__)  # open browser
                 get_no_of_cases_pagination_props = {
                     "driver": chrome_driver,
@@ -424,7 +424,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
             start_time = datetime.datetime.now()
             start = cases_per_iteration
             try:
-                __location__ = f'{path}/{req_body.get("advocateName")}'
+                __location__ = f'{path}/districtcourt/{req_body.get("advocateName")}'
                 chrome_driver = create_driver(__location__)
                 get_no_of_cases_props = {
                     "driver": chrome_driver,
@@ -526,7 +526,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
             start_time = datetime.datetime.now()
 
             try:
-                __location__ = f'{path}/{req_body["advocateName"]}/{req_body["iteration"]}'
+                __location__ = f'{path}/districtcourt/{req_body["advocateName"]}/{req_body["iteration"]}'
                 chrome_driver = create_driver(__location__)  # open browser
                 get_no_of_cases_pagination_props = {
                     "driver": chrome_driver,

@@ -44,7 +44,7 @@ def get_no_of_cases_district_court(props):
     name = "".join(ch for ch in advoc_name if ch.isalnum())
 
     if props.get("iteration"):
-        img_path = f'{name}-img-{props["iteration"]}.png'
+        img_path = f'dc-{name}-img-{props["iteration"]}.png'
     counter_retry = 0
     try:
         while is_failed_with_captach:

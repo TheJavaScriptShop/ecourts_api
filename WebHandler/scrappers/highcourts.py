@@ -46,7 +46,7 @@ def get_no_of_cases(props):
     img_path = f"{name}-image.png"
 
     if props.get("iteration"):
-        img_path = f'{name}-img-{props["iteration"]}.png'
+        img_path = f'hc-{name}-img-{props["iteration"]}.png'
     counter_retry = 0
     try:
         while is_failed_with_captach:
