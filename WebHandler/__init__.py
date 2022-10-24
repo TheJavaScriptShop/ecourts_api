@@ -15,6 +15,7 @@ from sentry_sdk import capture_exception
 from .scrappers.highcourts import get_highcourt_cases_by_name, get_no_of_cases
 from .scrappers.display_board import get_display_board
 from .scrappers.cause_list import get_cause_list_data
+from .scrappers.districtcourts import get_no_of_cases_district_court, get_highcourt_cases_by_name_district_court
 
 sentry_sdk.init(
     dsn="https://94c7a2c09b7140a9ac611581cfb3b33a@o4504008607924224.ingest.sentry.io/4504008615460864",
@@ -84,6 +85,28 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
         )
 
     req_params = dict(req.params.items())
+
+    if req_params.get("method") == "districtcourt_advocatecasesbyname":
+        req_body = {}
+        try:
+            req_body = req.get_json()
+        except Exception as e_exception:
+            capture_exception(e_exception)
+            return func.HttpResponse(
+                body=json.dumps(
+                    {"status": False, "debugMessage": str(e_exception), "version": version, "code": 1}),
+                status_code=200
+            )
+        if not req_body.get("advocateName"):
+            is_valid_request = False
+        if not req_body.get("state_id"):
+            is_valid_request = False
+        if not req_body.get("district_id"):
+            is_valid_request = False
+        if not req_body.get("court_complex_id"):
+            is_valid_request = False
+        if not req_body.get("callBackUrl"):
+            is_valid_request = False
 
     if req_params.get("method") == "advocatecasesbyname":
         req_body = {}
@@ -378,6 +401,64 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
 
         get_highcourt_cases_by_name_wrapper()
 
+        return func.HttpResponse(
+            body=json.dumps(
+                {"status": True, "debugMessage": "Request Received and processing", "request": {"body": req_body, "params": req_params, "version": version}}),
+        )
+
+    if req_params.get("method") == "districtcourt_advocatecasesbyname":
+        req_body = {}
+        try:
+            req_body = req.get_json()
+        except Exception as e_exception:
+            capture_exception(e_exception)
+            return func.HttpResponse(
+                body=json.dumps(
+                    {"status": False, "debugMessage": str(e_exception), "version": version, "code": 12}),
+                status_code=200
+            )
+
+        @ fire_and_forget
+        def get_total_no_of_cases_wrapper():
+            try:
+                __location__ = f'{path}/{req_body["advocateName"]}'
+                chrome_driver = create_driver(
+                    __location__=None)  # open browser
+                get_no_of_cases_props = {
+                    "driver": chrome_driver,
+                    "advocateName": req_body["advocateName"],
+                    "district_id": req_body["district_id"],
+                    "state_id": req_body["state_id"],
+                    "court_complex_id": req_body["court_complex_id"],
+                    "logger": logger,
+                    "location": __location__
+                }
+                case_details = get_no_of_cases_district_court(
+                    get_no_of_cases_props)
+                cases = get_highcourt_cases_by_name_district_court(
+                    chrome_driver, logger)
+                cases["number_of_establishments_in_court_complex"] = case_details["number_of_establishments_in_court_complex"]
+                cases["number_of_cases"] = case_details["number_of_cases"]
+                try:
+                    requests.post(url=req_body["callBackUrl"], timeout=10, json={
+                        "data": cases, "request": {"body": req_body, "params": req_params, "start_time": start_time.isoformat(), "time": total_time.seconds, "version": version}})
+                except Exception as e_exception:
+                    capture_exception(e_exception)
+                    logger.info({"err_msg": "callback request failed"})
+                chrome_driver.close()
+                chrome_driver.quit()
+            except Exception as e:
+                logger.info(str(e))
+                capture_exception(e)
+
+                try:
+                    requests.post(url=req_body["callBackUrl"], timeout=10, json={
+                        "error": str(e), "request": {"body": req_body, "params": req_params}})
+                except Exception as e_exception:
+                    capture_exception(e_exception)
+                    logger.info({"err_msg": "callback request failed"})
+
+        get_total_no_of_cases_wrapper()
         return func.HttpResponse(
             body=json.dumps(
                 {"status": True, "debugMessage": "Request Received and processing", "request": {"body": req_body, "params": req_params, "version": version}}),
