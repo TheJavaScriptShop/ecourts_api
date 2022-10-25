@@ -35,7 +35,7 @@ if os.environ.get("APP_ENV") == "local":
     load_dotenv()
 
 
-def get_no_of_cases_district_court(props):
+def get_districtcourt_no_of_cases(props):
     is_failed_with_captach = True
     driver = props["driver"]
     logger = props["logger"]
@@ -138,8 +138,11 @@ def get_no_of_cases_district_court(props):
         return {'status': False, 'error': str(e), "traceback": tb, "debugMessage": "Unable to scrape data", "code": 4}
 
 
-def get_highcourt_cases_by_name_district_court(driver, logger, start=None, stop=None):
-
+def get_districtcourt_cases_by_name(props):
+    driver =
+    logger =
+    start =
+    stop =
     try:
         # case details
         view_element = selenium_get_element_id(driver, 'dispTable')

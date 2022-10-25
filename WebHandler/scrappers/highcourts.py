@@ -34,7 +34,7 @@ if os.environ.get("APP_ENV") == "local":
     load_dotenv()
 
 
-def get_no_of_cases(props):
+def get_highcourt_no_of_cases(props):
     is_failed_with_captach = True
     fetched_data = False
     driver = props["driver"]
@@ -142,7 +142,14 @@ def get_no_of_cases(props):
         return {'status': False, 'error': str(e), "traceback": tb, "debugMessage": "Unable to scrape data", "code": 4}
 
 
-def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, stop=None, logger=None):
+def get_highcourt_cases_by_name(props):
+    driver = props["driver"]
+    advoc_name = props["advocate_name"]
+    __location__ = props["__location__"]
+    start = props["start"]
+    stop = props["stop"]
+    logger = props["logger"]
+
     def wait_for_download_and_rename(blob_path):
         try:
             blob_service_client = BlobServiceClient.from_connection_string(
