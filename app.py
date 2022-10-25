@@ -88,20 +88,26 @@ def main():
     if request.args.get('method') == "advocatecasesbyname":
         body = request.json
         params = request.args
-        if not body.get("advocate_name"):
-            is_valid_request = False
-        if not body.get("highcourt_id"):
-            is_valid_request = False
-        if not body.get("bench_code"):
-            is_valid_request = False
-        if not body.get("callback_url"):
-            is_valid_request = False
-        if not body.get("state_id"):
-            is_valid_request = False
-        if not body.get("district_id"):
-            is_valid_request = False
-        if not body.get("court_complex_id"):
-            is_valid_request = False
+        if body.get("highcourt_id"):
+            if not body.get("advocate_name"):
+                is_valid_request = False
+            if not body.get("highcourt_id"):
+                is_valid_request = False
+            if not body.get("bench_code"):
+                is_valid_request = False
+            if not body.get("callback_url"):
+                is_valid_request = False
+        if body.get("district_id"):
+            if not body.get("advocate_name"):
+                is_valid_request = False
+            if not body.get("callback_url"):
+                is_valid_request = False
+            if not body.get("state_id"):
+                is_valid_request = False
+            if not body.get("district_id"):
+                is_valid_request = False
+            if not body.get("court_complex_id"):
+                is_valid_request = False
 
     if request.args.get('method') == "advocatecauselist":
         body = request.json
@@ -184,8 +190,8 @@ def main():
             try:
                 __location__ = f'{path}/{body["advocate_name"]}'
                 chrome_driver = create_driver(__location__)  # open browser
-                get_no_of_cases
-                get_cases_by_name
+                get_no_of_cases = None
+                get_cases_by_name = None
                 get_no_of_cases_props = {}
                 get_cases_by_name_props = {}
                 if body.get("highcourt_id"):
@@ -293,8 +299,8 @@ def main():
             try:
                 __location__ = f'{path}/{body["advocate_name"]}/{body["iteration"]}'
                 chrome_driver = create_driver(__location__)  # open browser
-                get_no_of_cases
-                get_cases_by_name
+                get_no_of_cases = None
+                get_cases_by_name = None
                 get_no_of_cases_props = {}
                 get_cases_by_name_props = {}
                 if body.get("highcourt_id"):

@@ -39,9 +39,9 @@ def get_highcourt_no_of_cases(props):
     fetched_data = False
     driver = props["driver"]
     logger = props["logger"]
-    advoc_name = props["advocateName"]
-    state_code = props["highCourtId"]
-    bench_code = props["benchCode"]
+    advoc_name = props["advocate_name"]
+    state_code = props["highcourt_id"]
+    bench_code = props["bench_code"]
     name = "".join(ch for ch in advoc_name if ch.isalnum())
     img_path = f"{name}-image.png"
 

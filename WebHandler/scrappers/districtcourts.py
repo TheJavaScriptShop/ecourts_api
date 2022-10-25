@@ -39,7 +39,7 @@ def get_districtcourt_no_of_cases(props):
     is_failed_with_captach = True
     driver = props["driver"]
     logger = props["logger"]
-    advoc_name = props["advocateName"]
+    advoc_name = props["advocate_name"]
     district_id = props["district_id"]
     state_id = props["state_id"]
     court_complex_id = props["court_complex_id"]

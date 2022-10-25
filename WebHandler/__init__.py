@@ -97,20 +97,26 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                     {"status": False, "debug_message": str(e_exception), "version": version, "code": 1}),
                 status_code=200
             )
-        if not req_body.get("advocate_name"):
-            is_valid_request = False
-        if not req_body.get("highcourt_id"):
-            is_valid_request = False
-        if not req_body.get("bench_code"):
-            is_valid_request = False
-        if not req_body.get("callback_url"):
-            is_valid_request = False
-        if not req_body.get("state_id"):
-            is_valid_request = False
-        if not req_body.get("district_id"):
-            is_valid_request = False
-        if not req_body.get("court_complex_id"):
-            is_valid_request = False
+        if req_body.get("highcourt_id"):
+            if not req_body.get("advocate_name"):
+                is_valid_request = False
+            if not req_body.get("highcourt_id"):
+                is_valid_request = False
+            if not req_body.get("bench_code"):
+                is_valid_request = False
+            if not req_body.get("callback_url"):
+                is_valid_request = False
+        if req_body.get("district_id"):
+            if not req_body.get("advocate_name"):
+                is_valid_request = False
+            if not req_body.get("callback_url"):
+                is_valid_request = False
+            if not req_body.get("state_id"):
+                is_valid_request = False
+            if not req_body.get("district_id"):
+                is_valid_request = False
+            if not req_body.get("court_complex_id"):
+                is_valid_request = False
 
     if req_params.get("method") == "advocatecauselist":
         req_body = {}
