@@ -20,9 +20,10 @@ import requests
 import sentry_sdk
 
 from sentry_sdk import capture_exception
-from WebHandler.scrappers.highcourts import get_highcourt_cases_by_name, get_no_of_cases
+from WebHandler.scrappers.highcourts import get_highcourt_no_of_cases, get_highcourt_cases_by_name
 from WebHandler.scrappers.display_board import get_display_board
 from WebHandler.scrappers.cause_list import get_cause_list_data
+from WebHandler.scrappers.districtcourts import get_districtcourt_no_of_cases, get_districtcourt_cases_by_name
 
 
 path = os.environ.get('DOWNLOAD_PATH')
@@ -87,27 +88,39 @@ def main():
     if request.args.get('method') == "advocatecasesbyname":
         body = request.json
         params = request.args
-        if not body.get("advocateName"):
-            is_valid_request = False
-        if not body.get("highCourtId"):
-            is_valid_request = False
-        if not body.get("benchCode"):
-            is_valid_request = False
-        if not body.get("callBackUrl"):
-            is_valid_request = False
+        if body.get("highcourt_id"):
+            if not body.get("advocate_name"):
+                is_valid_request = False
+            if not body.get("highcourt_id"):
+                is_valid_request = False
+            if not body.get("bench_code"):
+                is_valid_request = False
+            if not body.get("callback_url"):
+                is_valid_request = False
+        if body.get("district_id"):
+            if not body.get("advocate_name"):
+                is_valid_request = False
+            if not body.get("callback_url"):
+                is_valid_request = False
+            if not body.get("state_id"):
+                is_valid_request = False
+            if not body.get("district_id"):
+                is_valid_request = False
+            if not body.get("court_complex_id"):
+                is_valid_request = False
 
     if request.args.get('method') == "advocatecauselist":
         body = request.json
         params = request.args
-        if not body.get("advocateName"):
+        if not body.get("advocate_name"):
             is_valid_request = False
-        if not body.get("highCourtId"):
+        if not body.get("highcourt_id"):
             is_valid_request = False
 
     if request.args.get('method') == "displayboard":
         body = request.json
         params = request.args
-        if not body.get("highCourtId"):
+        if not body.get("highcourt_id"):
             is_valid_request = False
 
     if not is_valid_request:
@@ -122,7 +135,7 @@ def main():
             params = request.args
             chrome_driver = create_driver(__location__=None)  # open browser
             data = get_cause_list_data(
-                chrome_driver, body["advocateName"], body["highCourtId"])
+                chrome_driver, body["advocate_name"], body["highcourt_id"])
             data = {
                 "status": True,
                 "data": data,
@@ -131,11 +144,11 @@ def main():
             end_time = datetime.datetime.now()
             total_time = end_time - start_time
             return jsonify({"status": True, "debugMessage": "Received", "data": data, "start_time": start_time, "total_time_taken": total_time.seconds})
-        except Exception as e:
+        except Exception as e_exception:
             end_time = datetime.datetime.now()
             total_time = end_time - start_time
-            capture_exception(e)
-            return jsonify({"status": False, "debugMessage": "Request Failed", "error": str(e), "start_time": start_time, "total_time_taken": total_time.seconds})
+            capture_exception(e_exception)
+            return jsonify({"status": False, "debugMessage": "Request Failed", "error": str(e_exception), "start_time": start_time, "total_time_taken": total_time.seconds})
 
     if request.args.get('method') == "displayboard":
         try:
@@ -144,7 +157,7 @@ def main():
             params = request.args
             chrome_driver = create_driver(__location__=None)  # open browser
             table_data = get_display_board(
-                chrome_driver, body["highCourtId"])
+                chrome_driver, body["highcourt_id"])
             data = {
                 "status": True,
                 "data": table_data,
@@ -153,11 +166,11 @@ def main():
             end_time = datetime.datetime.now()
             total_time = end_time - start_time
             return jsonify({"status": True, "debugMessage": "Received", "data": data, "start_time": start_time, "total_time_taken": total_time.seconds})
-        except Exception as e:
+        except Exception as e_exception:
             end_time = datetime.datetime.now()
             total_time = end_time - start_time
-            capture_exception(e)
-            return jsonify({"status": False, "debugMessage": "Request Failed", "error": str(e), "start_time": start_time, "total_time_taken": total_time.seconds})
+            capture_exception(e_exception)
+            return jsonify({"status": False, "debugMessage": "Request Failed", "error": str(e_exception), "start_time": start_time, "total_time_taken": total_time.seconds})
 
     if request.args.get('method') == "advocatecasesbyname":
         body = request.json
@@ -175,20 +188,58 @@ def main():
         @ fire_and_forget
         def get_total_no_of_cases_wrapper():
             try:
-                __location__ = f'{path}/{body["advocateName"]}'
+                __location__ = f'{path}/{body["advocate_name"]}'
                 chrome_driver = create_driver(__location__)  # open browser
-                get_no_of_cases_props = {"driver": chrome_driver,
-                                         "advocateName": body["advocateName"], "highCourtId": body["highCourtId"], "benchCode": body["benchCode"], "logger": logger, "location": __location__}
+                get_no_of_cases = None
+                get_cases_by_name = None
+                get_no_of_cases_props = {}
+                get_cases_by_name_props = {}
+                if body.get("highcourt_id"):
+                    get_no_of_cases = get_highcourt_no_of_cases
+                    get_cases_by_name = get_highcourt_cases_by_name
+                    get_no_of_cases_props = {
+                        "driver": chrome_driver,
+                        "advocate_name": body["advocate_name"],
+                        "highcourt_id": body["highcourt_id"],
+                        "bench_code": body["bench_code"],
+                        "logger": logger,
+                        "location": __location__
+                    }
+                    get_cases_by_name_props = {
+                        "driver": chrome_driver,
+                        "advocate_name": body["advocate_name"],
+                        "__location__": __location__,
+                        "start": None,
+                        "stop": None,
+                        "logger": logger
+                    }
+                else:
+                    get_no_of_cases = get_districtcourt_no_of_cases
+                    get_cases_by_name = get_districtcourt_cases_by_name
+                    get_no_of_cases_props = {
+                        "driver": chrome_driver,
+                        "advocate_name": body["advocate_name"],
+                        "district_id": body["district_id"],
+                        "state_id": body["state_id"],
+                        "court_complex_id": body["court_complex_id"],
+                        "logger": logger,
+                        "location": __location__
+                    }
+                    get_cases_by_name_props = {
+                        "driver": chrome_driver,
+                        "logger": logger,
+                        "start": None,
+                        "stop": None,
+                    }
                 case_details = get_no_of_cases(get_no_of_cases_props)
                 total_cases = int(case_details["number_of_cases"][23:])
                 logger.info({"total_cases": total_cases})
 
                 if total_cases <= cases_per_iteration:
-                    data = get_highcourt_cases_by_name(
-                        chrome_driver, body["advocateName"], __location__, logger)
+                    data = get_cases_by_name(get_cases_by_name_props)
                     data["number_of_establishments_in_court_complex"] = case_details["number_of_establishments_in_court_complex"]
                     data["number_of_cases"] = case_details["number_of_cases"]
-                    requests.post(url=body["callBackUrl"], timeout=10, json={
+                    requests.post(url=body["callback_url"], timeout=10, json={
                         "data": data, "request": {"body": body, "params": params}})
                 else:
                     n = total_cases/cases_per_iteration
@@ -214,11 +265,11 @@ def main():
                         iteration = iteration + 1
                 chrome_driver.close()
                 chrome_driver.quit()
-            except Exception as e:
-                logger.info(str(e))
-                capture_exception(e)
-                requests.post(url=body["callBackUrl"], timeout=10, json={
-                    "error": str(e), "request": {"body": body, "params": params}})
+            except Exception as e_exception:
+                logger.info(str(e_exception))
+                capture_exception(e_exception)
+                requests.post(url=body["callback_url"], timeout=10, json={
+                    "error": str(e_exception), "request": {"body": body, "params": params}})
 
         get_total_no_of_cases_wrapper()
         data = {
@@ -246,34 +297,68 @@ def main():
         @fire_and_forget
         def get_highcourt_cases_by_name_wrapper():
             try:
-                __location__ = f'{path}/{body["advocateName"]}/{body["iteration"]}'
+                __location__ = f'{path}/{body["advocate_name"]}/{body["iteration"]}'
                 chrome_driver = create_driver(__location__)  # open browser
-                get_no_of_cases_pagination_props = {
-                    "driver": chrome_driver,
-                    "advocateName": body["advocateName"],
-                    "highCourtId": body["highCourtId"],
-                    "benchCode": body["benchCode"],
-                    "logger": logger,
-                    "iteration": body["iteration"],
-                    "location": __location__
-                }
+                get_no_of_cases = None
+                get_cases_by_name = None
+                get_no_of_cases_props = {}
+                get_cases_by_name_props = {}
+                if body.get("highcourt_id"):
+                    get_no_of_cases = get_highcourt_no_of_cases
+                    get_cases_by_name = get_highcourt_cases_by_name
+                    get_no_of_cases_props = {
+                        "driver": chrome_driver,
+                        "advocate_name": body["advocate_name"],
+                        "highcourt_id": body["highcourt_id"],
+                        "bench_code": body["bench_code"],
+                        "logger": logger,
+                        "iteration": body["iteration"],
+                        "location": __location__
+                    }
+                    get_cases_by_name_props = {
+                        "driver": chrome_driver,
+                        "advocate_name": body["advocate_name"],
+                        "__location__": __location__,
+                        "start": body["start"],
+                        "stop": body["stop"],
+                        "logger": logger
+                    }
+                else:
+                    get_no_of_cases = get_districtcourt_no_of_cases
+                    get_cases_by_name = get_districtcourt_cases_by_name
+                    get_no_of_cases_props = {
+                        "driver": chrome_driver,
+                        "advocate_name": body["advocate_name"],
+                        "district_id": body["district_id"],
+                        "state_id": body["state_id"],
+                        "court_complex_id": body["court_complex_id"],
+                        "logger": logger,
+                        "iteration": body["iteration"],
+                        "location": __location__
+                    }
+                    get_cases_by_name_props = {
+                        "driver": chrome_driver,
+                        "logger": logger,
+                        "start": body["start"],
+                        "stop": body["stop"]
+                    }
+
                 case_details = get_no_of_cases(
-                    get_no_of_cases_pagination_props)
-                cases = get_highcourt_cases_by_name(
-                    chrome_driver, body["advocateName"], __location__, body["start"], body["stop"], logger)
+                    get_no_of_cases_props)
+                cases = get_cases_by_name(get_cases_by_name_props)
                 cases["number_of_establishments_in_court_complex"] = case_details["number_of_establishments_in_court_complex"]
                 cases["number_of_cases"] = case_details["number_of_cases"]
                 cases_data = {"start": body["start"],
                               "stop": body["stop"], "data": cases}
-                requests.post(url=body["callBackUrl"], timeout=10, json={
+                requests.post(url=body["callback_url"], timeout=10, json={
                               "data": cases_data, "request": {"body": body, "params": params}})
                 chrome_driver.close()
                 chrome_driver.quit()
-            except Exception as e:
-                logger.info(str(e))
-                capture_exception(e)
-                requests.post(url=body["callBackUrl"], timeout=10, json={
-                    "error": str(e), "request": {"body": body, "params": params}})
+            except Exception as e_exception:
+                logger.info(str(e_exception))
+                capture_exception(e_exception)
+                requests.post(url=body["callback_url"], timeout=10, json={
+                    "error": str(e_exception), "request": {"body": body, "params": params}})
         get_highcourt_cases_by_name_wrapper()
         data = {
             "status": True,

@@ -43,14 +43,16 @@ def get_text_from_captcha(driver, img_path, retry_path, captcha_path):
 
 
 def get_captcha(driver, img_path, captcha_path):
+    captcha_element = driver.find_element(By.XPATH, captcha_path)
+    # captcha_element = WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
+    #     (By.XPATH, captcha_path)))
     img_base64 = driver.execute_script("""
     var ele = arguments[0];
     var cnv = document.createElement('canvas');
     cnv.width = ele.width + 100; cnv.height = ele.height + 100;
     cnv.getContext('2d').drawImage(ele, 0, 0);
     return cnv.toDataURL('image/jpeg').substring(22);
-    """, WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
-        (By.XPATH, captcha_path))))
+    """, captcha_element)
 
     with open(img_path, 'wb') as f:
         f.write(base64.b64decode(img_base64))

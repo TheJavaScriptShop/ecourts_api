@@ -34,19 +34,19 @@ if os.environ.get("APP_ENV") == "local":
     load_dotenv()
 
 
-def get_no_of_cases(props):
+def get_highcourt_no_of_cases(props):
     is_failed_with_captach = True
     fetched_data = False
     driver = props["driver"]
     logger = props["logger"]
-    advoc_name = props["advocateName"]
-    state_code = props["highCourtId"]
-    bench_code = props["benchCode"]
+    advoc_name = props["advocate_name"]
+    state_code = props["highcourt_id"]
+    bench_code = props["bench_code"]
     name = "".join(ch for ch in advoc_name if ch.isalnum())
     img_path = f"{name}-image.png"
 
     if props.get("iteration"):
-        img_path = f'{name}-img-{props["iteration"]}.png'
+        img_path = f'hc-{name}-img-{props["iteration"]}.png'
     counter_retry = 0
     try:
         while is_failed_with_captach:
@@ -142,10 +142,16 @@ def get_no_of_cases(props):
         return {'status': False, 'error': str(e), "traceback": tb, "debugMessage": "Unable to scrape data", "code": 4}
 
 
-def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, stop=None, logger=None):
+def get_highcourt_cases_by_name(props):
+    driver = props["driver"]
+    advoc_name = props["advocate_name"]
+    __location__ = props["__location__"]
+    start = props["start"]
+    stop = props["stop"]
+    logger = props["logger"]
+
     def wait_for_download_and_rename(blob_path):
         try:
-            # time.sleep(5)
             blob_service_client = BlobServiceClient.from_connection_string(
                 os.environ.get('BLOB_STORAGE_CONTAINER'))
             blob_client = blob_service_client.get_blob_client(
@@ -156,7 +162,6 @@ def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, st
                         blob_client.upload_blob(data, overwrite=True)
                     break
 
-            # time.sleep(3)
             if os.path.isfile(f"{__location__}/display_pdf.pdf"):
                 os.remove(f"{__location__}/display_pdf.pdf")
         except Exception as e:
@@ -334,7 +339,6 @@ def get_highcourt_cases_by_name(driver, advoc_name, __location__, start=None, st
                         order_no = order_no+1
 
                     except Exception as e:
-                        # logger.error(exc_info=True)
                         traceback.print_exc()
                         logger.info({'err': str(e), 'case_no': case_sl_no})
                 case_orders = {'status': True, 'data': case_orders_data,

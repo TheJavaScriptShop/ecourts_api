@@ -40,7 +40,7 @@ def selenium_get_element_id(driver, el_id):
 
 
 def selenium_get_element_class(driver, classname):
-    WebDriverWait(driver, TIMEOUT).until(EC.element_to_be_clickable(
+    return WebDriverWait(driver, TIMEOUT).until(EC.element_to_be_clickable(
         (By.CLASS_NAME, classname)))
 
 
