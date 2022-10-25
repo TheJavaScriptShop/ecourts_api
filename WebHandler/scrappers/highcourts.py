@@ -339,7 +339,6 @@ def get_highcourt_cases_by_name(props):
                         order_no = order_no+1
 
                     except Exception as e:
-                        # logger.error(exc_info=True)
                         traceback.print_exc()
                         logger.info({'err': str(e), 'case_no': case_sl_no})
                 case_orders = {'status': True, 'data': case_orders_data,
