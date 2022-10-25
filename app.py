@@ -20,10 +20,10 @@ import requests
 import sentry_sdk
 
 from sentry_sdk import capture_exception
-from WebHandler.scrappers.highcourts import get_highcourt_cases_by_name, get_no_of_cases
+from WebHandler.scrappers.highcourts import get_highcourt_no_of_cases, get_highcourt_cases_by_name
 from WebHandler.scrappers.display_board import get_display_board
 from WebHandler.scrappers.cause_list import get_cause_list_data
-from WebHandler.scrappers.districtcourts import get_no_of_cases_district_court, get_highcourt_cases_by_name_district_court
+from WebHandler.scrappers.districtcourts import get_districtcourt_no_of_cases, get_districtcourt_cases_by_name
 
 
 path = os.environ.get('DOWNLOAD_PATH')

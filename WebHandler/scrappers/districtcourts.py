@@ -139,10 +139,10 @@ def get_districtcourt_no_of_cases(props):
 
 
 def get_districtcourt_cases_by_name(props):
-    driver =
-    logger =
-    start =
-    stop =
+    driver = props["driver"]
+    logger = props["logger"]
+    start = props["start"]
+    stop = props["stop"]
     try:
         # case details
         view_element = selenium_get_element_id(driver, 'dispTable')

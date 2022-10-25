@@ -86,28 +86,6 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
 
     req_params = dict(req.params.items())
 
-    if req_params.get("method") == "districtcourt_advocatecasesbyname":
-        req_body = {}
-        try:
-            req_body = req.get_json()
-        except Exception as e_exception:
-            capture_exception(e_exception)
-            return func.HttpResponse(
-                body=json.dumps(
-                    {"status": False, "debug_message": str(e_exception), "version": version, "code": 1}),
-                status_code=200
-            )
-        if not req_body.get("advocate_name"):
-            is_valid_request = False
-        if not req_body.get("state_id"):
-            is_valid_request = False
-        if not req_body.get("district_id"):
-            is_valid_request = False
-        if not req_body.get("court_complex_id"):
-            is_valid_request = False
-        if not req_body.get("callback_url"):
-            is_valid_request = False
-
     if req_params.get("method") == "advocatecasesbyname":
         req_body = {}
         try:
@@ -126,6 +104,12 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
         if not req_body.get("bench_code"):
             is_valid_request = False
         if not req_body.get("callback_url"):
+            is_valid_request = False
+        if not req_body.get("state_id"):
+            is_valid_request = False
+        if not req_body.get("district_id"):
+            is_valid_request = False
+        if not req_body.get("court_complex_id"):
             is_valid_request = False
 
     if req_params.get("method") == "advocatecauselist":
