@@ -211,7 +211,7 @@ def main():
                         "__location__": __location__,
                         "start": None,
                         "stop": None,
-                        "logger": None
+                        "logger": logger
                     }
                 else:
                     get_no_of_cases = get_districtcourt_no_of_cases
@@ -227,7 +227,7 @@ def main():
                     }
                     get_cases_by_name_props = {
                         "driver": chrome_driver,
-                        "logger": None,
+                        "logger": logger,
                         "start": None,
                         "stop": None,
                     }
