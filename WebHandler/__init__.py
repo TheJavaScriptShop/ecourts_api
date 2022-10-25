@@ -253,8 +253,8 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
             try:
                 __location__ = f'{path}/highcourt/{req_body.get("advocate_name")}'
                 chrome_driver = create_driver(__location__)
-                get_no_of_cases
-                get_cases_by_name
+                get_no_of_cases = None
+                get_cases_by_name = None
                 get_no_of_cases_props = {}
                 get_cases_by_name_props = {}
                 if req_body.get("highcourt_id"):
@@ -274,7 +274,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                         "__location__": __location__,
                         "start": None,
                         "stop": None,
-                        "logger": None
+                        "logger": logger
                     }
                 else:
                     get_no_of_cases = get_districtcourt_no_of_cases
@@ -290,7 +290,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                     }
                     get_cases_by_name_props = {
                         "driver": chrome_driver,
-                        "logger": None,
+                        "logger": logger,
                         "start": None,
                         "stop": None,
                     }
@@ -385,8 +385,8 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
             try:
                 __location__ = f'{path}/highcourt/{req_body["advocate_name"]}/{req_body["iteration"]}'
                 chrome_driver = create_driver(__location__)  # open browser
-                get_no_of_cases
-                get_cases_by_name
+                get_no_of_cases = None
+                get_cases_by_name = None
                 get_no_of_cases_props = {}
                 get_cases_by_name_props = {}
                 if req_body.get("highcourt_id"):
