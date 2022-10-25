@@ -48,94 +48,86 @@ def get_districtcourt_no_of_cases(props):
     if props.get("iteration"):
         img_path = f'dc-{name}-img-{props["iteration"]}.png'
     counter_retry = 0
-    try:
-        while is_failed_with_captach:
-            counter_retry += 1
-            driver.get('https://services.ecourts.gov.in/ecourtindia_v6/#')
-            time.sleep(5)
-            selenium_click_id(driver, 'leftPaneMenuCS')
-            logger.info("Successfully clicked")
-            time.sleep(3)
-            selenium_click_xpath(
-                driver, '/html/body/div[9]/div/div/div[1]/button')
-            time.sleep(3)
-            logger.info("ok clicked")
-            state_select = Select(
-                selenium_get_element_id(driver, 'sess_state_code'))
-            state_select.select_by_value(state_id)
-            time.sleep(3)
-            logger.info("Values selected")
-            district_select = Select(selenium_get_element_id(
-                driver, 'sess_dist_code'))
-            time.sleep(3)
-            district_select.select_by_value(district_id)
-            logger.info("district code selected")
-            court_select = Select(selenium_get_element_id(
-                driver, 'court_complex_code'))
-            time.sleep(3)
-            court_select.select_by_value(court_complex_id)
-            logger.info("court code selected")
-            selenium_click_id(driver, 'advname-tabMenu')
-            logger.info("hypelink clicked")
-            time.sleep(10)
-            selenium_send_keys_xpath(
-                driver, '//input[@id="advocate_name"]', advoc_name)
-            logger.info("names sent")
-            time.sleep(3)
 
-            captcha_xpath = '//div[@id="div_captcha_adv"]//img[@id="captcha_image"]'
-
-            # captcha_element.screenshot(img_path)
-            img_path = f"{name}-image.png"
-            get_captcha(driver, img_path, captcha_xpath)
-            text = get_text_from_captcha(
-                driver, img_path, '/html/body/div[1]/div/main/div[2]/div/div/div[4]/div[1]/form/div[2]/div/div/div/img', captcha_xpath)
+    while is_failed_with_captach:
+        counter_retry += 1
+        driver.get('https://services.ecourts.gov.in/ecourtindia_v6/#')
+        time.sleep(5)
+        if "Invalid Request" in selenium_get_text_xpath(driver, "/html/body/div[7]/div/div/div[2]/div/div[1]"):
+            selenium_click_xpath(
+                driver, "/html/body/div[7]/div/div/div[1]/button")
             time.sleep(3)
-            selenium_click_xpath(
-                driver, "//input[@id='adv_captcha_code']")
-            selenium_send_keys_xpath(
-                driver, '//input[@id="adv_captcha_code"]', text)
-            selenium_click_xpath(
-                driver, '/html/body/div[1]/div/main/div[2]/div/div/div[4]/div[1]/form/div[3]/div[2]/button')
-            is_failed_with_captach = False
-            try:
-                failure_text = selenium_get_text_xpath(
-                    driver, '/html/body/div[9]/div/div/div[2]/div/div[1]')
-                logger.info(failure_text)
-                if 'Invalid Captcha' in failure_text:
-                    is_failed_with_captach = True
-            except Exception as e:
-                capture_exception(e)
-                if counter_retry > 10:
-                    return {'status': False, 'data': {}, "debugMessage": "Maximun retries reached", "code": 2}
-            if os.path.isfile(img_path):
-                os.remove(img_path)
+        selenium_click_id(driver, 'leftPaneMenuCS')
+        logger.info("Successfully clicked")
+        time.sleep(3)
+        selenium_click_xpath(
+            driver, '/html/body/div[9]/div/div/div[1]/button')
+        time.sleep(3)
+        logger.info("ok clicked")
+        state_select = Select(
+            selenium_get_element_id(driver, 'sess_state_code'))
+        state_select.select_by_value(state_id)
+        time.sleep(3)
+        logger.info("Values selected")
+        district_select = Select(selenium_get_element_id(
+            driver, 'sess_dist_code'))
+        time.sleep(3)
+        district_select.select_by_value(district_id)
+        logger.info("district code selected")
+        court_select = Select(selenium_get_element_id(
+            driver, 'court_complex_code'))
+        time.sleep(3)
+        court_select.select_by_value(court_complex_id)
+        logger.info("court code selected")
+        selenium_click_id(driver, 'advname-tabMenu')
+        logger.info("hypelink clicked")
+        time.sleep(10)
+        selenium_send_keys_xpath(
+            driver, '//input[@id="advocate_name"]', advoc_name)
+        logger.info("names sent")
+        time.sleep(3)
+
+        captcha_xpath = '//div[@id="div_captcha_adv"]//img[@id="captcha_image"]'
+
+        # captcha_element.screenshot(img_path)
+        img_path = f"{name}-image.png"
+        get_captcha(driver, img_path, captcha_xpath)
+        text = get_text_from_captcha(
+            driver, img_path, '/html/body/div[1]/div/main/div[2]/div/div/div[4]/div[1]/form/div[2]/div/div/div/img', captcha_xpath)
+        time.sleep(3)
+        selenium_click_xpath(
+            driver, "//input[@id='adv_captcha_code']")
+        selenium_send_keys_xpath(
+            driver, '//input[@id="adv_captcha_code"]', text)
+        selenium_click_xpath(
+            driver, '/html/body/div[1]/div/main/div[2]/div/div/div[4]/div[1]/form/div[3]/div[2]/button')
+        is_failed_with_captach = False
         try:
-            courts_info = []
-            for div in driver.find_elements(by="xpath", value='.//div[@id="showList2"]/div')[1:]:
-                courts_info.append(selenium_get_text_xpath(div, './/a'))
-            number_of_establishments_in_court_complex = selenium_get_text_xpath(
-                driver, '//*[@id="showList2"]/div[1]/h3')
-            number_of_cases = selenium_get_text_xpath(
-                driver, '//*[@id="showList2"]/div[1]/h4')
-            data = {
-                "number_of_establishments_in_court_complex": number_of_establishments_in_court_complex,
-                "number_of_cases": number_of_cases,
-                "courts_info": courts_info
-            }
-            logger.info(data)
-            return data
+            failure_text = selenium_get_text_xpath(
+                driver, '/html/body/div[9]/div/div/div[2]/div/div[1]')
+            logger.info(failure_text)
+            if 'Invalid Captcha' in failure_text:
+                is_failed_with_captach = True
         except Exception as e:
             capture_exception(e)
-            logger.info(str(e), exc_info=True)
-            tb = traceback.print_exc()
-            return {'status': False, 'error': str(e), "traceback": tb, "debugMessage": "Unable to scrape data", "code": 3}
-
-    except Exception as e:
-        capture_exception(e)
-        logger.info(str(e), exc_info=True)
-        tb = traceback.print_exc()
-        return {'status': False, 'error': str(e), "traceback": tb, "debugMessage": "Unable to scrape data", "code": 4}
+            if counter_retry > 10:
+                return {'status': False, 'data': {}, "debugMessage": "Maximun retries reached", "code": 2}
+        if os.path.isfile(img_path):
+            os.remove(img_path)
+    courts_info = []
+    for div in driver.find_elements(by="xpath", value='.//div[@id="showList2"]/div')[1:]:
+        courts_info.append(selenium_get_text_xpath(div, './/a'))
+    number_of_establishments_in_court_complex = selenium_get_text_xpath(
+        driver, '//*[@id="showList2"]/div[1]/h3')
+    number_of_cases = selenium_get_text_xpath(
+        driver, '//*[@id="showList2"]/div[1]/h4')
+    data = {
+        "number_of_establishments_in_court_complex": number_of_establishments_in_court_complex,
+        "number_of_cases": number_of_cases,
+        "courts_info": courts_info
+    }
+    logger.info(data)
+    return data
 
 
 def get_districtcourt_cases_by_name(props):

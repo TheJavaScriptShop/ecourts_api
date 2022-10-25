@@ -10,7 +10,7 @@ def ingress():
     logger = logging.getLogger("initial")
     logger.setLevel(logging.DEBUG)
     fh = logging.FileHandler(
-        f'local/logger/callback.log', mode='w')
+        f'local/logger/callback1.log', mode='a')
     fh.setLevel(logging.DEBUG)
     logger.addHandler(fh)
     body = request.json
