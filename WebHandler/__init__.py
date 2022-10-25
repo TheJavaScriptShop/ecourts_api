@@ -80,7 +80,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
     if (req.method.lower() != "post"):
         return func.HttpResponse(
             body=json.dumps(
-                {"status": False, "debug_message": "Method not supported", "version": version}),
+                {"status": False, "debugMessage": "Method not supported", "version": version}),
             status_code=200
         )
 
@@ -94,7 +94,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
             capture_exception(e_exception)
             return func.HttpResponse(
                 body=json.dumps(
-                    {"status": False, "debug_message": str(e_exception), "version": version, "code": 1}),
+                    {"status": False, "debugMessage": str(e_exception), "version": version, "code": 1}),
                 status_code=200
             )
         if req_body.get("highcourt_id"):
@@ -126,7 +126,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
             capture_exception(e_exception)
             return func.HttpResponse(
                 body=json.dumps(
-                    {"status": False, "debug_message": str(e_exception), "version": version, "code": 2}),
+                    {"status": False, "debugMessage": str(e_exception), "version": version, "code": 2}),
                 status_code=200
             )
         if not req_body.get("advocate_name"):
@@ -142,7 +142,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
             capture_exception(e_exception)
             return func.HttpResponse(
                 body=json.dumps(
-                    {"status": False, "debug_message": str(e_exception), "version": version, "code": 3}),
+                    {"status": False, "debugMessage": str(e_exception), "version": version, "code": 3}),
                 status_code=200
             )
         if not req_body.get("highcourt_id"):
@@ -151,7 +151,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
     if not is_valid_request:
         return func.HttpResponse(
             body=json.dumps(
-                {"status": False, "debug_message": "Insufficient parameters", "version": version, "code": 4}),
+                {"status": False, "debugMessage": "Insufficient parameters", "version": version, "code": 4}),
             status_code=200
         )
 
@@ -165,7 +165,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                 capture_exception(e_exception)
                 return func.HttpResponse(
                     body=json.dumps(
-                        {"status": False, "debug_message": str(e_exception), "version": version, "code": 5}),
+                        {"status": False, "debugMessage": str(e_exception), "version": version, "code": 5}),
                     status_code=200
                 )
 
@@ -181,7 +181,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
             total_time = end_time - start_time
             return func.HttpResponse(
                 body=json.dumps(
-                    {"status": True, "debug_message": "Received", "data": data, "start_time": start_time.isoformat(), "total_time_taken": total_time.seconds, "version": version}),
+                    {"status": True, "debugMessage": "Received", "data": data, "start_time": start_time.isoformat(), "total_time_taken": total_time.seconds, "version": version}),
                 status_code=200
             )
         except Exception as e_exception:
@@ -190,7 +190,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
             capture_exception(e_exception)
             return func.HttpResponse(
                 body=json.dumps(
-                    {"status": False, "debug_message": "Request Failed", "error": str(e_exception), "start_time": start_time.isoformat(), "total_time_taken": total_time.seconds, "version": version, 'code': 6}),
+                    {"status": False, "debugMessage": "Request Failed", "error": str(e_exception), "start_time": start_time.isoformat(), "total_time_taken": total_time.seconds, "version": version, 'code': 6}),
                 status_code=200
             )
 
@@ -204,7 +204,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                 capture_exception(e_exception)
                 return func.HttpResponse(
                     body=json.dumps(
-                        {"status": False, "debug_message": str(e_exception), "version": version, "code": 7}),
+                        {"status": False, "debugMessage": str(e_exception), "version": version, "code": 7}),
                     status_code=200
                 )
             chrome_driver = create_driver(__location__=None)  # open browser
@@ -219,7 +219,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
             total_time = end_time - start_time
             return func.HttpResponse(
                 body=json.dumps(
-                    {"status": True, "debug_message": "Received", "data": data, "start_time": start_time.isoformat(), "total_time_taken": total_time.seconds, "version": version}),
+                    {"status": True, "debugMessage": "Received", "data": data, "start_time": start_time.isoformat(), "total_time_taken": total_time.seconds, "version": version}),
                 status_code=200
             )
         except Exception as e_exception:
@@ -228,7 +228,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
             capture_exception(e_exception)
             return func.HttpResponse(
                 body=json.dumps(
-                    {"status": False, "debug_message": "Request Failed", "error": str(e_exception), "start_time": start_time.isoformat(), "time_time_taken": total_time.seconds, "version": version, 'code': 8}),
+                    {"status": False, "debugMessage": "Request Failed", "error": str(e_exception), "start_time": start_time.isoformat(), "time_time_taken": total_time.seconds, "version": version, 'code': 8}),
                 status_code=200
             )
 
@@ -241,7 +241,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
             capture_exception(e_exception)
             return func.HttpResponse(
                 body=json.dumps(
-                    {"status": False, "debug_message": str(e_exception), "version": version, "code": 9}),
+                    {"status": False, "debugMessage": str(e_exception), "version": version, "code": 9}),
                 status_code=200
             )
 
@@ -361,7 +361,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
         get_highcourt_total_no_of_cases_wrapper()
         return func.HttpResponse(
             body=json.dumps(
-                {"status": True, "debug_message": "Request Received and processing", "request": {"body": req_body, "params": req_params, "version": version}}),
+                {"status": True, "debugMessage": "Request Received and processing", "request": {"body": req_body, "params": req_params, "version": version}}),
         )
 
     if req_params.get("method") == "advocatecasesbynamepagination":
@@ -372,7 +372,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
             capture_exception(e_exception)
             return func.HttpResponse(
                 body=json.dumps(
-                    {"status": False, "debug_message": str(e_exception), "version": version, "code": 12}),
+                    {"status": False, "debugMessage": str(e_exception), "version": version, "code": 12}),
                 status_code=200
             )
 
@@ -464,7 +464,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
 
         return func.HttpResponse(
             body=json.dumps(
-                {"status": True, "debug_message": "Request Received and processing", "request": {"body": req_body, "params": req_params, "version": version}}),
+                {"status": True, "debugMessage": "Request Received and processing", "request": {"body": req_body, "params": req_params, "version": version}}),
         )
 
 
@@ -476,6 +476,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         capture_exception(e_exception)
         return func.HttpResponse(
             body=json.dumps(
-                {"status": False, "debug_message": str(e_exception), "version": version, "code": 14}),
+                {"status": False, "debugMessage": str(e_exception), "version": version, "code": 14}),
             status_code=200
         )

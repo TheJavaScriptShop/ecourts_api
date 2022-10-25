@@ -124,7 +124,7 @@ def main():
             is_valid_request = False
 
     if not is_valid_request:
-        data = {"status": False, "debug_message": "Insufficient parameters"}
+        data = {"status": False, "debugMessage": "Insufficient parameters"}
         logger.info(data)
         return jsonify(data)
 
@@ -143,12 +143,12 @@ def main():
             }
             end_time = datetime.datetime.now()
             total_time = end_time - start_time
-            return jsonify({"status": True, "debug_message": "Received", "data": data, "start_time": start_time, "total_time_taken": total_time.seconds})
+            return jsonify({"status": True, "debugMessage": "Received", "data": data, "start_time": start_time, "total_time_taken": total_time.seconds})
         except Exception as e_exception:
             end_time = datetime.datetime.now()
             total_time = end_time - start_time
             capture_exception(e_exception)
-            return jsonify({"status": False, "debug_message": "Request Failed", "error": str(e_exception), "start_time": start_time, "total_time_taken": total_time.seconds})
+            return jsonify({"status": False, "debugMessage": "Request Failed", "error": str(e_exception), "start_time": start_time, "total_time_taken": total_time.seconds})
 
     if request.args.get('method') == "displayboard":
         try:
@@ -165,12 +165,12 @@ def main():
             }
             end_time = datetime.datetime.now()
             total_time = end_time - start_time
-            return jsonify({"status": True, "debug_message": "Received", "data": data, "start_time": start_time, "total_time_taken": total_time.seconds})
+            return jsonify({"status": True, "debugMessage": "Received", "data": data, "start_time": start_time, "total_time_taken": total_time.seconds})
         except Exception as e_exception:
             end_time = datetime.datetime.now()
             total_time = end_time - start_time
             capture_exception(e_exception)
-            return jsonify({"status": False, "debug_message": "Request Failed", "error": str(e_exception), "start_time": start_time, "total_time_taken": total_time.seconds})
+            return jsonify({"status": False, "debugMessage": "Request Failed", "error": str(e_exception), "start_time": start_time, "total_time_taken": total_time.seconds})
 
     if request.args.get('method') == "advocatecasesbyname":
         body = request.json
@@ -274,10 +274,10 @@ def main():
         get_total_no_of_cases_wrapper()
         data = {
             "status": True,
-            "debug_message": "Request Received and processing",
+            "debugMessage": "Request Received and processing",
             "request": {"body": body, "params": params}
         }
-        return jsonify({"status": True, "debug_message": "Received", "data": data})
+        return jsonify({"status": True, "debugMessage": "Received", "data": data})
 
     if request.args.get('method') == "advocatecasesbynamepagination":
         body = request.json
@@ -362,10 +362,10 @@ def main():
         get_highcourt_cases_by_name_wrapper()
         data = {
             "status": True,
-            "debug_message": "Request Received and processing",
+            "debugMessage": "Request Received and processing",
             "request": {"body": body, "params": params}
         }
-        return jsonify({"status": True, "debug_message": "Received", "data": data})
+        return jsonify({"status": True, "debugMessage": "Received", "data": data})
 
 
 if __name__ == "__main__":
