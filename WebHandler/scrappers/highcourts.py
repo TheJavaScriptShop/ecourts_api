@@ -48,98 +48,86 @@ def get_highcourt_no_of_cases(props):
     if props.get("iteration"):
         img_path = f'hc-{name}-img-{props["iteration"]}.png'
     counter_retry = 0
-    try:
-        while is_failed_with_captach:
-            counter_retry += 1
-            driver.get('https://hcservices.ecourts.gov.in/hcservices/main.php')
-            selenium_click_id(driver, 'leftPaneMenuCS')
-            logger.info("Successfully clicked")
-            selenium_click_xpath(
-                driver, '/html/body/div[2]/div/div/div[2]/button')
-            time.sleep(3)
-            logger.info("ok clicked")
-            state_select = Select(
-                selenium_get_element_id(driver, 'sess_state_code'))
-            state_select.select_by_value(state_code)
-            time.sleep(3)
-            logger.info("Values selected")
-            court_select = Select(selenium_get_element_id(
-                driver, 'court_complex_code'))
-            time.sleep(3)
-            court_select.select_by_value(bench_code)
-            logger.info("court code selected")
-            selenium_click_id(driver, 'CSAdvName')
-            logger.info("hypelink clicked")
-            selenium_send_keys_xpath(
-                driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[14]/div[2]/div[2]/input', advoc_name)
-            logger.info("names sent")
-            time.sleep(3)
 
-            captcha_xpath = '//*[@id="captcha_image"]'
-            get_captcha(driver, img_path, captcha_xpath)
-            text = get_text_from_captcha(
-                driver, img_path, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/span/div/div[1]/div[1]/img', captcha_xpath)
-            time.sleep(3)
-            selenium_click_xpath(
-                driver, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/span/div/div[2]/label")
-            selenium_send_keys_xpath(driver, '//*[@id="captcha"]', text)
-            selenium_click_xpath(driver, '//*[@class="Gobtn"]')
-            is_failed_with_captach = False
+    while is_failed_with_captach:
+        counter_retry += 1
+        driver.get('https://hcservices.ecourts.gov.in/hcservices/main.php')
+        selenium_click_id(driver, 'leftPaneMenuCS')
+        logger.info("Successfully clicked")
+        selenium_click_xpath(
+            driver, '/html/body/div[2]/div/div/div[2]/button')
+        time.sleep(3)
+        logger.info("ok clicked")
+        state_select = Select(
+            selenium_get_element_id(driver, 'sess_state_code'))
+        state_select.select_by_value(state_code)
+        time.sleep(3)
+        logger.info("Values selected")
+        court_select = Select(selenium_get_element_id(
+            driver, 'court_complex_code'))
+        time.sleep(3)
+        court_select.select_by_value(bench_code)
+        logger.info("court code selected")
+        selenium_click_id(driver, 'CSAdvName')
+        logger.info("hypelink clicked")
+        selenium_send_keys_xpath(
+            driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[14]/div[2]/div[2]/input', advoc_name)
+        logger.info("names sent")
+        time.sleep(3)
+
+        captcha_xpath = '//*[@id="captcha_image"]'
+        get_captcha(driver, img_path, captcha_xpath)
+        text = get_text_from_captcha(
+            driver, img_path, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/span/div/div[1]/div[1]/img', captcha_xpath)
+        time.sleep(3)
+        selenium_click_xpath(
+            driver, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/span/div/div[2]/label")
+        selenium_send_keys_xpath(driver, '//*[@id="captcha"]', text)
+        selenium_click_xpath(driver, '//*[@class="Gobtn"]')
+        is_failed_with_captach = False
+        try:
+            failure_text = selenium_get_text_xpath(
+                driver, '//*[@id="errSpan1"]')
+            logger.info(failure_text)
+            if 'THERE IS AN ERROR' in failure_text:
+                is_failed_with_captach = True
+        except Exception as e_exception:
             try:
-                failure_text = selenium_get_text_xpath(
-                    driver, '//*[@id="errSpan1"]')
-                logger.info(failure_text)
-                if 'THERE IS AN ERROR' in failure_text:
-                    is_failed_with_captach = True
-            except Exception as e_exception:
-                try:
-                    failure_text_other_page = selenium_get_text_xpath(
-                        driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[26]/p')
-                    logger.info(failure_text_other_page)
-                    is_failed_with_captach = True
+                failure_text_other_page = selenium_get_text_xpath(
+                    driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[26]/p')
+                logger.info(failure_text_other_page)
+                is_failed_with_captach = True
 
-                    if 'Record Not Found' in failure_text_other_page:
-                        data = {
-                            "number_of_establishments_in_court_complex": 0,
-                            "number_of_cases": 0,
-                            "case_list": [],
-                            'case_details': [],
-                        }
-                        fetched_data = True
-                        is_failed_with_captach = False
-                        capture_exception(e_exception)
-                        return {'status': False, 'data': {}, "debugMessage": "No data found", "code": 1}
+                if 'Record Not Found' in failure_text_other_page:
+                    data = {
+                        "number_of_establishments_in_court_complex": 0,
+                        "number_of_cases": 0,
+                        "case_list": [],
+                        'case_details': [],
+                    }
+                    fetched_data = True
+                    is_failed_with_captach = False
+                    capture_exception(e_exception)
+                    return {'status': False, 'data': {}, "debugMessage": "No data found", "code": 1}
 
-                except Exception as e:
-                    capture_exception(e)
-                    if counter_retry > 10:
-                        return {'status': False, 'data': {}, "debugMessage": "Maximun retries reached", "code": 2}
-            if os.path.isfile(img_path):
-                os.remove(img_path)
-        if not fetched_data:
-            try:
-                number_of_establishments_in_court_complex = selenium_get_text_xpath(
-                    driver, '//*[@id="showList2"]/div[1]/h3')
-                logger.info(number_of_establishments_in_court_complex)
-                number_of_cases = selenium_get_text_xpath(
-                    driver, '//*[@id="showList2"]/div[1]/h4')
-                logger.info(number_of_cases)
-                data = {
-                    "number_of_establishments_in_court_complex": number_of_establishments_in_court_complex,
-                    "number_of_cases": number_of_cases,
-                }
-                return data
             except Exception as e:
-                logger.info(str(e), exc_info=True)
                 capture_exception(e)
-                tb = traceback.print_exc()
-                return {'status': False, 'error': str(e), "traceback": tb, "debugMessage": "Unable to scrape data", "code": 3}
-
-    except Exception as e:
-        capture_exception(e)
-        logger.info(str(e), exc_info=True)
-        tb = traceback.print_exc()
-        return {'status': False, 'error': str(e), "traceback": tb, "debugMessage": "Unable to scrape data", "code": 4}
+                if counter_retry > 10:
+                    return {'status': False, 'data': {}, "debugMessage": "Maximun retries reached", "code": 2}
+        if os.path.isfile(img_path):
+            os.remove(img_path)
+    if not fetched_data:
+        number_of_establishments_in_court_complex = selenium_get_text_xpath(
+            driver, '//*[@id="showList2"]/div[1]/h3')
+        logger.info(number_of_establishments_in_court_complex)
+        number_of_cases = selenium_get_text_xpath(
+            driver, '//*[@id="showList2"]/div[1]/h4')
+        logger.info(number_of_cases)
+        data = {
+            "number_of_establishments_in_court_complex": number_of_establishments_in_court_complex,
+            "number_of_cases": number_of_cases,
+        }
+        return data
 
 
 def get_highcourt_cases_by_name(props):

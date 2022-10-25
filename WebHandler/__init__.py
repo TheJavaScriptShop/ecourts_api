@@ -429,8 +429,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                         "stop": req_body["stop"]
                     }
 
-                case_details = get_no_of_cases(
-                    get_no_of_cases_props)
+                case_details = get_no_of_cases(get_no_of_cases_props)
                 cases = get_cases_by_name(get_cases_by_name_props)
                 cases["number_of_establishments_in_court_complex"] = case_details["number_of_establishments_in_court_complex"]
                 cases["number_of_cases"] = case_details["number_of_cases"]
