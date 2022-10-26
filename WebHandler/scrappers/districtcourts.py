@@ -53,10 +53,13 @@ def get_districtcourt_no_of_cases(props):
         counter_retry += 1
         driver.get('https://services.ecourts.gov.in/ecourtindia_v6/#')
         time.sleep(5)
-        if "Invalid Request" in selenium_get_text_xpath(driver, "/html/body/div[7]/div/div/div[2]/div/div[1]"):
-            selenium_click_xpath(
-                driver, "/html/body/div[7]/div/div/div[1]/button")
-            time.sleep(3)
+        try:
+            if "Invalid Request" in selenium_get_text_xpath(driver, "/html/body/div[7]/div/div/div[2]/div/div[1]"):
+                selenium_click_xpath(
+                    driver, "/html/body/div[7]/div/div/div[1]/button")
+                time.sleep(3)
+        except Exception as e:
+            pass
         selenium_click_id(driver, 'leftPaneMenuCS')
         logger.info("Successfully clicked")
         time.sleep(3)
