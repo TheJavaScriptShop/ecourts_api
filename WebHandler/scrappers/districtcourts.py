@@ -98,8 +98,6 @@ def get_districtcourt_no_of_cases(props):
             time.sleep(3)
 
             captcha_xpath = '//div[@id="div_captcha_adv"]//img[@id="captcha_image"]'
-
-            # captcha_element.screenshot(img_path)
             get_captcha(driver, img_path, captcha_xpath)
             text = get_text_from_captcha(
                 driver, img_path, '/html/body/div[1]/div/main/div[2]/div/div/div[4]/div[1]/form/div[2]/div/div/div/img', captcha_xpath)
