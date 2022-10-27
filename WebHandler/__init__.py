@@ -97,25 +97,25 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                     {"status": False, "debugMessage": str(e_exception), "version": version, "code": 1}),
                 status_code=200
             )
-        if req_body.get("highcourt_id"):
-            if not req_body.get("advocate_name"):
+        if req_body.get("highcourtId"):
+            if not req_body.get("advocateName"):
                 is_valid_request = False
-            if not req_body.get("highcourt_id"):
+            if not req_body.get("highcourtId"):
                 is_valid_request = False
-            if not req_body.get("bench_code"):
+            if not req_body.get("benchCode"):
                 is_valid_request = False
-            if not req_body.get("callback_url"):
+            if not req_body.get("callBackUrl"):
                 is_valid_request = False
-        if req_body.get("district_id"):
-            if not req_body.get("advocate_name"):
+        if req_body.get("districtId"):
+            if not req_body.get("advocateName"):
                 is_valid_request = False
-            if not req_body.get("callback_url"):
+            if not req_body.get("callBackUrl"):
                 is_valid_request = False
-            if not req_body.get("state_id"):
+            if not req_body.get("stateId"):
                 is_valid_request = False
-            if not req_body.get("district_id"):
+            if not req_body.get("districtId"):
                 is_valid_request = False
-            if not req_body.get("court_complex_id"):
+            if not req_body.get("courtComplexId"):
                 is_valid_request = False
 
     if req_params.get("method") == "advocatecauselist":
@@ -129,9 +129,9 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                     {"status": False, "debugMessage": str(e_exception), "version": version, "code": 2}),
                 status_code=200
             )
-        if not req_body.get("advocate_name"):
+        if not req_body.get("advocateName"):
             is_valid_request = False
-        if not req_body.get("highcourt_id"):
+        if not req_body.get("highcourtId"):
             is_valid_request = False
 
     if req_params.get("method") == "displayboard":
@@ -145,7 +145,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                     {"status": False, "debugMessage": str(e_exception), "version": version, "code": 3}),
                 status_code=200
             )
-        if not req_body.get("highcourt_id"):
+        if not req_body.get("highcourtId"):
             is_valid_request = False
 
     if not is_valid_request:
@@ -171,7 +171,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
 
             chrome_driver = create_driver(__location__=None)  # open browse
             data = get_cause_list_data(
-                chrome_driver, req_body["advocate_name"], req_body["highcourt_id"])
+                chrome_driver, req_body["advocateName"], req_body["highcourtId"])
             data = {
                 "status": True,
                 "data": data,
@@ -209,7 +209,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                 )
             chrome_driver = create_driver(__location__=None)  # open browser
             table_data = get_display_board(
-                chrome_driver, req_body["highcourt_id"])
+                chrome_driver, req_body["highcourtId"])
             data = {
                 "status": True,
                 "data": table_data,
@@ -251,26 +251,26 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
             start_time = datetime.datetime.now()
             start = cases_per_iteration
             try:
-                __location__ = f'{path}/highcourt/{req_body.get("advocate_name")}'
+                __location__ = f'{path}/highcourt/{req_body.get("advocateName")}'
                 chrome_driver = create_driver(__location__)
                 get_no_of_cases = None
                 get_cases_by_name = None
                 get_no_of_cases_props = {}
                 get_cases_by_name_props = {}
-                if req_body.get("highcourt_id"):
+                if req_body.get("highcourtId"):
                     get_no_of_cases = get_highcourt_no_of_cases
                     get_cases_by_name = get_highcourt_cases_by_name
                     get_no_of_cases_props = {
                         "driver": chrome_driver,
-                        "advocate_name": req_body["advocate_name"],
-                        "highcourt_id": req_body["highcourt_id"],
-                        "bench_code": req_body["bench_code"],
+                        "advocate_name": req_body["advocateName"],
+                        "highcourt_id": req_body["highcourtId"],
+                        "bench_code": req_body["benchCode"],
                         "logger": logger,
                         "location": __location__
                     }
                     get_cases_by_name_props = {
                         "driver": chrome_driver,
-                        "advocate_name": req_body["advocate_name"],
+                        "advocate_name": req_body["advocateName"],
                         "__location__": __location__,
                         "start": None,
                         "stop": None,
@@ -281,10 +281,10 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                     get_cases_by_name = get_districtcourt_cases_by_name
                     get_no_of_cases_props = {
                         "driver": chrome_driver,
-                        "advocate_name": req_body["advocate_name"],
-                        "district_id": req_body["district_id"],
-                        "state_id": req_body["state_id"],
-                        "court_complex_id": req_body["court_complex_id"],
+                        "advocate_name": req_body["advocateName"],
+                        "district_id": req_body["districtId"],
+                        "state_id": req_body["stateId"],
+                        "court_complex_id": req_body["courtComplexId"],
                         "logger": logger,
                         "location": __location__
                     }
@@ -305,7 +305,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                     end_time = datetime.datetime.now()
                     total_time = end_time - start_time
                     try:
-                        requests.post(url=req_body["callback_url"], timeout=10, json={
+                        requests.post(url=req_body["callBackUrl"], timeout=10, json={
                             "data": data, "request": {"body": req_body, "params": req_params, "start_time": start_time.isoformat(), "time": total_time.seconds, "version": version}})
                     except Exception as e_exception:
                         capture_exception(e_exception)
@@ -331,7 +331,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                             total_time = end_time - start_time
                             capture_exception(e_exception)
                             try:
-                                requests.post(url=req_body["callback_url"], timeout=10, json={
+                                requests.post(url=req_body["callBackUrl"], timeout=10, json={
                                     "error": str(e_exception), "message": "Request Failed", "request": {"body": req_body, "params": req_params, "start_time": start_time.isoformat(), "time": total_time.seconds, "code": 10}})
                             except Exception as e_exc:
                                 capture_exception(e_exc)
@@ -352,7 +352,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                 total_time = end_time - start_time
                 capture_exception(e_exception)
                 try:
-                    requests.post(url=req_body["callback_url"], timeout=10, json={
+                    requests.post(url=req_body["callBackUrl"], timeout=10, json={
                         "error": str(e_exception), "traceback": tb, "request": {"body": req_body, "params": req_params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, "code": 11}})
                 except Exception as e_exc:
                     capture_exception(e_exc)
@@ -383,27 +383,27 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
             start_time = datetime.datetime.now()
 
             try:
-                __location__ = f'{path}/highcourt/{req_body["advocate_name"]}/{req_body["iteration"]}'
+                __location__ = f'{path}/highcourt/{req_body["advocateName"]}/{req_body["iteration"]}'
                 chrome_driver = create_driver(__location__)  # open browser
                 get_no_of_cases = None
                 get_cases_by_name = None
                 get_no_of_cases_props = {}
                 get_cases_by_name_props = {}
-                if req_body.get("highcourt_id"):
+                if req_body.get("highcourtId"):
                     get_no_of_cases = get_highcourt_no_of_cases
                     get_cases_by_name = get_highcourt_cases_by_name
                     get_no_of_cases_props = {
                         "driver": chrome_driver,
-                        "advocate_name": req_body["advocate_name"],
-                        "highcourt_id": req_body["highcourt_id"],
-                        "bench_code": req_body["bench_code"],
+                        "advocate_name": req_body["advocateName"],
+                        "highcourt_id": req_body["highcourtId"],
+                        "bench_code": req_body["benchCode"],
                         "logger": logger,
                         "iteration": req_body["iteration"],
                         "location": __location__
                     }
                     get_cases_by_name_props = {
                         "driver": chrome_driver,
-                        "advocate_name": req_body["advocate_name"],
+                        "advocate_name": req_body["advocateName"],
                         "__location__": __location__,
                         "start": req_body["start"],
                         "stop": req_body["stop"],
@@ -414,10 +414,10 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                     get_cases_by_name = get_districtcourt_cases_by_name
                     get_no_of_cases_props = {
                         "driver": chrome_driver,
-                        "advocate_name": req_body["advocate_name"],
-                        "district_id": req_body["district_id"],
-                        "state_id": req_body["state_id"],
-                        "court_complex_id": req_body["court_complex_id"],
+                        "advocate_name": req_body["advocateName"],
+                        "district_id": req_body["districtId"],
+                        "state_id": req_body["stateId"],
+                        "court_complex_id": req_body["courtComplexId"],
                         "logger": logger,
                         "iteration": req_body["iteration"],
                         "location": __location__
@@ -440,7 +440,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                 end_time = datetime.datetime.now()
                 total_time = end_time - start_time
                 try:
-                    requests.post(url=req_body["callback_url"], timeout=10, json={
+                    requests.post(url=req_body["callBackUrl"], timeout=10, json={
                         "data": cases_data, "request": {"body": req_body, "params": req_params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version}})
                 except Exception as e_exception:
                     capture_exception(e_exception)
@@ -453,7 +453,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                 total_time = end_time - start_time
                 capture_exception(e_exception)
                 try:
-                    requests.post(url=req_body["callback_url"], timeout=10, json={
+                    requests.post(url=req_body["callBackUrl"], timeout=10, json={
                         "error": str(e_exception), "traceback": tb, "request": {"body": req_body, "params": req_params, "start_time": start_time.isoformat(), "time": total_time.seconds, "version": version, "code": 13}})
                 except Exception as e_exc:
                     capture_exception(e_exc)
