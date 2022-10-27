@@ -96,7 +96,6 @@ def get_districtcourt_no_of_cases(props):
                 driver, '//input[@id="advocate_name"]', advoc_name)
             logger.info("names sent")
             time.sleep(3)
-
             captcha_xpath = '//div[@id="div_captcha_adv"]//img[@id="captcha_image"]'
             get_captcha(driver, img_path, captcha_xpath)
             text = get_text_from_captcha(
@@ -120,13 +119,14 @@ def get_districtcourt_no_of_cases(props):
                     is_failed_with_captach = True
             except:
                 pass
-
-    except Exception as e:
-        capture_exception(e)
-        if counter_retry > 10:
-            return {'status': False, 'data': {}, "debugMessage": "Maximun retries reached", "code": 2}
         if os.path.isfile(img_path):
             os.remove(img_path)
+
+    except Exception as e_exception:
+        capture_exception(e_exception)
+        if counter_retry > 10:
+            return {'status': False, 'data': {}, "debugMessage": "Maximun retries reached", "code": 2}
+
     courts_info = []
     for div in driver.find_elements(by="xpath", value='.//div[@id="showList2"]/div')[1:]:
         courts_info.append(selenium_get_text_xpath(div, './/a'))
