@@ -52,10 +52,10 @@ def get_districtcourt_no_of_cases(props):
 
     counter_retry = 0
     driver.get('https://services.ecourts.gov.in/ecourtindia_v6/#')
-    time.sleep(5)
     try:
         while is_failed_with_captach:
             counter_retry += 1
+            time.sleep(5)
 
             try:
                 if "Invalid Request" in selenium_get_text_xpath(driver, "/html/body/div[7]/div/div/div[2]/div/div[1]"):
@@ -71,6 +71,9 @@ def get_districtcourt_no_of_cases(props):
                 selenium_click_xpath(
                     driver, '/html/body/div[9]/div/div/div[1]/button')
                 time.sleep(3)
+                selenium_click_xpath(
+                    driver, '/html/body/div[9]/div/div/div[1]/button')
+                time.sleep(3)
             except:
                 pass
             logger.info("ok clicked")
@@ -81,6 +84,8 @@ def get_districtcourt_no_of_cases(props):
             logger.info("Values selected")
             district_select = Select(selenium_get_element_id(
                 driver, 'sess_dist_code'))
+            time.sleep(3)
+            district_select.select_by_value("1")
             time.sleep(3)
             district_select.select_by_value(district_id)
             logger.info("district code selected")
@@ -114,6 +119,7 @@ def get_districtcourt_no_of_cases(props):
                     selenium_click_xpath(
                         driver, '/html/body/div[9]/div/div/div[1]/button')
                     is_failed_with_captach = True
+
                 if 'Invalid Request' in selenium_get_text_xpath(driver, '//div[@id="msg-danger"]'):
                     selenium_click_xpath(driver, '/html/body/div/div/a')
                     is_failed_with_captach = True
