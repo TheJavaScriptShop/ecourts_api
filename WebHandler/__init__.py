@@ -22,7 +22,7 @@ sentry_sdk.init(
     traces_sample_rate=1.0
 )
 
-version = "2.3.6"
+version = "2.3.7"
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -323,6 +323,7 @@ def main_handler(req: func.HttpRequest) -> func.HttpResponse:
                         else:
                             req_body["stop"] = stop
                         try:
+                            time.sleep(5)
                             requests.post(
                                 url="https://ecourtsapiservice-dev.azurewebsites.net/api/WebHandler?method=advocatecasesbynamepagination", timeout=1, json=req_body)
                         except Exception as e_exception:

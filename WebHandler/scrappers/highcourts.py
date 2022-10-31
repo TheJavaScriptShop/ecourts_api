@@ -58,18 +58,18 @@ def get_highcourt_no_of_cases(props):
             try:
                 selenium_click_xpath(
                     driver, '/html/body/div[2]/div/div/div[2]/button')
-                time.sleep(3)
+                time.sleep(os.environ.get('WAIT_TIME'))
                 logger.info("ok clicked")
             except:
                 pass
             state_select = Select(
                 selenium_get_element_id(driver, 'sess_state_code'))
             state_select.select_by_value(state_code)
-            time.sleep(3)
+            time.sleep(os.environ.get('WAIT_TIME'))
             logger.info("Values selected")
             court_select = Select(selenium_get_element_id(
                 driver, 'court_complex_code'))
-            time.sleep(3)
+            time.sleep(os.environ.get('WAIT_TIME'))
             court_select.select_by_value(bench_code)
             logger.info("court code selected")
             selenium_click_id(driver, 'CSAdvName')
@@ -77,12 +77,12 @@ def get_highcourt_no_of_cases(props):
             selenium_send_keys_xpath(
                 driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[14]/div[2]/div[2]/input', advoc_name)
             logger.info("names sent")
-            time.sleep(3)
+            time.sleep(os.environ.get('WAIT_TIME'))
             captcha_xpath = '//*[@id="captcha_image"]'
             get_captcha(driver, img_path, captcha_xpath)
             text = get_text_from_captcha(
                 driver, img_path, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/span/div/div[1]/div[1]/img', captcha_xpath)
-            time.sleep(3)
+            time.sleep(os.environ.get('WAIT_TIME'))
             selenium_click_xpath(
                 driver, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/span/div/div[2]/label")
             selenium_send_keys_xpath(driver, '//*[@id="captcha"]', text)
@@ -193,14 +193,14 @@ def get_highcourt_cases_by_name(props):
     for link in case_links:
         logger.info(link)
         logger.info(f'case no: {case_sl_no}')
-        time.sleep(3)
+        time.sleep(os.environ.get('WAIT_TIME'))
         driver.execute_script(
             "arguments[0].scrollIntoView();", link)
         WebDriverWait(driver, 20).until(
             EC.element_to_be_clickable((By.CLASS_NAME, 'someclass')))
         selenium_click_class(link, 'someclass')
         logger.info(f"{case_sl_no} view clicked")
-        time.sleep(3)
+        time.sleep(os.environ.get('WAIT_TIME'))
         # details behind the hyperlink
         # case details
         case_details_title = selenium_get_text_xpath(
@@ -387,7 +387,7 @@ def get_highcourt_cases_by_name(props):
         case_details.append(details)
         logger.info({'case_details': case_details, "case_no": case_sl_no})
         selenium_click_xpath(driver, "/html/body/div[1]/div/p/a")
-        time.sleep(3)
+        time.sleep(os.environ.get('WAIT_TIME'))
         selenium_click_xpath(
             driver, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[48]/input")
         view_link = selenium_get_element_id(driver, 'dispTable')
