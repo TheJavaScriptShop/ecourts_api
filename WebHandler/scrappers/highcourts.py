@@ -64,12 +64,12 @@ def get_highcourt_no_of_cases(props):
             except:
                 pass
             state_select = Select(
-                selenium_get_element_id(driver, 'sess_state_code'))
+                driver.find_element(By.ID, 'sess_state_code'))
             state_select.select_by_value(state_code)
 
             logger.info("Values selected")
-            court_select = Select(selenium_get_element_id(
-                driver, 'court_complex_code'))
+            court_select = Select(driver.find_element(
+                By.ID, 'court_complex_code'))
 
             court_select.select_by_value(bench_code)
             logger.info("court code selected")
@@ -78,7 +78,7 @@ def get_highcourt_no_of_cases(props):
             selenium_send_keys_xpath(
                 driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[14]/div[2]/div[2]/input', advoc_name)
             logger.info("names sent")
-
+            time.sleep(3)
             captcha_xpath = '//*[@id="captcha_image"]'
             get_captcha(driver, img_path, captcha_xpath)
             text = get_text_from_captcha(
@@ -141,6 +141,7 @@ def get_highcourt_no_of_cases(props):
 
 def get_highcourt_cases_by_name(props):
     driver = props["driver"]
+    driver.implicitly_wait(30)
     advoc_name = props["advocate_name"]
     __location__ = props["__location__"]
     start = props["start"]
