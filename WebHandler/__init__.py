@@ -22,7 +22,7 @@ sentry_sdk.init(
     traces_sample_rate=1.0
 )
 
-version = "2.3.6"
+version = "2.3.7"
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
