@@ -59,6 +59,7 @@ def create_driver(__location__):
 
     options.add_experimental_option("prefs", prefs)
     driver = webdriver.Chrome(DRIVER_PATH, chrome_options=options)
+    driver.implicitly_wait(30)
     driver.maximize_window()
     return driver
 

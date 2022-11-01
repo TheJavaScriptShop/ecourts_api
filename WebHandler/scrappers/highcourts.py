@@ -38,7 +38,6 @@ def get_highcourt_no_of_cases(props):
     is_failed_with_captach = True
     fetched_data = False
     driver = props["driver"]
-    driver.implicitly_wait(30)
     logger = props["logger"]
     advoc_name = props["advocate_name"]
     state_code = props["highcourt_id"]
@@ -141,7 +140,6 @@ def get_highcourt_no_of_cases(props):
 
 def get_highcourt_cases_by_name(props):
     driver = props["driver"]
-    driver.implicitly_wait(30)
     advoc_name = props["advocate_name"]
     __location__ = props["__location__"]
     start = props["start"]
@@ -391,7 +389,7 @@ def get_highcourt_cases_by_name(props):
         case_details.append(details)
         logger.info({'case_details': case_details, "case_no": case_sl_no})
         selenium_click_xpath(driver, "/html/body/div[1]/div/p/a")
-
+        time.sleep(3)
         selenium_click_xpath(
             driver, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[48]/input")
         view_link = selenium_get_element_id(driver, 'dispTable')
