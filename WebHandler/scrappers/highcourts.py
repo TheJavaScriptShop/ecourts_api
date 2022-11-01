@@ -168,10 +168,10 @@ def get_highcourt_cases_by_name(props):
 
     # case details
 
-    view_element = selenium_get_element_id(driver, 'dispTable')
+    table_element = selenium_get_element_id(driver, 'dispTable')
 
     driver.execute_script(
-        "arguments[0].scrollIntoView();", view_element)
+        "arguments[0].scrollIntoView();", table_element)
 
     WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
         (By.XPATH, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table")))
@@ -187,7 +187,7 @@ def get_highcourt_cases_by_name(props):
     case_details = []
     case_sl_no = 1
     case_links = driver.find_elements(
-        by="xpath", value='/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table/tbody/tr/td[5]')
+        by="xpath", value='/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table/tbody/tr/td[5]/a')
     if start is not None and stop is not None:
         case_links = case_links[start:stop]
         case_sl_no = start + 1
@@ -197,10 +197,7 @@ def get_highcourt_cases_by_name(props):
         logger.info(f'case no: {case_sl_no}')
 
         driver.execute_script(
-            "arguments[0].scrollIntoView();", link)
-        WebDriverWait(driver, 20).until(
-            EC.element_to_be_clickable((By.CLASS_NAME, 'someclass')))
-        selenium_click_class(link, 'someclass')
+            "arguments[0].click();", link)
         logger.info(f"{case_sl_no} view clicked")
 
         # details behind the hyperlink
@@ -215,6 +212,8 @@ def get_highcourt_cases_by_name(props):
             driver, '//*[@id="caseBusinessDiv4"]/div/table/tbody/tr[1]/td[4]')
         case_details_registration_date = selenium_get_text_xpath(
             driver, '//*[@id="caseBusinessDiv4"]/div/table/tbody/tr[2]/td[4]/label')
+
+        driver.implicitly_wait(2)  # decrease wait time
         # case status
         try:
             case_status_data = get_table_data_as_list(
@@ -305,14 +304,6 @@ def get_highcourt_cases_by_name(props):
             case_orders_data = get_table_data_as_list(
                 driver, '//table[@class="order_table"]')
             no_of_orders = len(case_orders_data) - 1
-            orders = selenium_get_element_xpath(
-                driver, '//table[@class="order_table"]')
-            driver.implicitly_wait(5)
-            driver.execute_script(
-                "arguments[0].scrollIntoView();", orders)
-            driver.implicitly_wait(2)
-            logger.info(f'{case_sl_no} first scroll')
-
             order_no = 1
             for n in range(0, no_of_orders):
                 pdf_xpath = f'//table[@class="order_table"]/tbody/tr[{(n+2)}]/td[5]/a'
@@ -321,7 +312,6 @@ def get_highcourt_cases_by_name(props):
                 driver.execute_script(
                     "arguments[0].click();", pdf_element)
                 logger.info(f'{case_sl_no} clicked')
-
                 case_no = case_details_title.replace("/", "-")
                 try:
                     blob_path_container = f"{advoc_name}/{case_no}/{date.today().month}/{date.today().day}/orders/{order_no}.pdf"
@@ -332,7 +322,6 @@ def get_highcourt_cases_by_name(props):
                     case_orders_data[order_no] = order
                     logger.info(f'downloaded {order_no}')
                     order_no = order_no+1
-
                 except Exception as e:
                     traceback.print_exc()
                     logger.info({'err': str(e), 'case_no': case_sl_no})
@@ -387,18 +376,12 @@ def get_highcourt_cases_by_name(props):
             "objections": case_objections,
         }
         case_details.append(details)
+        driver.implicitly_wait(30)  # set default wait time
         logger.info({'case_details': case_details, "case_no": case_sl_no})
-        selenium_click_xpath(driver, "/html/body/div[1]/div/p/a")
-        time.sleep(3)
-        selenium_click_xpath(
-            driver, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[48]/input")
-        view_link = selenium_get_element_id(driver, 'dispTable')
-
+        back_button = selenium_get_element_xpath(
+            driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[48]/input')
         driver.execute_script(
-            "arguments[0].scrollIntoView();", view_link)
-
-        WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
-            (By.XPATH, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[45]/table")))
+            "arguments[0].click();", back_button)
         case_sl_no = case_sl_no + 1
 
     data = {
