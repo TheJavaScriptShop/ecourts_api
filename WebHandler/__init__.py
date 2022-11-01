@@ -22,7 +22,7 @@ sentry_sdk.init(
     traces_sample_rate=1.0
 )
 
-version = "2.3.7"
+version = "2.3.8"
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -59,6 +59,7 @@ def create_driver(__location__):
     chrome_options.add_experimental_option("prefs", prefs)
     driver = webdriver.Chrome(
         "/usr/local/bin/chromedriver", chrome_options=chrome_options)
+    driver.implicitly_wait(30)
     driver.maximize_window()
     return driver
 
