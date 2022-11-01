@@ -62,6 +62,7 @@ def selenium_click_class(driver, classname):
 def get_table_data_as_list(driver, xpath):
     rows = []
     table = driver.find_element(by="xpath", value=xpath)
+    driver.implicitly_wait(0)
     for row in table.find_elements(by="xpath", value='.//tr'):
         if row.find_elements(by="xpath", value=".//td"):
             rows.append(
@@ -69,7 +70,7 @@ def get_table_data_as_list(driver, xpath):
         if row.find_elements(by="xpath", value=".//th"):
             rows.append(
                 {"data": [th.text for th in row.find_elements(by="xpath", value=".//th")]})
-
+    driver.implicitly_wait(30)
     return rows
 
 
