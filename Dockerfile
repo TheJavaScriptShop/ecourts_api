@@ -52,3 +52,6 @@ COPY . /home/site/wwwroot
 # 5. Install other packages in requirements.txt
 RUN cd /home/site/wwwroot && \
     pip install -r requirements.txt
+
+RUN cd /home/site/wwwroot
+CMD python app.py
