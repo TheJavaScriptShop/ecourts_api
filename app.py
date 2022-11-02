@@ -188,6 +188,7 @@ def main():
 
         @ fire_and_forget
         def get_total_no_of_cases_wrapper():
+            start_time = datetime.datetime.now()
             try:
                 __location__ = f'{path}/{body["advocateName"]}'
                 chrome_driver = create_driver(__location__)  # open browser
@@ -240,8 +241,14 @@ def main():
                     data = get_cases_by_name(get_cases_by_name_props)
                     data["number_of_establishments_in_court_complex"] = case_details["number_of_establishments_in_court_complex"]
                     data["number_of_cases"] = case_details["number_of_cases"]
-                    requests.post(url=body["callBackUrl"], timeout=10, json={
-                        "data": data, "request": {"body": body, "params": params}})
+                    end_time = datetime.datetime.now()
+                    total_time = end_time - start_time
+                    try:
+                        requests.post(url=body["callBackUrl"], timeout=10, json={
+                            "data": data, "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds}})
+                    except Exception as e_exception:
+                        capture_exception(e_exception)
+                        logger.info({"err_msg": "callback request failed"})
                 else:
                     n = total_cases/cases_per_iteration
                     start = 0
@@ -256,10 +263,20 @@ def main():
                             body["stop"] = stop
                         logger.info({"body": body})
                         try:
+                            time.sleep(5)
                             requests.post(
                                 url="http://127.0.0.1:4000?method=advocatecasesbynamepagination", timeout=1, json=body)
                         except:
-                            pass
+                            end_time = datetime.datetime.now()
+                            total_time = end_time - start_time
+                            capture_exception(e_exception)
+                            try:
+                                requests.post(url=body["callBackUrl"], timeout=10, json={
+                                    "error": str(e_exception), "message": "Request Failed", "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds}})
+                            except Exception as e_exc:
+                                capture_exception(e_exc)
+                                logger.info(
+                                    {"err_msg": "callback request failed"})
                         start = start + cases_per_iteration
                         stop = stop + cases_per_iteration
                         n = n - 1
@@ -269,9 +286,15 @@ def main():
             except Exception as e_exception:
                 logger.info(str(e_exception))
                 capture_exception(e_exception)
-                requests.post(url=body["callBackUrl"], timeout=10, json={
-                    "error": str(e_exception), "request": {"body": body, "params": params}})
-
+                end_time = datetime.datetime.now()
+                total_time = end_time - start_time
+                capture_exception(e_exception)
+                try:
+                    requests.post(url=body["callBackUrl"], timeout=10, json={
+                        "error": str(e_exception), "traceback": tb, "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds}})
+                except Exception as e_exc:
+                    capture_exception(e_exc)
+                    logger.info({"err_msg": "callback request failed"})
         get_total_no_of_cases_wrapper()
         data = {
             "status": True,
@@ -297,6 +320,7 @@ def main():
 
         @fire_and_forget
         def get_highcourt_cases_by_name_wrapper():
+            start_time = datetime.datetime.now()
             try:
                 __location__ = f'{path}/{body["advocateName"]}/{body["iteration"]}'
                 chrome_driver = create_driver(__location__)  # open browser
@@ -355,11 +379,26 @@ def main():
                               "data": cases_data, "request": {"body": body, "params": params}})
                 chrome_driver.close()
                 chrome_driver.quit()
+                end_time = datetime.datetime.now()
+                total_time = end_time - start_time
+                try:
+                    requests.post(url=body["callBackUrl"], timeout=10, json={
+                        "data": cases_data, "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds}})
+                except Exception as e_exception:
+                    capture_exception(e_exception)
+                    logger.info({"err_msg": "callback request failed"})
             except Exception as e_exception:
                 logger.info(str(e_exception))
                 capture_exception(e_exception)
-                requests.post(url=body["callBackUrl"], timeout=10, json={
-                    "error": str(e_exception), "request": {"body": body, "params": params}})
+                end_time = datetime.datetime.now()
+                total_time = end_time - start_time
+                capture_exception(e_exception)
+                try:
+                    requests.post(url=body["callBackUrl"], timeout=10, json={
+                        "error": str(e_exception), "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds}})
+                except Exception as e_exc:
+                    capture_exception(e_exc)
+                    logger.info({"err_msg": "callback request failed"})
         get_highcourt_cases_by_name_wrapper()
         data = {
             "status": True,
