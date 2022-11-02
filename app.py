@@ -18,12 +18,16 @@ import logging
 import threading
 import requests
 import sentry_sdk
+from dotenv import load_dotenv
 
 from sentry_sdk import capture_exception
 from WebHandler.scrappers.highcourts import get_highcourt_no_of_cases, get_highcourt_cases_by_name
 from WebHandler.scrappers.display_board import get_display_board
 from WebHandler.scrappers.cause_list import get_cause_list_data
 from WebHandler.scrappers.districtcourts import get_districtcourt_no_of_cases, get_districtcourt_cases_by_name
+
+if os.environ.get("APP_ENV") == "local":
+    load_dotenv()
 
 
 path = os.environ.get('DOWNLOAD_PATH')
@@ -32,6 +36,8 @@ sentry_sdk.init(
     dsn="https://94c7a2c09b7140a9ac611581cfb3b33a@o4504008607924224.ingest.sentry.io/4504008615460864",
     traces_sample_rate=1.0
 )
+
+version = "3.0.0"
 
 
 def create_driver(__location__):
@@ -144,12 +150,12 @@ def main():
             }
             end_time = datetime.datetime.now()
             total_time = end_time - start_time
-            return jsonify({"status": True, "debugMessage": "Received", "data": data, "start_time": start_time, "total_time_taken": total_time.seconds})
+            return jsonify({"status": True, "debugMessage": "Received", "data": data, "start_time": start_time, "total_time_taken": total_time.seconds, 'version': version, 'code': '1'})
         except Exception as e_exception:
             end_time = datetime.datetime.now()
             total_time = end_time - start_time
             capture_exception(e_exception)
-            return jsonify({"status": False, "debugMessage": "Request Failed", "error": str(e_exception), "start_time": start_time, "total_time_taken": total_time.seconds})
+            return jsonify({"status": False, "debugMessage": "Request Failed", "error": str(e_exception), "start_time": start_time, "total_time_taken": total_time.seconds, 'version': version, 'code': '2'})
 
     if request.args.get('method') == "displayboard":
         try:
@@ -166,12 +172,12 @@ def main():
             }
             end_time = datetime.datetime.now()
             total_time = end_time - start_time
-            return jsonify({"status": True, "debugMessage": "Received", "data": data, "start_time": start_time, "total_time_taken": total_time.seconds})
+            return jsonify({"status": True, "debugMessage": "Received", "data": data, "start_time": start_time, "total_time_taken": total_time.seconds, 'version': version, 'code': '3'})
         except Exception as e_exception:
             end_time = datetime.datetime.now()
             total_time = end_time - start_time
             capture_exception(e_exception)
-            return jsonify({"status": False, "debugMessage": "Request Failed", "error": str(e_exception), "start_time": start_time, "total_time_taken": total_time.seconds})
+            return jsonify({"status": False, "debugMessage": "Request Failed", "error": str(e_exception), "start_time": start_time, "total_time_taken": total_time.seconds, 'version': version, 'code': '4'})
 
     if request.args.get('method') == "advocatecasesbyname":
         body = request.json
@@ -182,9 +188,10 @@ def main():
         sh.setLevel(logging.DEBUG)
         logger.addHandler(sh)
 
-        fh = logging.FileHandler('local/logger/initial.log', mode='w')
-        fh.setLevel(logging.DEBUG)
-        logger.addHandler(fh)
+        if os.environ.get("APP_ENV") == "local":
+            fh = logging.FileHandler('local/logger/initial.log', mode='w')
+            fh.setLevel(logging.DEBUG)
+            logger.addHandler(fh)
 
         @ fire_and_forget
         def get_total_no_of_cases_wrapper():
@@ -245,10 +252,11 @@ def main():
                     total_time = end_time - start_time
                     try:
                         requests.post(url=body["callBackUrl"], timeout=10, json={
-                            "data": data, "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds}})
+                            "data": data, "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, 'code': '5'}})
                     except Exception as e_exception:
                         capture_exception(e_exception)
-                        logger.info({"err_msg": "callback request failed"})
+                        logger.info(
+                            {"err_msg": "callback request failed", 'version': version, 'code': '6'})
                 else:
                     n = total_cases/cases_per_iteration
                     start = 0
@@ -272,11 +280,11 @@ def main():
                             capture_exception(e_exception)
                             try:
                                 requests.post(url=body["callBackUrl"], timeout=10, json={
-                                    "error": str(e_exception), "message": "Request Failed", "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds}})
+                                    "error": str(e_exception), "message": "Request Failed", "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, 'code': '7'}})
                             except Exception as e_exc:
                                 capture_exception(e_exc)
                                 logger.info(
-                                    {"err_msg": "callback request failed"})
+                                    {"err_msg": "callback request failed", 'version': version, 'code': '8'})
                         start = start + cases_per_iteration
                         stop = stop + cases_per_iteration
                         n = n - 1
@@ -291,17 +299,18 @@ def main():
                 capture_exception(e_exception)
                 try:
                     requests.post(url=body["callBackUrl"], timeout=10, json={
-                        "error": str(e_exception), "traceback": tb, "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds}})
+                        "error": str(e_exception), "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, 'code': '9'}})
                 except Exception as e_exc:
                     capture_exception(e_exc)
-                    logger.info({"err_msg": "callback request failed"})
+                    logger.info({"err_msg": "callback request failed",
+                                'version': version, 'code': '10'})
         get_total_no_of_cases_wrapper()
         data = {
             "status": True,
             "debugMessage": "Request Received and processing",
             "request": {"body": body, "params": params}
         }
-        return jsonify({"status": True, "debugMessage": "Received", "data": data})
+        return jsonify({"status": True, "debugMessage": "Received", "data": data, 'version': version, 'code': '11'})
 
     if request.args.get('method') == "advocatecasesbynamepagination":
         body = request.json
@@ -312,11 +321,11 @@ def main():
         sh = logging.StreamHandler()
         sh.setLevel(logging.DEBUG)
         logger.addHandler(sh)
-
-        fh = logging.FileHandler(
-            f'local/logger/{body["iteration"]}-{body["start"]}.log', mode='w')
-        fh.setLevel(logging.DEBUG)
-        logger.addHandler(fh)
+        if os.environ.get("APP_ENV") == "local":
+            fh = logging.FileHandler(
+                f'local/logger/{body["iteration"]}-{body["start"]}.log', mode='w')
+            fh.setLevel(logging.DEBUG)
+            logger.addHandler(fh)
 
         @fire_and_forget
         def get_highcourt_cases_by_name_wrapper():
@@ -383,10 +392,11 @@ def main():
                 total_time = end_time - start_time
                 try:
                     requests.post(url=body["callBackUrl"], timeout=10, json={
-                        "data": cases_data, "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds}})
+                        "data": cases_data, "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, 'code': '12'}})
                 except Exception as e_exception:
                     capture_exception(e_exception)
-                    logger.info({"err_msg": "callback request failed"})
+                    logger.info(
+                        {"err_msg": "callback request failed", 'version': version, 'code': '13'})
             except Exception as e_exception:
                 logger.info(str(e_exception))
                 capture_exception(e_exception)
@@ -395,18 +405,19 @@ def main():
                 capture_exception(e_exception)
                 try:
                     requests.post(url=body["callBackUrl"], timeout=10, json={
-                        "error": str(e_exception), "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds}})
+                        "error": str(e_exception), "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, 'code': '14'}})
                 except Exception as e_exc:
                     capture_exception(e_exc)
-                    logger.info({"err_msg": "callback request failed"})
+                    logger.info(
+                        {"err_msg": "callback request failed", 'version': version, 'code': '15'})
         get_highcourt_cases_by_name_wrapper()
         data = {
             "status": True,
             "debugMessage": "Request Received and processing",
             "request": {"body": body, "params": params}
         }
-        return jsonify({"status": True, "debugMessage": "Received", "data": data})
+        return jsonify({"status": True, "debugMessage": "Received", "data": data, 'version': version, 'code': '16'})
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=4000)
+    app.run(debug=True, port=os.environ.get('PORT'))
