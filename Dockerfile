@@ -53,5 +53,5 @@ COPY . /home/site/wwwroot
 RUN cd /home/site/wwwroot && \
     pip install -r requirements.txt
 
-RUN cd /home/site/wwwroot
-CMD python app.py
+WORKDIR /home/site/wwwroot
+CMD ["python", "app.py"]
