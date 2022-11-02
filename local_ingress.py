@@ -15,7 +15,7 @@ def ingress():
     logger.addHandler(fh)
     body = request.json
     print(body)
-    logger.info(body["request"])
+    logger.info(body)
     return jsonify({"status": True, "debugMessage": "Received"})
 
 

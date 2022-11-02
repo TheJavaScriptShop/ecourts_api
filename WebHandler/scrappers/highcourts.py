@@ -77,7 +77,7 @@ def get_highcourt_no_of_cases(props):
             selenium_send_keys_xpath(
                 driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[14]/div[2]/div[2]/input', advoc_name)
             logger.info("names sent")
-            time.sleep(3)
+            time.sleep(os.environ.get('WAIT_TIME'))
             captcha_xpath = '//*[@id="captcha_image"]'
             get_captcha(driver, img_path, captcha_xpath)
             text = get_text_from_captcha(
@@ -199,7 +199,7 @@ def get_highcourt_cases_by_name(props):
         driver.execute_script(
             "arguments[0].click();", link)
         logger.info(f"{case_sl_no} view clicked")
-        time.sleep(3)
+        time.sleep(os.environ.get('WAIT_TIME'))
         # details behind the hyperlink
         # case details
         case_details_title = WebDriverWait(driver, 30).until(EC.visibility_of_element_located(
