@@ -10,11 +10,11 @@ def ingress():
     logger = logging.getLogger("initial")
     logger.setLevel(logging.DEBUG)
     fh = logging.FileHandler(
-        f'local/logger/callback1.log', mode='a')
+        f'local/logger/callback.log', mode='a')
     fh.setLevel(logging.DEBUG)
     logger.addHandler(fh)
     body = request.json
-    print(body["request"])
+    print(body)
     logger.info(body)
     return jsonify({"status": True, "debugMessage": "Received"})
 
