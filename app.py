@@ -35,7 +35,7 @@ sentry_sdk.init(
     traces_sample_rate=1.0
 )
 
-version = "3.0.2"
+version = "3.0.3"
 
 
 def create_driver(__location__):
@@ -93,10 +93,10 @@ def main():
     if request.args.get('method') == "advocatecasesbyname":
         body = request.json
         params = request.args
-        if body.get("highcourtId"):
+        if body.get("highCourtId"):
             if not body.get("advocateName"):
                 is_valid_request = False
-            if not body.get("highcourtId"):
+            if not body.get("highCourtId"):
                 is_valid_request = False
             if not body.get("benchCode"):
                 is_valid_request = False
@@ -119,13 +119,13 @@ def main():
         params = request.args
         if not body.get("advocateName"):
             is_valid_request = False
-        if not body.get("highcourtId"):
+        if not body.get("highCourtId"):
             is_valid_request = False
 
     if request.args.get('method') == "displayboard":
         body = request.json
         params = request.args
-        if not body.get("highcourtId"):
+        if not body.get("highCourtId"):
             is_valid_request = False
 
     if not is_valid_request:
@@ -140,7 +140,7 @@ def main():
             params = request.args
             chrome_driver = create_driver(__location__=None)  # open browser
             data = get_cause_list_data(
-                chrome_driver, body["advocateName"], body["highcourtId"])
+                chrome_driver, body["advocateName"], body["highCourtId"])
             data = {
                 "status": True,
                 "data": data,
@@ -162,7 +162,7 @@ def main():
             params = request.args
             chrome_driver = create_driver(__location__=None)  # open browser
             table_data = get_display_board(
-                chrome_driver, body["highcourtId"])
+                chrome_driver, body["highCourtId"])
             data = {
                 "status": True,
                 "data": table_data,
@@ -201,13 +201,13 @@ def main():
                 get_cases_by_name = None
                 get_no_of_cases_props = {}
                 get_cases_by_name_props = {}
-                if body.get("highcourtId"):
+                if body.get("highCourtId"):
                     get_no_of_cases = get_highcourt_no_of_cases
                     get_cases_by_name = get_highcourt_cases_by_name
                     get_no_of_cases_props = {
                         "driver": chrome_driver,
                         "advocate_name": body["advocateName"],
-                        "highcourt_id": body["highcourtId"],
+                        "highcourt_id": body["highCourtId"],
                         "bench_code": body["benchCode"],
                         "logger": logger,
                         "location": __location__
@@ -338,13 +338,13 @@ def main():
                 get_cases_by_name = None
                 get_no_of_cases_props = {}
                 get_cases_by_name_props = {}
-                if body.get("highcourtId"):
+                if body.get("highCourtId"):
                     get_no_of_cases = get_highcourt_no_of_cases
                     get_cases_by_name = get_highcourt_cases_by_name
                     get_no_of_cases_props = {
                         "driver": chrome_driver,
                         "advocate_name": body["advocateName"],
-                        "highcourt_id": body["highcourtId"],
+                        "highcourt_id": body["highCourtId"],
                         "bench_code": body["benchCode"],
                         "logger": logger,
                         "iteration": body["iteration"],
