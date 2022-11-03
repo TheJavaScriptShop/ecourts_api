@@ -199,7 +199,7 @@ def get_highcourt_cases_by_name(props):
         driver.execute_script(
             "arguments[0].click();", link)
         logger.info(f"{case_sl_no} view clicked")
-        time.sleep(int(os.environ.get('WAIT_TIME')))
+        time.sleep(5)
         # details behind the hyperlink
         # case details
         case_details_title = WebDriverWait(driver, 30).until(EC.visibility_of_element_located(
@@ -397,6 +397,5 @@ def get_highcourt_cases_by_name(props):
         "case_list": case_list,
         "case_details": case_details
     }
-    logger.info({"status": True, "data": data,
-                "total_downloaded_files": total_downloaded_files})
+    logger.info({"status": True, "data": data})
     return {"status": True, "data": data}
