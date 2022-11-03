@@ -201,8 +201,9 @@ def get_highcourt_cases_by_name(props):
         logger.info(f"{case_sl_no} view clicked")
         # details behind the hyperlink
         # case details
-        selenium_get_element_xpath(
-            driver, "//div[contains(@style,'display: none')]/div/div//label[contains(@for,'advocate_name')]")
+        if case_sl_no != 1 or case_sl_no != start + 1:
+            selenium_get_element_xpath(
+                driver, "//div[contains(@style,'display: none')]/div/div//label[contains(@for,'advocate_name')]")
         case_details_title = WebDriverWait(driver, 30).until(EC.visibility_of_element_located(
             (By.XPATH, '//table[contains(@class, "case_details_table")]/tbody/tr[1]/td[2]'))).text
         case_details_registration_no = selenium_get_text_xpath(
