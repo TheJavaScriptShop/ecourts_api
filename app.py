@@ -13,7 +13,6 @@ import cv2
 import easyocr
 import time
 import torch
-import ipdb
 import logging
 import threading
 import requests
@@ -273,7 +272,7 @@ def main():
                         try:
                             time.sleep(5)
                             requests.post(
-                                url="http://127.0.0.1:4000?method=advocatecasesbynamepagination", timeout=1, json=body)
+                                url=f"{os.environ.get('HOST')}?method=advocatecasesbynamepagination", timeout=1, json=body)
                         except:
                             end_time = datetime.datetime.now()
                             total_time = end_time - start_time
@@ -420,4 +419,4 @@ def main():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=os.environ.get('PORT'))
+    app.run(debug=True, host="0.0.0.0", port=os.environ.get('PORT'))

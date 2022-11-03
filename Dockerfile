@@ -31,7 +31,7 @@ ARG CHROME_VERSION="google-chrome-stable"
 RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
     && echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list \
     && apt-get update -qqy \
-        && apt-get -qqy install \
+    && apt-get -qqy install \
     ${CHROME_VERSION:-google-chrome-stable} \
     && rm /etc/apt/sources.list.d/google-chrome.list \
     && rm -rf /var/lib/apt/lists/* /var/cache/apt/*
@@ -49,9 +49,7 @@ RUN pip install -U selenium
 # 4. Finally, copy python code to image
 COPY . /home/site/wwwroot
 
-# 5. Install other packages in requirements.txt
-RUN cd /home/site/wwwroot && \
-    pip install -r requirements.txt
-
 WORKDIR /home/site/wwwroot
+EXPOSE 3000 80 443 22
+
 CMD ["python", "app.py"]
