@@ -35,7 +35,7 @@ sentry_sdk.init(
     traces_sample_rate=1.0
 )
 
-version = "3.0.1"
+version = "3.0.2"
 
 
 def create_driver(__location__):
@@ -248,8 +248,8 @@ def main():
                     data["number_of_cases"] = case_details["number_of_cases"]
                     end_time = datetime.datetime.now()
                     total_time = end_time - start_time
-                    logger.info({"body": body, "params": params, "start_time": start_time.isoformat(
-                    ), "time": total_time.seconds, 'version': version})
+                    logger.info(
+                        {"start_time": start_time.isoformat(), "time": total_time.seconds})
                     try:
                         requests.post(url=body["callBackUrl"], timeout=10, json={
                             "data": data, "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, 'code': '5'}})
@@ -279,8 +279,6 @@ def main():
                             end_time = datetime.datetime.now()
                             total_time = end_time - start_time
                             capture_exception(e_exception)
-                            logger.info({"body": body, "params": params, "start_time": start_time.isoformat(
-                            ), "time": total_time.seconds, 'version': version})
                             try:
                                 requests.post(url=body["callBackUrl"], timeout=10, json={
                                     "error": str(e_exception), "message": "Request Failed", "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, 'code': '7'}})
@@ -300,8 +298,6 @@ def main():
                 end_time = datetime.datetime.now()
                 total_time = end_time - start_time
                 capture_exception(e_exception)
-                logger.info({"body": body, "params": params, "start_time": start_time.isoformat(
-                ), "time": total_time.seconds, 'version': version})
                 try:
                     requests.post(url=body["callBackUrl"], timeout=10, json={
                         "error": str(e_exception), "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, 'code': '9'}})
@@ -393,8 +389,8 @@ def main():
                 chrome_driver.quit()
                 end_time = datetime.datetime.now()
                 total_time = end_time - start_time
-                logger.info({"body": body, "params": params, "start_time": start_time.isoformat(
-                ), "time": total_time.seconds, 'version': version})
+                logger.info({"start_time": start_time.isoformat(),
+                            "time": total_time.seconds})
                 try:
                     requests.post(url=body["callBackUrl"], timeout=10, json={
                         "data": cases_data, "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, 'code': '12'}})
@@ -408,8 +404,6 @@ def main():
                 end_time = datetime.datetime.now()
                 total_time = end_time - start_time
                 capture_exception(e_exception)
-                logger.info({"body": body, "params": params, "start_time": start_time.isoformat(
-                ), "time": total_time.seconds, 'version': version})
                 try:
                     requests.post(url=body["callBackUrl"], timeout=10, json={
                         "error": str(e_exception), "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, 'code': '14'}})
