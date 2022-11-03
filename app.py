@@ -273,7 +273,8 @@ def main():
                             time.sleep(5)
                             requests.post(
                                 url=f"{os.environ.get('HOST')}?method=advocatecasesbynamepagination", timeout=1, json=body)
-                        except:
+                            logger.info("request made")
+                        except Exception as e_exception:
                             end_time = datetime.datetime.now()
                             total_time = end_time - start_time
                             capture_exception(e_exception)
@@ -419,4 +420,10 @@ def main():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=os.environ.get('PORT'))
+    if os.environ.get("APP_ENV") == "local":
+        PORT = os.environ.get('PORT')
+    else:
+        PORT = 4000
+
+    port = os.environ.get('PORT')
+    app.run(debug=True, host="0.0.0.0", port=PORT)
