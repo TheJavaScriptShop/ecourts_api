@@ -25,8 +25,7 @@ from WebHandler.scrappers.display_board import get_display_board
 from WebHandler.scrappers.cause_list import get_cause_list_data
 from WebHandler.scrappers.districtcourts import get_districtcourt_no_of_cases, get_districtcourt_cases_by_name
 
-if os.environ.get("APP_ENV") == "local":
-    load_dotenv()
+load_dotenv()
 
 
 path = os.environ.get('DOWNLOAD_PATH')
@@ -36,7 +35,7 @@ sentry_sdk.init(
     traces_sample_rate=1.0
 )
 
-version = "3.0.0"
+version = "3.0.1"
 
 
 def create_driver(__location__):
@@ -273,7 +272,8 @@ def main():
                             time.sleep(5)
                             requests.post(
                                 url=f"{os.environ.get('HOST')}?method=advocatecasesbynamepagination", timeout=1, json=body)
-                        except:
+                            logger.info("request made")
+                        except Exception as e_exception:
                             end_time = datetime.datetime.now()
                             total_time = end_time - start_time
                             capture_exception(e_exception)
