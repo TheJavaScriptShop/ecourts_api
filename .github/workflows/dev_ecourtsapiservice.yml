@@ -1,67 +1,67 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy container app to Azure Web App - ecourtsapiservice
+# name: Build and deploy container app to Azure Web App - ecourtsapiservice
 
-on:
-  push:
-    branches:
-      - dev
-  workflow_dispatch:
+# on:
+#   push:
+#     branches:
+#       - dev
+#   workflow_dispatch:
 
-jobs:
-  build:
-    runs-on: 'ubuntu-latest'
+# jobs:
+#   build:
+#     runs-on: 'ubuntu-latest'
 
-    steps:
-    - uses: actions/checkout@v2
+#     steps:
+#     - uses: actions/checkout@v2
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
+#     - name: Set up Docker Buildx
+#       uses: docker/setup-buildx-action@v1
 
-    - name: Log in to registry
-      uses: docker/login-action@v1
-      with:
-        registry: https://ecourtsscrapper.azurecr.io/
-        username: ${{ secrets.AzureAppService_ContainerUsername_adfc802c8bda4f6397a80bc5f2fb563b }}
-        password: ${{ secrets.AzureAppService_ContainerPassword_f80cc35a36cf489fb0af628f0524a02a }}
+#     - name: Log in to registry
+#       uses: docker/login-action@v1
+#       with:
+#         registry: https://ecourtsscrapper.azurecr.io/
+#         username: ${{ secrets.AzureAppService_ContainerUsername_adfc802c8bda4f6397a80bc5f2fb563b }}
+#         password: ${{ secrets.AzureAppService_ContainerPassword_f80cc35a36cf489fb0af628f0524a02a }}
 
-    - name: Build and push container image to registry
-      uses: docker/build-push-action@v2
-      with:
-        push: true
-        tags: ecourtsscrapper.azurecr.io/ecourtsapidockerimage:dev
-        file: ./Dockerfile
+#     - name: Build and push container image to registry
+#       uses: docker/build-push-action@v2
+#       with:
+#         push: true
+#         tags: ecourtsscrapper.azurecr.io/ecourtsapidockerimage:dev
+#         file: ./Dockerfile
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    environment:
-      name: 'production'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+#   deploy:
+#     runs-on: ubuntu-latest
+#     needs: build
+#     environment:
+#       name: 'production'
+#       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
-    steps:
-    - name: Deploy to Azure Web App
-      id: deploy-to-webapp
-      uses: azure/webapps-deploy@v2
-      with:
-        app-name: 'ecourtsapiservice'
-        slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_7d82e7ba6c0f4e16a33b730881b0d75f }}
-        images: 'ecourtsscrapper.azurecr.io/ecourtsapidockerimage:dev'
-    - name: Install Azure cli
-      run: |
-        sudo apt-get install ca-certificates curl apt-transport-https lsb-release gnupg
-        curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/microsoft.gpg > /dev/null
-        AZ_REPO=$(lsb_release -cs)
-        echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" | sudo tee /etc/apt/sources.list.d/azure-cli.list
-        sudo apt-get update
-        sudo apt-get install azure-cli
-    - uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-    - uses: azure/CLI@v1
-      with:
-        creds: '{"clientId":"${{ secrets.CLIENT_ID }}","clientSecret":"${{ secrets.CLIENT_SECRET }}","subscriptionId":"${{ secrets.SUBSCRIPTION_ID }}","tenantId":"${{ secrets.TENANT_ID }}"}'
-        inlineScript: |
-          az functionapp restart --resource-group ecourts_api --name ecourtsapiservice-dev
+#     steps:
+#     - name: Deploy to Azure Web App
+#       id: deploy-to-webapp
+#       uses: azure/webapps-deploy@v2
+#       with:
+#         app-name: 'ecourtsapiservice'
+#         slot-name: 'production'
+#         publish-profile: ${{ secrets.AzureAppService_PublishProfile_7d82e7ba6c0f4e16a33b730881b0d75f }}
+#         images: 'ecourtsscrapper.azurecr.io/ecourtsapidockerimage:dev'
+#     - name: Install Azure cli
+#       run: |
+#         sudo apt-get install ca-certificates curl apt-transport-https lsb-release gnupg
+#         curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/microsoft.gpg > /dev/null
+#         AZ_REPO=$(lsb_release -cs)
+#         echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" | sudo tee /etc/apt/sources.list.d/azure-cli.list
+#         sudo apt-get update
+#         sudo apt-get install azure-cli
+#     - uses: azure/login@v1
+#       with:
+#         creds: ${{ secrets.AZURE_CREDENTIALS }}
+#     - uses: azure/CLI@v1
+#       with:
+#         creds: '{"clientId":"${{ secrets.CLIENT_ID }}","clientSecret":"${{ secrets.CLIENT_SECRET }}","subscriptionId":"${{ secrets.SUBSCRIPTION_ID }}","tenantId":"${{ secrets.TENANT_ID }}"}'
+#         inlineScript: |
+#           az functionapp restart --resource-group ecourts_api --name ecourtsapiservice-dev
