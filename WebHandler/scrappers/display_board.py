@@ -22,7 +22,6 @@ def get_display_board(driver, highCourtId):
         if not url:
             return {"status": False, "message": "Invalid request"}
         driver.get(url)
-        time.sleep(3)
         try:
             data = get_display_board_table_data_as_list(
                 driver, "//table[@id='table1']")
