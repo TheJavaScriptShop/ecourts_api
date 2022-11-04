@@ -147,25 +147,26 @@ def get_highcourt_cases_by_name(props):
     logger = props["logger"]
 
     def wait_for_download_and_rename(blob_path):
-        try:
-            blob_service_client = BlobServiceClient.from_connection_string(
-                os.environ.get('BLOB_STORAGE_CONTAINER'))
-            blob_client = blob_service_client.get_blob_client(
-                container="ecourtsapiservicebucketdev", blob=blob_path)
-            while True:
-                if os.path.isfile(f"{__location__}/display_pdf.pdf"):
-                    with open(os.path.join(__location__, "display_pdf.pdf"), "rb") as data:
-                        blob_client.upload_blob(data, overwrite=True)
-                    break
-
-            if os.path.isfile(f"{__location__}/display_pdf.pdf"):
+        if os.path.isfile(f"{__location__}/display_pdf.pdf"):
+            try:
+                blob_service_client = BlobServiceClient.from_connection_string(
+                    os.environ.get('BLOB_STORAGE_CONTAINER'))
+                blob_client = blob_service_client.get_blob_client(
+                    container="ecourtsapiservicebucketdev", blob=blob_path)
+                while True:
+                    if os.path.isfile(f"{__location__}/display_pdf.pdf"):
+                        with open(os.path.join(__location__, "display_pdf.pdf"), "rb") as data:
+                            blob_client.upload_blob(data, overwrite=True)
+                        break
                 os.remove(f"{__location__}/display_pdf.pdf")
-        except Exception as e:
-            logger.error(str(e), exc_info=True)
-            tb = traceback.print_exc()
-            capture_exception(e)
-            return {'status': False, 'error': str(e), "traceback": tb, "debugMessage": "Failed to upload file to blob", "code": 5}
-
+                return {"upload": True}
+            except Exception as e:
+                logger.error(str(e), exc_info=True)
+                tb = traceback.print_exc()
+                capture_exception(e)
+                return {'status': False, 'error': str(e), "traceback": tb, "debugMessage": "Failed to upload file to blob", "code": 5}
+        else:
+            return {"upload": False}
     # case details
 
     table_element = selenium_get_element_id(driver, 'dispTable')
@@ -315,7 +316,6 @@ def get_highcourt_cases_by_name(props):
                 no_of_orders = len(case_orders_data) - 1
                 order_no = 1
                 for n in range(0, no_of_orders):
-                    original_window = driver.current_window_handle
                     pdf_xpath = f'//table[@class="order_table"]/tbody/tr[{(n+2)}]/td[5]/a'
                     pdf_element = selenium_get_element_xpath(
                         driver, pdf_xpath)
@@ -325,27 +325,17 @@ def get_highcourt_cases_by_name(props):
                     blob_path_container = ""
                     time.sleep(int(os.environ.get('WAIT_TIME')))
 
+                    logger.info('downloading file')
+                    case_no = case_details_title.replace("/", "-")
                     try:
-                        for window_handle in driver.window_handles:
-                            if window_handle != original_window:
-                                driver.switch_to.window(window_handle)
-                                break
-                        text = selenium_get_text_xpath(
-                            driver, '/html/body/h2/table/tbody/tr/td')
-                        logger.info({"text": text})
-                        blob_path_container = "File not available"
-                        driver.close()
-                        driver.switch_to.window(original_window)
-                    except:
-                        logger.info('downloading file')
-                        case_no = case_details_title.replace("/", "-")
-                        try:
-                            blob_path_container = f"{advoc_name}/{case_no}/{date.today().month}/{date.today().day}/orders/{order_no}.pdf"
-                            wait_for_download_and_rename(
-                                blob_path_container)
-                        except Exception as e:
-                            traceback.print_exc()
-                            logger.info({'err': str(e), 'case_no': case_sl_no})
+                        blob_path_container = f"{advoc_name}/{case_no}/{date.today().month}/{date.today().day}/orders/{order_no}.pdf"
+                        status = wait_for_download_and_rename(
+                            blob_path_container)
+                    except Exception as e:
+                        traceback.print_exc()
+                        logger.info({'err': str(e), 'case_no': case_sl_no})
+                    if status["upload"] == False:
+                        blob_path_container = "File not Available"
                     order = case_orders_data[order_no]
                     order["file"] = blob_path_container
                     case_orders_data[order_no] = order
