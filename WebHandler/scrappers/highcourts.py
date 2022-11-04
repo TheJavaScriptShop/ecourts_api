@@ -201,9 +201,7 @@ def get_highcourt_cases_by_name(props):
         logger.info(f"{case_sl_no} view clicked")
         # details behind the hyperlink
         # case details
-        if case_sl_no != 1 or case_sl_no != start + 1:
-            selenium_get_element_xpath(
-                driver, "//div[contains(@style,'display: none')]/div/div//label[contains(@for,'advocate_name')]")
+        time.sleep(8)
         case_details_title = WebDriverWait(driver, 30).until(EC.visibility_of_element_located(
             (By.XPATH, '//table[contains(@class, "case_details_table")]/tbody/tr[1]/td[2]'))).text
         case_details_registration_no = selenium_get_text_xpath(
@@ -317,25 +315,42 @@ def get_highcourt_cases_by_name(props):
                 no_of_orders = len(case_orders_data) - 1
                 order_no = 1
                 for n in range(0, no_of_orders):
+                    original_window = driver.current_window_handle
                     pdf_xpath = f'//table[@class="order_table"]/tbody/tr[{(n+2)}]/td[5]/a'
                     pdf_element = selenium_get_element_xpath(
                         driver, pdf_xpath)
                     driver.execute_script(
                         "arguments[0].click();", pdf_element)
                     logger.info(f'{case_sl_no} clicked')
-                    case_no = case_details_title.replace("/", "-")
+                    blob_path_container = ""
+                    time.sleep(int(os.environ.get('WAIT_TIME')))
+
                     try:
-                        blob_path_container = f"{advoc_name}/{case_no}/{date.today().month}/{date.today().day}/orders/{order_no}.pdf"
-                        wait_for_download_and_rename(
-                            blob_path_container)
-                        order = case_orders_data[order_no]
-                        order["file"] = blob_path_container
-                        case_orders_data[order_no] = order
-                        logger.info(f'downloaded {order_no}')
-                        order_no = order_no+1
-                    except Exception as e:
-                        traceback.print_exc()
-                        logger.info({'err': str(e), 'case_no': case_sl_no})
+                        for window_handle in driver.window_handles:
+                            if window_handle != original_window:
+                                driver.switch_to.window(window_handle)
+                                break
+                        text = selenium_get_text_xpath(
+                            driver, '/html/body/h2/table/tbody/tr/td')
+                        logger.info({"text": text})
+                        blob_path_container = "File not available"
+                        driver.close()
+                        driver.switch_to.window(original_window)
+                    except:
+                        logger.info('downloading file')
+                        case_no = case_details_title.replace("/", "-")
+                        try:
+                            blob_path_container = f"{advoc_name}/{case_no}/{date.today().month}/{date.today().day}/orders/{order_no}.pdf"
+                            wait_for_download_and_rename(
+                                blob_path_container)
+                        except Exception as e:
+                            traceback.print_exc()
+                            logger.info({'err': str(e), 'case_no': case_sl_no})
+                    order = case_orders_data[order_no]
+                    order["file"] = blob_path_container
+                    case_orders_data[order_no] = order
+                    logger.info(f'downloaded {order_no}')
+                    order_no = order_no+1
                 case_orders = {'status': True, 'data': case_orders_data,
                                'number_of_downloaded_files': order_no - 1}
                 total_downloaded_files = total_downloaded_files + 1

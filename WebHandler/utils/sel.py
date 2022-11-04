@@ -77,30 +77,33 @@ def get_table_data_as_list(driver, xpath):
 def get_display_board_table_data_as_list(driver, xpath):
     rows = []
     table = driver.find_element(by="xpath", value=xpath)
-    for row in table.find_elements(by="xpath", value='.//tr'):
-        if row.find_elements(by="xpath", value=".//td"):
+    driver.implicitly_wait(5)
+    for head in table.find_elements(by="xpath", value='.//thead'):
+        if head.find_elements(by="xpath", value=".//th"):
             rows.append(
-                [td.text for td in row.find_elements(by="xpath", value=".//td")[0:3]])
-            rows.append(
-                [td.text for td in row.find_elements(by="xpath", value=".//td")[3:6]])
-            rows.append(
-                [td.text for td in row.find_elements(by="xpath", value=".//td")[6:9]])
-            rows.append(
-                [td.text for td in row.find_elements(by="xpath", value=".//td")[9:12]])
-        if row.find_elements(by="xpath", value=".//th"):
-            rows.append(
-                [th.text for th in row.find_elements(by="xpath", value=".//th")[0:3]])
+                [th.text for th in head.find_elements(by="xpath", value=".//th")[0:3]])
 
+    for body in driver.find_elements(by="xpath", value="//table[@id='table1']/tbody/tr[@bgcolor='#e4e6b7']"):
+        if body.find_elements(by="xpath", value=".//td"):
+            rows.append(
+                [td.text for td in body.find_elements(by="xpath", value=".//td")[0:3]])
+            rows.append(
+                [td.text for td in body.find_elements(by="xpath", value=".//td")[3:6]])
+            rows.append(
+                [td.text for td in body.find_elements(by="xpath", value=".//td")[6:9]])
+            rows.append(
+                [td.text for td in body.find_elements(by="xpath", value=".//td")[9:12]])
+    driver.implicitly_wait(30)
     return rows
 
 
 def get_cause_list_table_data_as_list(driver, xpath):
     table_data = []
     table = driver.find_element(by="xpath", value=xpath)
+    driver.implicitly_wait(0)
     i = 0
     rows = []
     for tbody in table.find_elements(by="xpath", value='.//tbody'):
-
         for row in tbody.find_elements(by="xpath", value='.//tr'):
             if row.find_elements(by="xpath", value=".//td"):
                 rows.append(
@@ -117,5 +120,5 @@ def get_cause_list_table_data_as_list(driver, xpath):
             table_data.append(rows)
             rows = []
         i = i+1
-
+    driver.implicitly_wait(30)
     return table_data
