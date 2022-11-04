@@ -100,10 +100,10 @@ def get_display_board_table_data_as_list(driver, xpath):
 def get_cause_list_table_data_as_list(driver, xpath):
     table_data = []
     table = driver.find_element(by="xpath", value=xpath)
+    driver.implicitly_wait(0)
     i = 0
     rows = []
     for tbody in table.find_elements(by="xpath", value='.//tbody'):
-
         for row in tbody.find_elements(by="xpath", value='.//tr'):
             if row.find_elements(by="xpath", value=".//td"):
                 rows.append(
@@ -120,5 +120,5 @@ def get_cause_list_table_data_as_list(driver, xpath):
             table_data.append(rows)
             rows = []
         i = i+1
-
+    driver.implicitly_wait(30)
     return table_data
