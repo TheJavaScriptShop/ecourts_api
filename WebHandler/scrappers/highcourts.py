@@ -52,7 +52,14 @@ def get_highcourt_no_of_cases(props):
     try:
         while is_failed_with_captach:
             counter_retry += 1
-            driver.get('https://hcservices.ecourts.gov.in/hcservices/main.php')
+            url_trail = 1
+            while url_trail <= 10:
+                try:
+                    driver.get(
+                        'https://hcservices.ecourts.gov.in/hcservices/main.php')
+                    break
+                except:
+                    url_trail = url_trail + 1
             selenium_click_id(driver, 'leftPaneMenuCS')
             logger.info("Successfully clicked case status")
             try:
