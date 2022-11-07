@@ -51,16 +51,16 @@ def get_districtcourt_no_of_cases(props):
         img_path = f"{name}-image.png"
 
     counter_retry = 0
-    url_trail = 1
-    while url_trail < 11:
+    url_trial = 1
+    while url_trial < 11:
         try:
             driver.get('https://services.ecourts.gov.in/ecourtindia_v6/#')
             break
         except Exception as e_exception:
-            if url_trail >= 10:
+            if url_trial >= 10:
                 capture_exception(e_exception)
-                return {'status': False, 'data': {}, "debugMessage": "Maximun retries reached", "code": 0}
-            url_trail = url_trail + 1
+                return {'status': False, 'data': {}, "debugMessage": "Maximun retries reached", "code": 1}
+            url_trial = url_trial + 1
     try:
         while is_failed_with_captach:
             counter_retry += 1
@@ -195,8 +195,8 @@ def get_districtcourt_cases_by_name(props):
 
         # details behind the hyperlink
         # case details
-        case_trail = 1
-        while case_trail <= 10:
+        case_trial = 1
+        while case_trial <= 10:
             time.sleep(5)
             registration_number = selenium_get_text_xpath(
                 driver, '//table[contains(@class, "case_details_table")]/tbody/tr[3]/td[2]')
@@ -304,7 +304,7 @@ def get_districtcourt_cases_by_name(props):
                 driver.implicitly_wait(30)
                 break
             else:
-                case_trail = case_trail + 1
+                case_trial = case_trial + 1
 
         logger.info({'case_details': case_details_list, "case_no": case_sl_no})
 

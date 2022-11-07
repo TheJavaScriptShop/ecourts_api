@@ -52,17 +52,17 @@ def get_highcourt_no_of_cases(props):
     try:
         while is_failed_with_captach:
             counter_retry += 1
-            url_trail = 1
-            while url_trail <= 11:
+            url_trial = 1
+            while url_trial <= 11:
                 try:
                     driver.get(
                         'https://hcservices.ecourts.gov.in/hcservices/main.php')
                     break
                 except Exception as e_exception:
-                    if url_trail >= 10:
+                    if url_trial >= 10:
                         capture_exception(e_exception)
-                        return {'status': False, 'data': {}, "debugMessage": "Maximun retries reached", "code": 0}
-                    url_trail = url_trail + 1
+                        return {'status': False, 'data': {}, "debugMessage": "Maximun retries reached", "code": 1}
+                    url_trial = url_trial + 1
             selenium_click_id(driver, 'leftPaneMenuCS')
             logger.info("Successfully clicked case status")
             try:
@@ -121,7 +121,7 @@ def get_highcourt_no_of_cases(props):
                         fetched_data = True
                         is_failed_with_captach = False
                         capture_exception(e_exception)
-                        return {'status': False, 'data': {}, "debugMessage": "No data found", "code": 1}
+                        return {'status': False, 'data': {}, "debugMessage": "No data found", "code": 2}
 
                 except Exception as e:
                     pass
@@ -132,7 +132,7 @@ def get_highcourt_no_of_cases(props):
         capture_exception(e_exception)
         if counter_retry > 10:
             is_failed_with_captach = False
-            return {'status': False, 'data': {}, "debugMessage": "Maximun retries reached", "code": 2}
+            return {'status': False, 'data': {}, "debugMessage": "Maximun retries reached", "code": 3}
 
     if not fetched_data:
         number_of_establishments_in_court_complex = selenium_get_text_xpath(
@@ -174,7 +174,7 @@ def get_highcourt_cases_by_name(props):
                 logger.error(str(e), exc_info=True)
                 tb = traceback.print_exc()
                 capture_exception(e)
-                return {'status': False, 'error': str(e), "traceback": tb, "debugMessage": "Failed to upload file to blob", "code": 5}
+                return {'status': False, 'error': str(e), "traceback": tb, "debugMessage": "Failed to upload file to blob", "code": 4}
         else:
             return {"upload": False}
     # case details
@@ -214,8 +214,8 @@ def get_highcourt_cases_by_name(props):
         logger.info(f"{case_sl_no} view clicked")
         # details behind the hyperlink
         # case details
-        case_trail = 1
-        while case_trail < 11:
+        case_trial = 1
+        while case_trial < 11:
             time.sleep(5)
             case_details_registration_no = selenium_get_text_xpath(
                 driver, '//*[@id="caseBusinessDiv4"]/div/table/tbody/tr[2]/td[2]/label')
@@ -417,7 +417,7 @@ def get_highcourt_cases_by_name(props):
                 driver.implicitly_wait(30)  # set default wait time
                 break
             else:
-                case_trail = case_trail + 1
+                case_trial = case_trial + 1
 
         logger.info({'case_details': case_details, "case_no": case_sl_no})
         back_button = selenium_get_element_xpath(
