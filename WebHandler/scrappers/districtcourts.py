@@ -301,7 +301,7 @@ def get_districtcourt_cases_by_name(props):
                     "history": case_history,
                 }
                 case_details_list.append(details)
-
+                driver.implicitly_wait(30)
                 break
             else:
                 case_trail = case_trail + 1
