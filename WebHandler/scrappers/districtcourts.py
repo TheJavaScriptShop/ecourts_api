@@ -203,7 +203,7 @@ def get_districtcourt_cases_by_name(props):
             reg_no = "".join(
                 ch for ch in registration_number if ch.isalnum())
             case_name = "".join(ch for ch in case_name if ch.isalnum())
-            if (case_name == reg_no):
+            if (reg_no in case_name):
                 case_details_element = selenium_get_element_xpath(
                     driver, '//table[contains(@class, "case_details_table")]')
                 case_type = selenium_get_text_xpath(
