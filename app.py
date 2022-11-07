@@ -35,7 +35,7 @@ sentry_sdk.init(
     traces_sample_rate=1.0
 )
 
-version = "3.0.7"
+version = "3.0.8"
 
 
 def create_driver(__location__):
@@ -400,7 +400,6 @@ def main():
                         {"err_msg": "callback request failed", 'version': version, 'code': '13'})
             except Exception as e_exception:
                 logger.info(str(e_exception))
-                capture_exception(e_exception)
                 end_time = datetime.datetime.now()
                 total_time = end_time - start_time
                 capture_exception(e_exception)
