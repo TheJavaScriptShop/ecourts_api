@@ -209,9 +209,9 @@ def get_highcourt_cases_by_name(props):
         logger.info(f"{case_sl_no} view clicked")
         # details behind the hyperlink
         # case details
-        time.sleep(8)
-        case_details_title = WebDriverWait(driver, 30).until(EC.visibility_of_element_located(
-            (By.XPATH, '//table[contains(@class, "case_details_table")]/tbody/tr[1]/td[2]'))).text
+        time.sleep(int(os.environ.get('WAIT_TIME')))
+        case_details_title = selenium_get_text_xpath(
+            driver, '//table[contains(@class, "case_details_table")]/tbody/tr[1]/td[2]')
         case_details_registration_no = selenium_get_text_xpath(
             driver, '//*[@id="caseBusinessDiv4"]/div/table/tbody/tr[2]/td[2]/label')
         case_details_cnr_no = selenium_get_text_xpath(
@@ -405,6 +405,13 @@ def get_highcourt_cases_by_name(props):
             driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[48]/input')
         driver.execute_script(
             "arguments[0].click();", back_button)
+        # Remove element in this page
+        case_element = selenium_get_element_xpath(
+            driver, "//div[@id='caseBusinessDiv4']")
+        driver.execute_script("""
+            var element = arguments[0];
+            element.parentNode.removeChild(element);
+            """, case_element)
         case_sl_no = case_sl_no + 1
 
     data = {
