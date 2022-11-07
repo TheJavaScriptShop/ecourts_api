@@ -57,7 +57,7 @@ def get_districtcourt_no_of_cases(props):
             driver.get('https://services.ecourts.gov.in/ecourtindia_v6/#')
             break
         except Exception as e_exception:
-            if url_trail >= 11:
+            if url_trail >= 10:
                 capture_exception(e_exception)
                 return {'status': False, 'data': {}, "debugMessage": "Maximun retries reached", "code": 0}
             url_trail = url_trail + 1
