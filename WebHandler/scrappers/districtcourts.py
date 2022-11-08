@@ -88,21 +88,21 @@ def get_districtcourt_no_of_cases(props):
                 selenium_get_element_id(driver, 'sess_state_code'))
             state_select.select_by_value(state_id)
             logger.info("Values selected")
-            time.sleep(int(os.environ.get('WAIT_TIME')))
+            time.sleep(int(os.environ.get('MIN_WAIT_TIME')))
             district_select = Select(selenium_get_element_id(
                 driver, 'sess_dist_code'))
             district_select.select_by_value("1")
             district_select.select_by_value(district_id)
             logger.info("district code selected")
-            time.sleep(int(os.environ.get('WAIT_TIME')))
+            time.sleep(int(os.environ.get('MIN_WAIT_TIME')))
             court_select = Select(selenium_get_element_id(
                 driver, 'court_complex_code'))
             court_select.select_by_value(court_complex_id)
             logger.info("court code selected")
-            time.sleep(int(os.environ.get('WAIT_TIME')))
+            time.sleep(int(os.environ.get('MAX_WAIT_TIME')))
             selenium_click_id(driver, 'advname-tabMenu')
             logger.info("hypelink clicked")
-            time.sleep(int(os.environ.get('WAIT_TIME')))
+            time.sleep(int(os.environ.get('MIN_WAIT_TIME')))
             selenium_click_xpath(driver, '//input[@id="advocate_name"]')
             selenium_send_keys_xpath(
                 driver, '//input[@id="advocate_name"]', advoc_name)
@@ -140,19 +140,25 @@ def get_districtcourt_no_of_cases(props):
         if counter_retry > 10:
             return {'status': False, 'data': {}, "debugMessage": "Maximun retries reached", "code": 2}
 
-    courts_info = []
-    for div in driver.find_elements(by="xpath", value='.//div[@id="showList2"]/div')[1:]:
-        courts_info.append(selenium_get_text_xpath(div, './/a'))
-    time.sleep(int(os.environ.get('WAIT_TIME')))
-    number_of_establishments_in_court_complex = selenium_get_text_xpath(
-        driver, '//*[@id="showList2"]/div[1]/h3')
-    number_of_cases = selenium_get_text_xpath(
-        driver, '//*[@id="showList2"]/div[1]/h4')
-    data = {
-        "number_of_establishments_in_court_complex": number_of_establishments_in_court_complex,
-        "number_of_cases": number_of_cases,
-        "courts_info": courts_info
-    }
+    while True:
+        try:
+            time.sleep(int(os.environ.get('MIN_WAIT_TIME')))
+            courts_info = []
+            for div in driver.find_elements(by="xpath", value='.//div[@id="showList2"]/div')[1:]:
+                courts_info.append(selenium_get_text_xpath(div, './/a'))
+            number_of_establishments_in_court_complex = selenium_get_text_xpath(
+                driver, '//*[@id="showList2"]/div[1]/h3')
+            number_of_cases = selenium_get_text_xpath(
+                driver, '//*[@id="showList2"]/div[1]/h4')
+            data = {
+                "number_of_establishments_in_court_complex": number_of_establishments_in_court_complex,
+                "number_of_cases": number_of_cases,
+                "courts_info": courts_info
+            }
+            break
+        except:
+            pass
+
     logger.info(data)
     return data
 
@@ -187,16 +193,25 @@ def get_districtcourt_cases_by_name(props):
         case_sl_no = start + 1
     for case in cases:
         logger.info(f'case no: {case_sl_no}')
-        time.sleep(int(os.environ.get('WAIT_TIME')))
+        time.sleep(int(os.environ.get('MIN_WAIT_TIME')))
         driver.execute_script(
             "arguments[0].click();", case)
         logger.info(f"{case_sl_no} view clicked")
-
+        try:
+            if "THERE IS AN ERROR" in selenium_get_text_xpath(driver, '/html/body/div[9]/div/div/div[2]/div/div[1]'):
+                selenium_click_xpath(
+                    driver, '/html/body/div[9]/div/div/div[1]/button')
+            case_details_list.append(
+                {"status": False, "message": "THERE IS AN ERROR"})
+            case_sl_no = case_sl_no + 1
+            continue
+        except:
+            pass
         # details behind the hyperlink
         # case details
         while True:
             try:
-                time.sleep(int(os.environ.get('WAIT_TIME')))
+                time.sleep(int(os.environ.get('MIN_WAIT_TIME')))
                 case_details_element = selenium_get_element_xpath(
                     driver, '//table[contains(@class, "case_details_table")]')
                 break
@@ -306,7 +321,7 @@ def get_districtcourt_cases_by_name(props):
             driver, '//div[@id="CSAdvName"]')
         driver.execute_script(
             "arguments[0].innerHTML = '';", case_element)
-        time.sleep(int(os.environ.get('WAIT_TIME')))
+        time.sleep(int(os.environ.get('MIN_WAIT_TIME')))
         back_button_element = selenium_get_element_xpath(
             driver, '//button[@id="main_back_AdvName"]')
         driver.execute_script(
