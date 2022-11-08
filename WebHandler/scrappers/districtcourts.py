@@ -137,8 +137,9 @@ def get_districtcourt_no_of_cases(props):
 
     except Exception as e_exception:
         capture_exception(e_exception)
+        tb = traceback.TracebackException.from_exception(e_exception)
         if counter_retry > 10:
-            return {'status': False, 'data': {}, "debugMessage": "Maximun retries reached", "code": 2}
+            return {'status': False, 'data': {}, "message": ''.join(tb.format()), "debugMessage": "Maximun retries reached", "code": 2}
 
     while True:
         try:
