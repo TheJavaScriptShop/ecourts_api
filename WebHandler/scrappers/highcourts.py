@@ -61,7 +61,9 @@ def get_highcourt_no_of_cases(props):
                 except Exception as e_exception:
                     if url_trial >= 10:
                         capture_exception(e_exception)
-                        return {'status': False, 'data': {}, "debugMessage": "Maximun retries reached", "code": 1}
+                        tb = traceback.TracebackException.from_exception(
+                            e_exception)
+                        return {'status': False, "message": ''.join(tb.format()), 'data': {}, "debugMessage": "Maximun retries reached", "code": 1}
                     url_trial = url_trial + 1
             selenium_click_id(driver, 'leftPaneMenuCS')
             logger.info("Successfully clicked case status")
@@ -82,12 +84,13 @@ def get_highcourt_no_of_cases(props):
 
             court_select.select_by_value(bench_code)
             logger.info("court code selected")
+            time.sleep(int(os.environ.get('MAX_WAIT_TIME')))
             selenium_click_id(driver, 'CSAdvName')
             logger.info("hypelink clicked")
             selenium_send_keys_xpath(
                 driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[14]/div[2]/div[2]/input', advoc_name)
             logger.info("names sent")
-            time.sleep(int(os.environ.get('WAIT_TIME')))
+            time.sleep(int(os.environ.get('MIN_WAIT_TIME')))
             captcha_xpath = '//*[@id="captcha_image"]'
             get_captcha(driver, img_path, captcha_xpath)
             text = get_text_from_captcha(
@@ -130,22 +133,29 @@ def get_highcourt_no_of_cases(props):
     except Exception as e_exception:
         is_failed_with_captach = True
         capture_exception(e_exception)
+        tb = traceback.TracebackException.from_exception(e_exception)
         if counter_retry > 10:
             is_failed_with_captach = False
-            return {'status': False, 'data': {}, "debugMessage": "Maximun retries reached", "code": 3}
+            return {'status': False, "message": ''.join(tb.format()), 'data': {}, "debugMessage": "Maximun retries reached", "code": 3}
 
-    if not fetched_data:
-        number_of_establishments_in_court_complex = selenium_get_text_xpath(
-            driver, '//*[@id="showList2"]/div[1]/h3')
-        logger.info(number_of_establishments_in_court_complex)
-        number_of_cases = selenium_get_text_xpath(
-            driver, '//*[@id="showList2"]/div[1]/h4')
-        logger.info(number_of_cases)
-        data = {
-            "number_of_establishments_in_court_complex": number_of_establishments_in_court_complex,
-            "number_of_cases": number_of_cases,
-        }
-        return data
+    while True:
+        try:
+            time.sleep(int(os.environ.get('MIN_WAIT_TIME')))
+            if not fetched_data:
+                number_of_establishments_in_court_complex = selenium_get_text_xpath(
+                    driver, '//*[@id="showList2"]/div[1]/h3')
+                logger.info(number_of_establishments_in_court_complex)
+                number_of_cases = selenium_get_text_xpath(
+                    driver, '//*[@id="showList2"]/div[1]/h4')
+                logger.info(number_of_cases)
+                data = {
+                    "number_of_establishments_in_court_complex": number_of_establishments_in_court_complex,
+                    "number_of_cases": number_of_cases,
+                }
+                return data
+            break
+        except:
+            pass
 
 
 def get_highcourt_cases_by_name(props):
@@ -165,7 +175,7 @@ def get_highcourt_cases_by_name(props):
             file_exists = True
             trial = 1
             while file_exists:
-                time.sleep(int(os.environ.get('WAIT_TIME')))
+                time.sleep(int(os.environ.get('MIN_WAIT_TIME')))
                 if os.path.isfile(f"{__location__}/display_pdf.pdf"):
                     with open(os.path.join(__location__, "display_pdf.pdf"), "rb") as data:
                         blob_client.upload_blob(data, overwrite=True)
@@ -178,9 +188,9 @@ def get_highcourt_cases_by_name(props):
 
         except Exception as e:
             logger.error(str(e), exc_info=True)
-            tb = traceback.print_exc()
+            tb = traceback.TracebackException.from_exception(e_exception)
             capture_exception(e)
-            return {'status': False, 'error': str(e), "traceback": tb, "debugMessage": "Failed to upload file to blob", "code": 4}
+            return {'status': False, 'error': str(e), "traceback": ''.join(tb.format()), "debugMessage": "Failed to upload file to blob", "code": 4}
 
     # case details
 
@@ -216,9 +226,14 @@ def get_highcourt_cases_by_name(props):
         logger.info(f"{case_sl_no} view clicked")
         # details behind the hyperlink
         # case details
-        time.sleep(int(os.environ.get('WAIT_TIME')))
-        case_details_title = selenium_get_text_xpath(
-            driver, '//table[contains(@class, "case_details_table")]/tbody/tr[1]/td[2]')
+        while True:
+            try:
+                time.sleep(int(os.environ.get('MIN_WAIT_TIME')))
+                case_details_title = selenium_get_text_xpath(
+                    driver, '//table[contains(@class, "case_details_table")]/tbody/tr[1]/td[2]')
+                break
+            except:
+                pass
         case_details_cnr_no = selenium_get_text_xpath(
             driver, '//*[@id="caseBusinessDiv4"]/div/table/tbody/tr[3]/td[2]/strong')
         case_details_filing_date = selenium_get_text_xpath(
@@ -340,7 +355,7 @@ def get_highcourt_cases_by_name(props):
                         "arguments[0].click();", pdf_element)
                     logger.info(f'{case_sl_no} clicked')
                     blob_path_container = ""
-                    time.sleep(int(os.environ.get('WAIT_TIME')))
+                    time.sleep(int(os.environ.get('MIN_WAIT_TIME')))
 
                     logger.info('downloading file')
                     case_no = case_details_title.replace("/", "-")
@@ -416,7 +431,7 @@ def get_highcourt_cases_by_name(props):
             driver, '//div[@id="caseHistoryDiv"]')
         driver.execute_script(
             "arguments[0].innerHTML = '';", case_element)
-        time.sleep(int(os.environ.get('WAIT_TIME')))
+        time.sleep(int(os.environ.get('MIN_WAIT_TIME')))
         back_button = selenium_get_element_xpath(
             driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[48]/input')
         driver.execute_script(
