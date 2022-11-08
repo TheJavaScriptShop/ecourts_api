@@ -103,7 +103,7 @@ def get_districtcourt_no_of_cases(props):
             selenium_click_id(driver, 'advname-tabMenu')
             logger.info("hypelink clicked")
             time.sleep(int(os.environ.get('WAIT_TIME')))
-
+            selenium_click_xpath(driver, '//input[@id="advocate_name"]')
             selenium_send_keys_xpath(
                 driver, '//input[@id="advocate_name"]', advoc_name)
             logger.info("names sent")
@@ -143,6 +143,7 @@ def get_districtcourt_no_of_cases(props):
     courts_info = []
     for div in driver.find_elements(by="xpath", value='.//div[@id="showList2"]/div')[1:]:
         courts_info.append(selenium_get_text_xpath(div, './/a'))
+    time.sleep(int(os.environ.get('WAIT_TIME')))
     number_of_establishments_in_court_complex = selenium_get_text_xpath(
         driver, '//*[@id="showList2"]/div[1]/h3')
     number_of_cases = selenium_get_text_xpath(
@@ -180,16 +181,15 @@ def get_districtcourt_cases_by_name(props):
     case_details_list = []
     case_sl_no = 1
     cases = driver.find_elements(
-        by="xpath", value='/html/body/div[1]/div/main/div[2]/div/div/div[4]/div[1]/form/div[4]/table/tbody/tr')[1:]
+        by="xpath", value='/html/body/div[1]/div/main/div[2]/div/div/div[4]/div[1]/form/div[4]/table/tbody/tr/td[5]/a')
     if start is not None and stop is not None:
         cases = cases[start:stop]
         case_sl_no = start + 1
     for case in cases:
         logger.info(f'case no: {case_sl_no}')
         time.sleep(int(os.environ.get('WAIT_TIME')))
-        link = selenium_get_element_xpath(case, ".//td[5]/a")
         driver.execute_script(
-            "arguments[0].click();", link)
+            "arguments[0].click();", case)
         logger.info(f"{case_sl_no} view clicked")
 
         # details behind the hyperlink
