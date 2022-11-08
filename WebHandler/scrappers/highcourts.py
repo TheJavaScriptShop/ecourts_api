@@ -84,7 +84,7 @@ def get_highcourt_no_of_cases(props):
 
             court_select.select_by_value(bench_code)
             logger.info("court code selected")
-            time.sleep(int(os.environ.get('MAX_WAIT_TIME')))
+            time.sleep(int(os.environ.get('MIN_WAIT_TIME')))
             selenium_click_id(driver, 'CSAdvName')
             logger.info("hypelink clicked")
             selenium_send_keys_xpath(

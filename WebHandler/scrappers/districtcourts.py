@@ -100,7 +100,7 @@ def get_districtcourt_no_of_cases(props):
                 driver, 'court_complex_code'))
             court_select.select_by_value(court_complex_id)
             logger.info("court code selected")
-            time.sleep(int(os.environ.get('MAX_WAIT_TIME')))
+            time.sleep(int(os.environ.get('MIN_WAIT_TIME')))
             selenium_click_id(driver, 'advname-tabMenu')
             logger.info("hypelink clicked")
             time.sleep(int(os.environ.get('MIN_WAIT_TIME')))
