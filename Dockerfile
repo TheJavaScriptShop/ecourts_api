@@ -52,4 +52,4 @@ COPY . /home/site/wwwroot
 WORKDIR /home/site/wwwroot
 EXPOSE 3000 80 443 22
 
-CMD ["python", "app.py"]
+CMD ["gunicorn --workers 4 --timeout 600 --capture-output --bind 0.0.0.0:80 -m 007 wsgi:application --reload"]
