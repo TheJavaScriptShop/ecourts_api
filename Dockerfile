@@ -45,6 +45,8 @@ ENV PATH="/usr/local/bin/chromedriver:${PATH}"
 
 # 3. Install selenium in Python
 RUN pip install -U selenium
+RUN apt-get install -y gunicorn
+RUN apt-get install -y python-gevent
 
 # 4. Finally, copy python code to image
 COPY . /home/site/wwwroot
