@@ -72,7 +72,10 @@ def get_districtcourt_no_of_cases(props):
 
             except Exception as e:
                 pass
-            selenium_click_id(driver, 'leftPaneMenuCS')
+            case_status_element = selenium_get_element_id(
+                driver, 'leftPaneMenuCS')
+            driver.execute_script(
+                "arguments[0].click();", case_status_element)
             logger.info("Successfully clicked")
 
             try:
