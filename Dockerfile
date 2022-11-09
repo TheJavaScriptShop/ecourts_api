@@ -45,8 +45,7 @@ ENV PATH="/usr/local/bin/chromedriver:${PATH}"
 
 # 3. Install selenium in Python
 RUN pip install -U selenium
-RUN apt-get install -y gunicorn
-RUN apt-get install -y python-gevent
+
 
 # 4. Finally, copy python code to image
 COPY . /home/site/wwwroot
@@ -54,4 +53,4 @@ COPY . /home/site/wwwroot
 WORKDIR /home/site/wwwroot
 EXPOSE 3000 80 443 22
 
-CMD ["gunicorn --workers 4 --timeout 600 --capture-output --bind 0.0.0.0:80 -m 007 wsgi:application --reload"]
+CMD ["gunicorn", "--workers", "4", "--timeout", "600", "--capture-output", "--bind", "0.0.0.0:80", "-m", "007", "wsgi:application", "--reload"]
