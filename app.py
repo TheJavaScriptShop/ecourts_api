@@ -35,7 +35,7 @@ sentry_sdk.init(
     traces_sample_rate=1.0
 )
 
-version = "3.0.12"
+version = "3.0.13"
 
 
 def create_driver(__location__):
@@ -147,14 +147,9 @@ def main():
             chrome_driver = create_driver(__location__=None)  # open browser
             data = get_cause_list_data(
                 chrome_driver, body["advocateName"], body["highCourtId"])
-            data = {
-                "status": True,
-                "data": data,
-                "request": {"body": body, "params": params}
-            }
             end_time = datetime.datetime.now()
             total_time = end_time - start_time
-            return jsonify({"data": data, "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version}})
+            return jsonify({"status": True, "data": data, "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version}})
         except Exception as e_exception:
             end_time = datetime.datetime.now()
             total_time = end_time - start_time
@@ -170,14 +165,9 @@ def main():
             chrome_driver = create_driver(__location__=None)  # open browser
             table_data = get_display_board(
                 chrome_driver, body["highCourtId"])
-            data = {
-                "status": True,
-                "data": table_data,
-                "request": {"params": params}
-            }
             end_time = datetime.datetime.now()
             total_time = end_time - start_time
-            return jsonify({"data": data, "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version}})
+            return jsonify({"status": True, "data": table_data, "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version}})
         except Exception as e_exception:
             end_time = datetime.datetime.now()
             total_time = end_time - start_time

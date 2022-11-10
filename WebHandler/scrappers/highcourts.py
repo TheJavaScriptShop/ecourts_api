@@ -18,11 +18,10 @@ from dotenv import load_dotenv
 from sentry_sdk import capture_exception
 
 from ..utils.sel import (
-    selenium_click_xpath, selenium_send_keys_xpath,
+    selenium_send_keys_xpath,
     selenium_send_keys_id, selenium_get_text_xpath,
     selenium_get_element_xpath, selenium_get_element_id,
     selenium_get_element_class, selenium_find_element_css_selector,
-    selenium_click_class, selenium_click_id,
     get_table_data_as_list
 )
 from ..utils.ocr import (
@@ -65,11 +64,12 @@ def get_highcourt_no_of_cases(props):
                             e_exception)
                         return {'status': False, "message": ''.join(tb.format()), 'data': {}, "debugMessage": "Maximun retries reached", "code": 1}
                     url_trial = url_trial + 1
-            selenium_click_id(driver, 'leftPaneMenuCS')
+            driver.execute_script(
+                "arguments[0].click();", selenium_get_element_id(driver, 'leftPaneMenuCS'))
             logger.info("Successfully clicked case status")
             try:
-                selenium_click_xpath(
-                    driver, '/html/body/div[2]/div/div/div[2]/button')
+                driver.execute_script("arguments[0].click();", selenium_get_element_xpath(
+                    driver, '/html/body/div[2]/div/div/div[2]/button'))
 
                 logger.info("ok clicked")
             except:
@@ -85,7 +85,8 @@ def get_highcourt_no_of_cases(props):
             court_select.select_by_value(bench_code)
             logger.info("court code selected")
             time.sleep(int(os.environ.get('MIN_WAIT_TIME')))
-            selenium_click_id(driver, 'CSAdvName')
+            driver.execute_script(
+                "arguments[0].click();", selenium_get_element_id(driver, 'CSAdvName'))
             logger.info("hypelink clicked")
             selenium_send_keys_xpath(
                 driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[14]/div[2]/div[2]/input', advoc_name)
@@ -96,10 +97,11 @@ def get_highcourt_no_of_cases(props):
             text = get_text_from_captcha(
                 driver, img_path, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/span/div/div[1]/div[1]/img', captcha_xpath)
 
-            selenium_click_xpath(
-                driver, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/span/div/div[2]/label")
+            driver.execute_script("arguments[0].click();", selenium_get_element_xpath(
+                driver, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/span/div/div[2]/label"))
             selenium_send_keys_xpath(driver, '//*[@id="captcha"]', text)
-            selenium_click_xpath(driver, '//*[@class="Gobtn"]')
+            driver.execute_script("arguments[0].click();", selenium_get_element_xpath(
+                driver, '//*[@class="Gobtn"]'))
             is_failed_with_captach = False
             try:
                 failure_text = selenium_get_text_xpath(

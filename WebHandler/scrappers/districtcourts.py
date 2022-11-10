@@ -67,8 +67,9 @@ def get_districtcourt_no_of_cases(props):
             counter_retry += 1
             try:
                 if "Invalid Request" in selenium_get_text_xpath(driver, "/html/body/div[7]/div/div/div[2]/div/div[1]"):
-                    selenium_click_xpath(
-                        driver, "/html/body/div[7]/div/div/div[1]/button")
+                    driver.execute_script(
+                        "arguments[0].click();", selenium_get_element_xpath(
+                            driver, "/html/body/div[7]/div/div/div[1]/button"))
 
             except Exception as e:
                 pass
@@ -79,11 +80,10 @@ def get_districtcourt_no_of_cases(props):
             logger.info("Successfully clicked")
 
             try:
-                selenium_click_xpath(
-                    driver, '/html/body/div[9]/div/div/div[1]/button')
-
-                selenium_click_xpath(
-                    driver, '/html/body/div[9]/div/div/div[1]/button')
+                driver.execute_script("arguments[0].click();", selenium_get_element_xpath(
+                    driver, '/html/body/div[9]/div/div/div[1]/button'))
+                driver.execute_script("arguments[0].click();", selenium_get_element_xpath(
+                    driver, '/html/body/div[9]/div/div/div[1]/button'))
 
             except:
                 pass
@@ -104,10 +104,12 @@ def get_districtcourt_no_of_cases(props):
             court_select.select_by_value(court_complex_id)
             logger.info("court code selected")
             time.sleep(int(os.environ.get('MIN_WAIT_TIME')))
-            selenium_click_id(driver, 'advname-tabMenu')
+            driver.execute_script(
+                "arguments[0].click();", selenium_get_element_id(driver, 'advname-tabMenu'))
             logger.info("hypelink clicked")
             time.sleep(int(os.environ.get('MIN_WAIT_TIME')))
-            selenium_click_xpath(driver, '//input[@id="advocate_name"]')
+            driver.execute_script("arguments[0].click();", selenium_get_element_xpath(
+                driver, '//input[@id="advocate_name"]'))
             selenium_send_keys_xpath(
                 driver, '//input[@id="advocate_name"]', advoc_name)
             logger.info("names sent")
@@ -116,23 +118,24 @@ def get_districtcourt_no_of_cases(props):
             get_captcha(driver, img_path, captcha_xpath)
             text = get_text_from_captcha(
                 driver, img_path, '/html/body/div[1]/div/main/div[2]/div/div/div[4]/div[1]/form/div[2]/div/div/div/img', captcha_xpath)
-
-            selenium_click_xpath(
-                driver, "//input[@id='adv_captcha_code']")
+            driver.execute_script("arguments[0].click();", selenium_get_element_xpath(
+                driver, "//input[@id='adv_captcha_code']"))
             selenium_send_keys_xpath(
                 driver, '//input[@id="adv_captcha_code"]', text)
-            selenium_click_xpath(
-                driver, '/html/body/div[1]/div/main/div[2]/div/div/div[4]/div[1]/form/div[3]/div[2]/button')
+            driver.execute_script("arguments[0].click();", selenium_get_element_xpath(
+                driver, '/html/body/div[1]/div/main/div[2]/div/div/div[4]/div[1]/form/div[3]/div[2]/button'))
+
             is_failed_with_captach = False
             try:
                 if 'Invalid Captcha' in selenium_get_text_xpath(
                         driver, '/html/body/div[9]/div/div/div[2]/div/div[1]'):
-                    selenium_click_xpath(
-                        driver, '/html/body/div[9]/div/div/div[1]/button')
+                    driver.execute_script("arguments[0].click();", selenium_get_element_xpath(
+                        driver, '/html/body/div[9]/div/div/div[1]/button'))
                     is_failed_with_captach = True
 
                 if 'Invalid Request' in selenium_get_text_xpath(driver, '//div[@id="msg-danger"]'):
-                    selenium_click_xpath(driver, '/html/body/div/div/a')
+                    driver.execute_script("arguments[0].click();", selenium_get_element_xpath(
+                        driver, '/html/body/div/div/a'))
                     is_failed_with_captach = True
             except:
                 pass
@@ -203,8 +206,8 @@ def get_districtcourt_cases_by_name(props):
         logger.info(f"{case_sl_no} view clicked")
         try:
             if "THERE IS AN ERROR" in selenium_get_text_xpath(driver, '/html/body/div[9]/div/div/div[2]/div/div[1]'):
-                selenium_click_xpath(
-                    driver, '/html/body/div[9]/div/div/div[1]/button')
+                driver.execute_script("arguments[0].click();", selenium_get_element_xpath(
+                    driver, '/html/body/div[9]/div/div/div[1]/button'))
             case_details_list.append(
                 {"status": False, "message": "THERE IS AN ERROR"})
             case_sl_no = case_sl_no + 1
