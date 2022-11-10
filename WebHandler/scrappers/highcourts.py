@@ -362,7 +362,9 @@ def get_highcourt_cases_by_name(props):
                     logger.info('downloading file')
                     case_no = case_details_title.replace("/", "-")
                     try:
-                        blob_path_container = f"{advoc_name}/{case_no}/{date.today().month}/{date.today().day}/orders/{order_no}.pdf"
+                        name = "".join(
+                            ch for ch in advoc_name if ch.isalnum()).lower()
+                        blob_path_container = f"{name}/{case_no}/{date.today().month}/{date.today().day}/orders/{order_no}.pdf"
                         status = wait_for_download_and_rename(
                             blob_path_container)
                     except Exception as e:
