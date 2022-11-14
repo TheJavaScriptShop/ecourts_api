@@ -23,6 +23,7 @@ from sentry_sdk import capture_exception
 from WebHandler.scrappers.highcourts import get_highcourt_no_of_cases, get_highcourt_cases_by_name
 from WebHandler.scrappers.display_board import get_display_board
 from WebHandler.scrappers.cause_list import get_cause_list_data
+from WebHandler.scrappers.nclt import get_nclt_data
 from WebHandler.scrappers.districtcourts import get_districtcourt_no_of_cases, get_districtcourt_cases_by_name
 
 load_dotenv()
@@ -120,6 +121,18 @@ def main():
             if not body.get("courtComplexId"):
                 is_valid_request = False
 
+        if request.args.get('method') == "advocatecasesbynumber":
+            body = request.json
+            params = request.args
+            if not body.get("benchId"):
+                is_valid_request = False
+            if not body.get("caseTypeId"):
+                is_valid_request = False
+            if not body.get("caseNum"):
+                is_valid_request = False
+            if not body.get("caseYear"):
+                is_valid_request = False
+
     if request.args.get('method') == "advocatecauselist":
         body = request.json
         params = request.args
@@ -173,6 +186,29 @@ def main():
             total_time = end_time - start_time
             capture_exception(e_exception)
             return jsonify({"status": False, "debugMessage": "Request Failed", "error": str(e_exception), "start_time": start_time, "total_time_taken": total_time.seconds, 'version': version, 'code': '2'})
+
+    if request.args.get('method') == "advocatecasesbynumber":
+        try:
+            start_time = datetime.datetime.now()
+            body = request.json
+            params = request.args
+            chrome_driver = create_driver(__location__=None)  # open browser
+            nclt_props = {
+                "driver": chrome_driver,
+                "bench_id": body["benchId"],
+                "case_type_id": body['caseTypeId'],
+                "case_num": body["caseNum"],
+                "case_year": body["caseYear"]
+            }
+            data = get_nclt_data(nclt_props)
+            end_time = datetime.datetime.now()
+            total_time = end_time - start_time
+            return jsonify({"status": True, "data": data, "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version}})
+        except Exception as e_exception:
+            end_time = datetime.datetime.now()
+            total_time = end_time - start_time
+            capture_exception(e_exception)
+            return jsonify({"status": False, "debugMessage": "Request Failed", "error": str(e_exception), "start_time": start_time, "total_time_taken": total_time.seconds, 'version': version, 'code': '3'})
 
     if request.args.get('method') == "advocatecasesbyname":
         body = request.json
@@ -255,7 +291,7 @@ def main():
                         tb = traceback.TracebackException.from_exception(
                             e_exception)
                         logger.info(
-                            {"err_msg": "callback request failed", "error": ''.join(tb.format()), 'version': version, 'code': '3'})
+                            {"err_msg": "callback request failed", "error": ''.join(tb.format()), 'version': version, 'code': '4'})
                 else:
                     n = total_cases/cases_per_iteration
                     start = 0
@@ -282,13 +318,13 @@ def main():
                                 e_exception)
                             try:
                                 requests.post(url=body["callBackUrl"], timeout=10, json={
-                                    "error": ''.join(tb.format()), "message": "Request Failed", "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, 'code': '4'}})
+                                    "error": ''.join(tb.format()), "message": "Request Failed", "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, 'code': '5'}})
                             except Exception as e_exc:
                                 capture_exception(e_exc)
                                 tb = traceback.TracebackException.from_exception(
                                     e_exception)
                                 logger.info(
-                                    {"err_msg": "callback request failed", "message": ''.join(tb.format()), 'version': version, 'code': '5'})
+                                    {"err_msg": "callback request failed", "message": ''.join(tb.format()), 'version': version, 'code': '6'})
                         start = start + cases_per_iteration
                         stop = stop + cases_per_iteration
                         n = n - 1
@@ -304,13 +340,13 @@ def main():
                 tb = traceback.TracebackException.from_exception(e_exception)
                 try:
                     requests.post(url=body["callBackUrl"], timeout=10, json={
-                        "error": ''.join(tb.format()), "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, "code": "6"}})
+                        "error": ''.join(tb.format()), "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, "code": "7"}})
                 except Exception as e_exc:
                     capture_exception(e_exc)
                     tb = traceback.TracebackException.from_exception(
                         e_exception)
                     logger.info({"err_msg": "callback request failed", "message": ''.join(tb.format()),
-                                'version': version, 'code': '7'})
+                                'version': version, 'code': '8'})
         get_total_no_of_cases_wrapper()
         data = {
             "status": True,
@@ -405,7 +441,7 @@ def main():
                     tb = traceback.TracebackException.from_exception(
                         e_exception)
                     logger.info(
-                        {"err_msg": "callback request failed", "message": ''.join(tb.format()), 'version': version, 'code': '8'})
+                        {"err_msg": "callback request failed", "message": ''.join(tb.format()), 'version': version, 'code': '9'})
             except Exception as e_exception:
                 logger.info(str(e_exception))
                 end_time = datetime.datetime.now()
@@ -414,13 +450,13 @@ def main():
                 tb = traceback.TracebackException.from_exception(e_exception)
                 try:
                     requests.post(url=body["callBackUrl"], timeout=10, json={
-                        "error": ''.join(tb.format()), "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, 'code': '9'}})
+                        "error": ''.join(tb.format()), "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, 'code': '10'}})
                 except Exception as e_exc:
                     capture_exception(e_exc)
                     tb = traceback.TracebackException.from_exception(
                         e_exception)
                     logger.info(
-                        {"err_msg": "callback request failed", "message": ''.join(tb.format()), 'version': version, 'code': '10'})
+                        {"err_msg": "callback request failed", "message": ''.join(tb.format()), 'version': version, 'code': '11'})
         get_highcourt_cases_by_name_wrapper()
         data = {
             "status": True,
