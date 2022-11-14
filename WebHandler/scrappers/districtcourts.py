@@ -1,22 +1,14 @@
-from sys import exc_info
 import time
-import logging
 import os
-import shutil
-from datetime import date
+
 import traceback
 from sentry_sdk import capture_exception
 
 
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import Select
-from azure.storage.blob import BlobServiceClient
 from dotenv import load_dotenv
+import WebHandler.scrappers.constants as constants
+
 
 from ..utils.sel import (
     selenium_click_xpath, selenium_send_keys_xpath,
@@ -54,7 +46,8 @@ def get_districtcourt_no_of_cases(props):
     url_trial = 1
     while url_trial < 11:
         try:
-            driver.get('https://services.ecourts.gov.in/ecourtindia_v6/#')
+            url = constants.district_courts_codes["districts_courts_url"]
+            driver.get(url)
             break
         except Exception as e_exception:
             if url_trial >= 10:

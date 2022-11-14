@@ -44,7 +44,7 @@ def create_driver(__location__):
     DRIVER_PATH = os.environ.get('DRIVER_PATH')
     options.add_argument("--disable-extensions")
     options.add_argument("--disable-infobars")
-    options.add_argument("--headless")
+    # options.add_argument("--headless")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--no-sandbox")
     options.add_argument("--window-size=1700x800")
@@ -121,7 +121,7 @@ def main():
             if not body.get("courtComplexId"):
                 is_valid_request = False
 
-        if request.args.get('method') == "advocatecasesbynumber":
+        if request.args.get('method') == "ncltadvocatecasesbynumber":
             body = request.json
             params = request.args
             if not body.get("benchId"):
@@ -187,7 +187,7 @@ def main():
             capture_exception(e_exception)
             return jsonify({"status": False, "debugMessage": "Request Failed", "error": str(e_exception), "start_time": start_time, "total_time_taken": total_time.seconds, 'version': version, 'code': '2'})
 
-    if request.args.get('method') == "advocatecasesbynumber":
+    if request.args.get('method') == "ncltadvocatecasesbynumber":
         try:
             start_time = datetime.datetime.now()
             body = request.json

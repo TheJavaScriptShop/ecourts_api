@@ -1,19 +1,12 @@
-from sys import exc_info
 import time
-import logging
 import os
-import shutil
 from datetime import date
 import traceback
 
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import Select
-from azure.storage.blob import BlobServiceClient
 from dotenv import load_dotenv
 from sentry_sdk import capture_exception
 
@@ -24,10 +17,13 @@ from ..utils.sel import (
     selenium_get_element_class, selenium_find_element_css_selector,
     get_table_data_as_list
 )
+from ..utils.blob_storage import (wait_for_download_and_rename)
 from ..utils.ocr import (
     get_text_from_captcha,
     get_captcha
 )
+import WebHandler.scrappers.constants as constants
+
 
 if os.environ.get("APP_ENV") == "local":
     load_dotenv()
@@ -54,8 +50,8 @@ def get_highcourt_no_of_cases(props):
             url_trial = 1
             while url_trial <= 11:
                 try:
-                    driver.get(
-                        'https://hcservices.ecourts.gov.in/hcservices/main.php')
+                    url = constants.high_courts_codes["high_court_url"]
+                    driver.get(url)
                     break
                 except Exception as e_exception:
                     if url_trial >= 10:
@@ -167,32 +163,6 @@ def get_highcourt_cases_by_name(props):
     start = props["start"]
     stop = props["stop"]
     logger = props["logger"]
-
-    def wait_for_download_and_rename(blob_path):
-        try:
-            blob_service_client = BlobServiceClient.from_connection_string(
-                os.environ.get('BLOB_STORAGE_CONTAINER'))
-            blob_client = blob_service_client.get_blob_client(
-                container="ecourtsapiservicebucketdev", blob=blob_path)
-            file_exists = True
-            trial = 1
-            while file_exists:
-                time.sleep(int(os.environ.get('MIN_WAIT_TIME')))
-                if os.path.isfile(f"{__location__}/display_pdf.pdf"):
-                    with open(os.path.join(__location__, "display_pdf.pdf"), "rb") as data:
-                        blob_client.upload_blob(data, overwrite=True)
-                    os.remove(f"{__location__}/display_pdf.pdf")
-                    file_exists = False
-                    return {"upload": True}
-                if trial >= 10:
-                    return {"upload": False}
-                trial = trial + 1
-
-        except Exception as e:
-            logger.error(str(e), exc_info=True)
-            tb = traceback.TracebackException.from_exception(e_exception)
-            capture_exception(e)
-            return {'status': False, 'error': str(e), "traceback": ''.join(tb.format()), "debugMessage": "Failed to upload file to blob", "code": 4}
 
     # case details
 
@@ -366,7 +336,7 @@ def get_highcourt_cases_by_name(props):
                             ch for ch in advoc_name if ch.isalnum()).lower()
                         blob_path_container = f"{name}/{case_no}/{date.today().month}/{date.today().day}/orders/{order_no}.pdf"
                         status = wait_for_download_and_rename(
-                            blob_path_container)
+                            blob_path_container, __location__)
                     except Exception as e:
                         traceback.print_exc()
                         logger.info(
