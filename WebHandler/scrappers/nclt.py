@@ -24,7 +24,7 @@ def get_nclt_data(nclt_props):
             except Exception as e_exception:
                 if url_trial >= 10:
                     capture_exception(e_exception)
-                    return {'status': False, 'data': {}, "debugMessage": "Maximun retries reached", "code": 1}
+                    return {'status': False, 'data': {}, "debugMessage": "Maximun retries reached", "code": "nclt-1"}
                 url_trial = url_trial + 1
         driver.get(url)
         bench_select = Select(

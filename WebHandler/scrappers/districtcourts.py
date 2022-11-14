@@ -53,7 +53,7 @@ def get_districtcourt_no_of_cases(props):
             if url_trial >= 10:
                 capture_exception(e_exception)
                 tb = traceback.TracebackException.from_exception(e_exception)
-                return {'status': False, "message": ''.join(tb.format()), 'data': {}, "debugMessage": "Maximun retries reached", "code": 1}
+                return {'status': False, "message": ''.join(tb.format()), 'data': {}, "debugMessage": "Maximun retries reached", "code": "dc-1"}
             url_trial = url_trial + 1
     try:
         while is_failed_with_captach:
@@ -139,7 +139,7 @@ def get_districtcourt_no_of_cases(props):
         capture_exception(e_exception)
         tb = traceback.TracebackException.from_exception(e_exception)
         if counter_retry > 10:
-            return {'status': False, 'data': {}, "message": ''.join(tb.format()), "debugMessage": "Maximun retries reached", "code": 2}
+            return {'status': False, 'data': {}, "message": ''.join(tb.format()), "debugMessage": "Maximun retries reached", "code": "dc-2"}
 
     while True:
         try:

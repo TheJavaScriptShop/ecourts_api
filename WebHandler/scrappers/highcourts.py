@@ -58,7 +58,7 @@ def get_highcourt_no_of_cases(props):
                         capture_exception(e_exception)
                         tb = traceback.TracebackException.from_exception(
                             e_exception)
-                        return {'status': False, "message": ''.join(tb.format()), 'data': {}, "debugMessage": "Maximun retries reached", "code": 1}
+                        return {'status': False, "message": ''.join(tb.format()), 'data': {}, "debugMessage": "Maximun retries reached", "code": "hc-1"}
                     url_trial = url_trial + 1
             driver.execute_script(
                 "arguments[0].click();", selenium_get_element_id(driver, 'leftPaneMenuCS'))
@@ -122,7 +122,7 @@ def get_highcourt_no_of_cases(props):
                         fetched_data = True
                         is_failed_with_captach = False
                         capture_exception(e_exception)
-                        return {'status': False, 'data': {}, "debugMessage": "No data found", "code": 2}
+                        return {'status': False, 'data': {}, "debugMessage": "No data found", "code": "hc-2"}
 
                 except Exception as e:
                     pass
@@ -134,7 +134,7 @@ def get_highcourt_no_of_cases(props):
         tb = traceback.TracebackException.from_exception(e_exception)
         if counter_retry > 10:
             is_failed_with_captach = False
-            return {'status': False, "message": ''.join(tb.format()), 'data': {}, "debugMessage": "Maximun retries reached", "code": 3}
+            return {'status': False, "message": ''.join(tb.format()), 'data': {}, "debugMessage": "Maximun retries reached", "code": "hc-3"}
 
     while True:
         try:
