@@ -9,7 +9,7 @@ from azure.storage.blob import BlobServiceClient
 from dotenv import load_dotenv
 from sentry_sdk import capture_exception
 
-from ..utils.sel import selenium_get_element_id, selenium_send_keys_id, selenium_click_xpath, get_table_data_as_list, selenium_get_element_xpath
+from ..utils.sel import selenium_get_text_xpath, selenium_get_element_id, selenium_send_keys_id, selenium_click_xpath, get_table_data_as_list, selenium_get_element_xpath
 import WebHandler.scrappers.constants as constants
 
 import time
@@ -39,8 +39,11 @@ def get_nclt_data(nclt_props):
             driver, "/html/body/div/div[2]/div/div/div[2]/div/div/div/div/div/div/form/div/div[5]/button")
         full_table_element = selenium_get_element_xpath(
             driver, "/html/body/div/div[2]/div/div/div[2]/div/div/div/div/div/div[2]/table")
-        data = get_table_data_as_list(
-            driver, "/html/body/div/div[2]/div/div/div[2]/div/div/div/div/div/div[2]/table")
+        if "click here" in selenium_get_text_xpath(driver, "/html/body/div/div[2]/div/div/div[2]/div/div/div/div/div/div[2]/table/tbody/tr/td/a"):
+            data = "No Data"
+        else:
+            data = get_table_data_as_list(
+                driver, "/html/body/div/div[2]/div/div/div[2]/div/div/div/div/div/div[2]/table")
         return data
 
     except Exception as e:
