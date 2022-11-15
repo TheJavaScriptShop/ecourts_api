@@ -1,4 +1,5 @@
 high_courts_codes = {
+    "url": "https://hcservices.ecourts.gov.in/hcservices/main.php",
     "29": {
         'id': '29',
         'name': 'High Court for State of Telangana',
@@ -26,6 +27,7 @@ high_courts_codes = {
 
 
 district_courts_codes = {
+    "url": 'https://services.ecourts.gov.in/ecourtindia_v6/#',
     "29": {
         'id': '29',
         'name': 'Telangana',
@@ -960,5 +962,61 @@ district_courts_codes = {
                 }
             }
         }
+    }
+}
+
+nclt_court_codes = {
+    "url": "https://nclt.gov.in/case-number-wise",
+    "nclt_case_type": {
+        "34": "Transfer Application (IBC)",
+        "33": "Insolvency &amp; Bankruptcy (Pre-Packaged)",
+        "32": "Transfer Application",
+        "31": "Interlocutory Application (I.B.C)",
+        "30": "Execution Petition",
+        "29": "Transfer Petition (IBC)",
+        "28": "Cross Appeal (IBC)",
+        "27": "Company Appeal (IBC)",
+        "26": "Miscellaneous Application (IBC)",
+        "25": "Contempt Petition (IBC)",
+        "24": "Cross Application (IBC)",
+        "23": "Intervention Petition (IBC)",
+        "22": "Restoration Application (IBC)",
+        "21": "Review Application (IBC)",
+        "20": "Interlocatory Application (IBC)",
+        "19": "Rehabilitation petition(IBC)",
+        "18": "Company Application(IBC)",
+        "16": "Company Petition IB (IBC)",
+        "15": "CP(AA) Merger and Amalgamation(Companies Act)",
+        "14": "CA(A) Merger and Amalgamation(Companies Act)",
+        "13": "Company Application(Companies Act)",
+        "12": "Cross Appeal(Companies Act)",
+        "11": "Company Appeal(Companies Act)",
+        "10": "Miscellaneous Application(Companies Act)",
+        "9": "Contempt Petition(Companies Act)",
+        "8": "Cross Appeal(Companies Act)",
+        "7": "Intervention Petition(Companies Act)",
+        "6": "Restoration Application (Companies Act)",
+        "5": "Review Application (Companies Act)",
+        "4": "Interlocatory Application(Companies Act)",
+        "3": "Rehabilitation petition (Companies Act)",
+        "2": "Company Petition (Companies Act)",
+        "1": "Transfer Petition(Companies Act)",
+    },
+    "nclt_zonal_bench": {
+        "ahmedabad": "Ahmedabad",
+        "allahabad": "Allahabad",
+        "amravati": "Amaravati",
+        "bengaluru": "Bengaluru",
+        "chandigarh": "Chandigarh",
+        "chennai": "Chennai",
+        "cuttack": "Cuttack",
+        "guwahati": "Guwahati",
+        "hyderabad": "Hyderabad",
+        "indore": "Indore",
+        "jaipur": "Jaipur",
+        "kochi": "Kochi",
+        "kolkata": "Kolkata",
+        "mumbai": "Mumbai",
+        "delhi": "New Delhi",
     }
 }

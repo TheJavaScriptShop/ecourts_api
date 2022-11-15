@@ -1,22 +1,14 @@
-from sys import exc_info
 import time
-import logging
 import os
-import shutil
-from datetime import date
+
 import traceback
 from sentry_sdk import capture_exception
 
 
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import Select
-from azure.storage.blob import BlobServiceClient
 from dotenv import load_dotenv
+import WebHandler.scrappers.constants as constants
+
 
 from ..utils.sel import (
     selenium_click_xpath, selenium_send_keys_xpath,
@@ -54,13 +46,14 @@ def get_districtcourt_no_of_cases(props):
     url_trial = 1
     while url_trial < 11:
         try:
-            driver.get('https://services.ecourts.gov.in/ecourtindia_v6/#')
+            url = constants.district_courts_codes["url"]
+            driver.get(url)
             break
         except Exception as e_exception:
             if url_trial >= 10:
                 capture_exception(e_exception)
                 tb = traceback.TracebackException.from_exception(e_exception)
-                return {'status': False, "message": ''.join(tb.format()), 'data': {}, "debugMessage": "Maximun retries reached", "code": 1}
+                return {'status': False, "message": ''.join(tb.format()), 'data': {}, "debugMessage": "Maximun retries reached", "code": "dc-1"}
             url_trial = url_trial + 1
     try:
         while is_failed_with_captach:
@@ -146,7 +139,7 @@ def get_districtcourt_no_of_cases(props):
         capture_exception(e_exception)
         tb = traceback.TracebackException.from_exception(e_exception)
         if counter_retry > 10:
-            return {'status': False, 'data': {}, "message": ''.join(tb.format()), "debugMessage": "Maximun retries reached", "code": 2}
+            return {'status': False, 'data': {}, "message": ''.join(tb.format()), "debugMessage": "Maximun retries reached", "code": "dc-2"}
 
     while True:
         try:
