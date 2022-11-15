@@ -18,7 +18,7 @@ def get_nclt_data(nclt_props):
         url_trial = 1
         while url_trial < 11:
             try:
-                url = constants.nclt_court_codes["nclt_url"]
+                url = constants.nclt_court_codes["url"]
                 driver.get(url)
                 break
             except Exception as e_exception:

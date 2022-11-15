@@ -50,7 +50,7 @@ def get_highcourt_no_of_cases(props):
             url_trial = 1
             while url_trial <= 11:
                 try:
-                    url = constants.high_courts_codes["high_court_url"]
+                    url = constants.high_courts_codes["url"]
                     driver.get(url)
                     break
                 except Exception as e_exception:

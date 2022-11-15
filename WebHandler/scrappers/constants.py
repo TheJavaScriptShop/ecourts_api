@@ -1,5 +1,5 @@
 high_courts_codes = {
-    "high_court_url": "https://hcservices.ecourts.gov.in/hcservices/main.php",
+    "url": "https://hcservices.ecourts.gov.in/hcservices/main.php",
     "29": {
         'id': '29',
         'name': 'High Court for State of Telangana',
@@ -27,7 +27,7 @@ high_courts_codes = {
 
 
 district_courts_codes = {
-    "districts_courts_url": 'https://services.ecourts.gov.in/ecourtindia_v6/#',
+    "url": 'https://services.ecourts.gov.in/ecourtindia_v6/#',
     "29": {
         'id': '29',
         'name': 'Telangana',
@@ -966,7 +966,7 @@ district_courts_codes = {
 }
 
 nclt_court_codes = {
-    "nclt_url": "https://nclt.gov.in/case-number-wise",
+    "url": "https://nclt.gov.in/case-number-wise",
     "nclt_case_type": {
         "34": "Transfer Application (IBC)",
         "33": "Insolvency &amp; Bankruptcy (Pre-Packaged)",

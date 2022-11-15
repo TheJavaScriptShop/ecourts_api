@@ -46,7 +46,7 @@ def get_districtcourt_no_of_cases(props):
     url_trial = 1
     while url_trial < 11:
         try:
-            url = constants.district_courts_codes["districts_courts_url"]
+            url = constants.district_courts_codes["url"]
             driver.get(url)
             break
         except Exception as e_exception:
