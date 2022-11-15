@@ -201,10 +201,10 @@ def get_districtcourt_cases_by_name(props):
             if "THERE IS AN ERROR" in selenium_get_text_xpath(driver, '/html/body/div[9]/div/div/div[2]/div/div[1]'):
                 driver.execute_script("arguments[0].click();", selenium_get_element_xpath(
                     driver, '/html/body/div[9]/div/div/div[1]/button'))
-            case_details_list.append(
-                {"status": False, "message": "THERE IS AN ERROR"})
-            case_sl_no = case_sl_no + 1
-            continue
+                case_details_list.append(
+                    {"status": False, "message": "THERE IS AN ERROR"})
+                case_sl_no = case_sl_no + 1
+                continue
         except:
             pass
         # details behind the hyperlink
