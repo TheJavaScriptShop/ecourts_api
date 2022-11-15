@@ -121,14 +121,14 @@ def main():
             if not body.get("courtComplexId"):
                 is_valid_request = False
 
-        if request.args.get('method') == "ncltadvocatecasesbynumber":
+        if request.args.get('method') == "ncltadvocatecasebynumber":
             body = request.json
             params = request.args
             if not body.get("benchId"):
                 is_valid_request = False
             if not body.get("caseTypeId"):
                 is_valid_request = False
-            if not body.get("caseNum"):
+            if not body.get("caseNumber"):
                 is_valid_request = False
             if not body.get("caseYear"):
                 is_valid_request = False
@@ -187,7 +187,7 @@ def main():
             capture_exception(e_exception)
             return jsonify({"status": False, "debugMessage": "Request Failed", "error": str(e_exception), "start_time": start_time, "total_time_taken": total_time.seconds, 'version': version, 'code': '2'})
 
-    if request.args.get('method') == "ncltadvocatecasesbynumber":
+    if request.args.get('method') == "ncltadvocatecasebynumber":
         try:
             start_time = datetime.datetime.now()
             body = request.json
@@ -197,7 +197,7 @@ def main():
                 "driver": chrome_driver,
                 "bench_id": body["benchId"],
                 "case_type_id": body['caseTypeId'],
-                "case_num": body["caseNum"],
+                "case_num": body["caseNumber"],
                 "case_year": body["caseYear"]
             }
             data = get_nclt_data(nclt_props)
