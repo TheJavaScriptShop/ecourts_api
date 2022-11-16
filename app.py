@@ -36,7 +36,7 @@ sentry_sdk.init(
     traces_sample_rate=1.0
 )
 
-version = "3.1.1"
+version = "3.1.2"
 
 
 def create_driver(__location__):
@@ -79,12 +79,11 @@ def fire_and_forget(f):
 app = Flask(__name__)
 
 
-@app.route("/", methods=["POST"])
+@app.route("/", methods=["POST", "GET"])
 def main():
     cases_per_iteration = int(os.environ.get('CASES_PER_ITERATION', 50))
     data = {}
     is_valid_request = True
-
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
     sh = logging.StreamHandler()
