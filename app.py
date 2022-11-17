@@ -131,6 +131,8 @@ def main():
                 is_valid_request = False
             if not body.get("caseYear"):
                 is_valid_request = False
+            if not body.get("callBackUrl"):
+                is_valid_request = False
 
     if request.args.get('method') == "advocatecauselist":
         body = request.json
@@ -187,27 +189,57 @@ def main():
             return jsonify({"status": False, "debugMessage": "Request Failed", "error": str(e_exception), "start_time": start_time, "total_time_taken": total_time.seconds, 'version': version, 'code': '2'})
 
     if request.args.get('method') == "ncltadvocatecasebynumber":
-        try:
-            start_time = datetime.datetime.now()
-            body = request.json
-            params = request.args
-            chrome_driver = create_driver(__location__=None)  # open browser
-            nclt_props = {
-                "driver": chrome_driver,
-                "bench_id": body["benchId"],
-                "case_type_id": body['caseTypeId'],
-                "case_num": body["caseNumber"],
-                "case_year": body["caseYear"]
-            }
-            data = get_nclt_data(nclt_props)
-            end_time = datetime.datetime.now()
-            total_time = end_time - start_time
-            return jsonify({"status": True, "data": data, "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version}})
-        except Exception as e_exception:
-            end_time = datetime.datetime.now()
-            total_time = end_time - start_time
-            capture_exception(e_exception)
-            return jsonify({"status": False, "debugMessage": "Request Failed", "error": str(e_exception), "start_time": start_time, "total_time_taken": total_time.seconds, 'version': version, 'code': '3'})
+        start_time = datetime.datetime.now()
+        body = request.json
+        params = request.args
+        logger = logging.getLogger("initial")
+        logger.setLevel(logging.DEBUG)
+        sh = logging.StreamHandler()
+        sh.setLevel(logging.DEBUG)
+        logger.addHandler(sh)
+
+        if os.environ.get("APP_ENV") == "local":
+            fh = logging.FileHandler('local/logger/initial.log', mode='w')
+            fh.setLevel(logging.DEBUG)
+            logger.addHandler(fh)
+
+        @ fire_and_forget
+        def get_nclt_case_details():
+            try:
+                __location__ = f'{path}/{body["caseNumber"]}'
+                chrome_driver = create_driver(
+                    __location__)  # open browser
+                nclt_props = {
+                    "driver": chrome_driver,
+                    "bench_id": body["benchId"],
+                    "case_type_id": body['caseTypeId'],
+                    "case_num": body["caseNumber"],
+                    "case_year": body["caseYear"]
+                }
+                data = get_nclt_data(nclt_props)
+                end_time = datetime.datetime.now()
+                total_time = end_time - start_time
+                try:
+                    requests.post(url=body["callBackUrl"], timeout=10, json={
+                        "data": data, "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version}})
+                except Exception as e_exception:
+                    capture_exception(e_exception)
+                    tb = traceback.TracebackException.from_exception(
+                        e_exception)
+                    logger.info(
+                        {"err_msg": "callback request failed", "error": ''.join(tb.format()), 'version': version, 'code': '4'})
+            except Exception as e_exception:
+                end_time = datetime.datetime.now()
+                total_time = end_time - start_time
+                capture_exception(e_exception)
+                return jsonify({"status": False, "debugMessage": "Request Failed", "error": str(e_exception), "start_time": start_time, "total_time_taken": total_time.seconds, 'version': version, 'code': '3'})
+        get_nclt_case_details()
+        data = {
+            "status": True,
+            "debugMessage": "Request Received and processing",
+            "request": {"body": body, "params": params}
+        }
+        return jsonify({"status": True, "debugMessage": "Received", "data": data, 'version': version})
 
     if request.args.get('method') == "advocatecasesbyname":
         body = request.json
