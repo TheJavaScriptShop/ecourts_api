@@ -1,11 +1,28 @@
 from selenium.webdriver.support.ui import Select
 from sentry_sdk import capture_exception
+from datetime import date
+import os
+import time
 
-from ..utils.sel import selenium_get_text_xpath, selenium_get_element_id, selenium_send_keys_id, selenium_click_xpath, get_table_data_as_list, selenium_get_element_xpath
+from ..utils.blob_storage import wait_for_download_and_rename
+
+from ..utils.sel import (
+    selenium_get_text_xpath,
+    selenium_get_element_id,
+    selenium_send_keys_id,
+    selenium_click_xpath,
+    get_table_data_as_list,
+    selenium_get_element_xpath,
+)
 import WebHandler.scrappers.constants as constants
 
 from datetime import datetime
 import WebHandler.scrappers.constants as constants
+from dotenv import load_dotenv
+
+
+if os.environ.get("APP_ENV") == "local":
+    load_dotenv()
 
 
 def get_nclt_data(nclt_props):
@@ -15,6 +32,8 @@ def get_nclt_data(nclt_props):
         case_type_id = nclt_props["case_type_id"]
         case_num = nclt_props["case_num"]
         case_year = nclt_props["case_year"]
+        location = nclt_props["location"]
+        logger = nclt_props["logger"]
         url_trial = 1
         while url_trial < 11:
             try:
@@ -26,27 +45,122 @@ def get_nclt_data(nclt_props):
                     capture_exception(e_exception)
                     return {'status': False, 'data': {}, "debugMessage": "Maximun retries reached", "code": "nclt-1"}
                 url_trial = url_trial + 1
-        driver.get(url)
         bench_select = Select(
             selenium_get_element_id(driver, 'bench'))
         bench_select.select_by_value(bench_id)
+        logger.info("bench selected")
         case_type_select = Select(
             selenium_get_element_id(driver, 'case_type'))
         case_type_select.select_by_value(case_type_id)
+        logger.info("case type selected")
         selenium_send_keys_id(
             driver, 'case_number', case_num)
+        logger.info("case number entered")
         case_year_select = Select(
             selenium_get_element_id(driver, 'case_year'))
         case_year_select.select_by_value(case_year)
+        logger.info("case year entered")
         selenium_click_xpath(
             driver, "/html/body/div/div[2]/div/div/div[2]/div/div/div/div/div/div/form/div/div[5]/button")
-        full_table_element = selenium_get_element_xpath(
+        logger.info("clicked submit")
+        selenium_get_element_xpath(
             driver, "/html/body/div/div[2]/div/div/div[2]/div/div/div/div/div/div[2]/table")
         if "click here" in selenium_get_text_xpath(driver, "/html/body/div/div[2]/div/div/div[2]/div/div/div/div/div/div[2]/table/tbody/tr/td/a"):
             data = "No Data"
-        else:
-            data = get_table_data_as_list(
-                driver, "/html/body/div/div[2]/div/div/div[2]/div/div/div/div/div/div[2]/table")
+            logger.info("No Data")
+            return data
+        preview_data = get_table_data_as_list(
+            driver, "/html/body/div/div[2]/div/div/div[2]/div/div/div/div/div/div[2]/table")
+        button = selenium_get_element_xpath(
+            driver, '/html/body/div/div[2]/div/div/div[2]/div/div/div/div/div/div[2]/table/tbody/tr/td[6]/a')
+        driver.execute_script("arguments[0].click();", button)
+
+        # switch to other window
+        original_window = driver.current_window_handle
+        for window_handle in driver.window_handles:
+            if window_handle != original_window:
+                driver.switch_to.window(window_handle)
+                break
+        selenium_get_element_xpath(
+            driver, '/html/body/div/div[2]/div/div/div/div/div/div/div/div[1]/table/tbody/tr[1]/td[1]')
+        logger.info("opened full deatails tab")
+        # case info
+        case_info = get_table_data_as_list(
+            driver, '//div[@id="block-nclt-content"]/div/div/table')
+        logger.info("case info")
+
+        # All parties
+        driver.execute_script("arguments[0].click();", selenium_get_element_xpath(
+            driver, '/html/body/div/div[2]/div/div/div/div/div/div/div/div[2]/div[1]/div[1]/h2/button'))
+        selenium_get_element_xpath(
+            driver, '/html/body/div/div[2]/div/div/div/div/div/div/div/div[2]/div[1]/div[2]/div/div/table/thead/tr/th[1]')
+        all_parties_data = get_table_data_as_list(
+            driver, '/html/body/div/div[2]/div/div/div/div/div/div/div/div[2]/div[1]/div[2]/div/div/table')
+        logger.info("All Parties")
+
+        # Orders
+        driver.execute_script("arguments[0].click();", selenium_get_element_xpath(
+            driver, '/html/body/div/div[2]/div/div/div/div/div/div/div/div[2]/div[2]/div[1]/h2/button'))
+        selenium_get_element_xpath(
+            driver, '/html/body/div/div[2]/div/div/div/div/div/div/div/div[2]/div[2]/div[2]/div/div/table/thead/tr/th[1]')
+        orders_data = get_table_data_as_list(
+            driver, '/html/body/div/div[2]/div/div/div/div/div/div/div/div[2]/div[2]/div[2]/div/div/table')
+        orders = driver.find_elements(
+            by="xpath", value='/html/body/div/div[2]/div/div/div/div/div/div/div/div[2]/div[2]/div[2]/div/div/table/tbody/tr/td[4]')
+        order_no = 1
+        for pdf_link in orders:
+            pdf_element = selenium_get_element_xpath(pdf_link, ".//a")
+            driver.execute_script(
+                "arguments[0].click();", pdf_element)
+            blob_path_container = ""
+            try:
+                case = f"{bench_id}-{case_type_id}-{case_num}-{case_year}"
+                blob_path_container = f"nclt/{case}/{date.today().month}/{date.today().day}/orders/{order_no}.pdf"
+                file_name = 'filename.pdf'
+                status = wait_for_download_and_rename(
+                    blob_path_container, location, file_name)
+            except Exception as e:
+                logger.info(
+                    {'err': str(e)})
+            if status["upload"] == False:
+                blob_path_container = "File not Available"
+            order = orders_data[order_no]
+            order["file"] = blob_path_container
+            orders_data[order_no] = order
+            logger.info(f'downloaded {order_no}')
+            order_no = order_no+1
+            logger.info("orders")
+
+        # IA/MA
+        driver.execute_script("arguments[0].click();", selenium_get_element_xpath(
+            driver, '/html/body/div/div[2]/div/div/div/div/div/div/div/div[2]/div[3]/div[1]/h2/button'))
+        selenium_get_element_xpath(
+            driver, '/html/body/div/div[2]/div/div/div/div/div/div/div/div[2]/div[3]/div[2]/div/div/table/thead/tr/th[1]')
+        ia_ma = get_table_data_as_list(
+            driver, '/html/body/div/div[2]/div/div/div/div/div/div/div/div[2]/div[3]/div[2]/div/div/table')
+        logger.info("IA/MA")
+
+        # Connected Matters
+        driver.execute_script("arguments[0].click();", selenium_get_element_xpath(
+            driver, '/html/body/div/div[2]/div/div/div/div/div/div/div/div[2]/div[4]/div[1]/h2/button'))
+        selenium_get_element_xpath(
+            driver, '/html/body/div/div[2]/div/div/div/div/div/div/div/div[2]/div[4]/div[2]/div/div/table/thead/tr/th[1]')
+        connected_matters_data = get_table_data_as_list(
+            driver, '/html/body/div/div[2]/div/div/div/div/div/div/div/div[2]/div[4]/div[2]/div/div/table')
+        logger.info("Connected Matters")
+
+        case_details = {
+            "case_info": case_info,
+            "all_parties_data": all_parties_data,
+            "orders_data": orders_data,
+            "ia_ma": ia_ma,
+            "connected_matters_data": connected_matters_data
+        }
+        data = {
+            'preview_data': preview_data,
+            "case_details": case_details
+        }
+        logger.info(data)
         return data
 
     except Exception as e:

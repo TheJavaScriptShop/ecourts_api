@@ -17,7 +17,7 @@ from ..utils.sel import (
     selenium_get_element_class, selenium_find_element_css_selector,
     get_table_data_as_list
 )
-from ..utils.blob_storage import (wait_for_download_and_rename)
+from ..utils.blob_storage import wait_for_download_and_rename
 from ..utils.ocr import (
     get_text_from_captcha,
     get_captcha
@@ -335,8 +335,9 @@ def get_highcourt_cases_by_name(props):
                         name = "".join(
                             ch for ch in advoc_name if ch.isalnum()).lower()
                         blob_path_container = f"{name}/{case_no}/{date.today().month}/{date.today().day}/orders/{order_no}.pdf"
+                        file_name = 'display_pdf.pdf'
                         status = wait_for_download_and_rename(
-                            blob_path_container, __location__)
+                            blob_path_container, __location__, file_name)
                     except Exception as e:
                         traceback.print_exc()
                         logger.info(
