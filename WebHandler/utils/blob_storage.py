@@ -5,9 +5,14 @@ import traceback
 
 from azure.storage.blob import BlobServiceClient
 from sentry_sdk import capture_exception
+from dotenv import load_dotenv
 
 
-def wait_for_download_and_rename(blob_path, __location__):
+if os.environ.get("APP_ENV") == "local":
+    load_dotenv()
+
+
+def wait_for_download_and_rename(blob_path, __location__, file_name):
     try:
         blob_service_client = BlobServiceClient.from_connection_string(
             os.environ.get('BLOB_STORAGE_CONTAINER'))
@@ -17,10 +22,10 @@ def wait_for_download_and_rename(blob_path, __location__):
         trial = 1
         while file_exists:
             time.sleep(int(os.environ.get('MIN_WAIT_TIME')))
-            if os.path.isfile(f"{__location__}/display_pdf.pdf"):
-                with open(os.path.join(__location__, "display_pdf.pdf"), "rb") as data:
+            if os.path.isfile(f"{__location__}/{file_name}"):
+                with open(os.path.join(__location__, file_name), "rb") as data:
                     blob_client.upload_blob(data, overwrite=True)
-                os.remove(f"{__location__}/display_pdf.pdf")
+                os.remove(f"{__location__}/{file_name}")
                 file_exists = False
                 return {"upload": True}
             if trial >= 10:

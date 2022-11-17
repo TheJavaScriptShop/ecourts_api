@@ -206,7 +206,7 @@ def main():
         @ fire_and_forget
         def get_nclt_case_details():
             try:
-                __location__ = f'{path}/{body["caseNumber"]}'
+                __location__ = f'{path}/nclt/{body["benchId"]}-{body["caseTypeId"]}-{body["caseNumber"]}-{body["caseYear"]}'
                 chrome_driver = create_driver(
                     __location__)  # open browser
                 nclt_props = {
@@ -214,7 +214,9 @@ def main():
                     "bench_id": body["benchId"],
                     "case_type_id": body['caseTypeId'],
                     "case_num": body["caseNumber"],
-                    "case_year": body["caseYear"]
+                    "case_year": body["caseYear"],
+                    "location": __location__,
+                    "logger": logger
                 }
                 data = get_nclt_data(nclt_props)
                 end_time = datetime.datetime.now()
@@ -232,7 +234,18 @@ def main():
                 end_time = datetime.datetime.now()
                 total_time = end_time - start_time
                 capture_exception(e_exception)
-                return jsonify({"status": False, "debugMessage": "Request Failed", "error": str(e_exception), "start_time": start_time, "total_time_taken": total_time.seconds, 'version': version, 'code': '3'})
+                tb = traceback.TracebackException.from_exception(
+                    e_exception)
+                try:
+                    requests.post(url=body["callBackUrl"], timeout=10, json={
+                        "error": ''.join(tb.format()), "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version}})
+                except Exception as e_exception:
+                    capture_exception(e_exception)
+                    tb = traceback.TracebackException.from_exception(
+                        e_exception)
+                    logger.info(
+                        {"err_msg": "callback request failed", "error": ''.join(tb.format()), 'version': version, 'code': '4'})
+
         get_nclt_case_details()
         data = {
             "status": True,
