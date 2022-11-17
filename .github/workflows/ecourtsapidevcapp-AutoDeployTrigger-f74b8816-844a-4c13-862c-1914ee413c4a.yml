@@ -4,14 +4,13 @@ name: Trigger auto deployment for ecourtsapidevcapp
 on:
   # Automatically trigger it when detected changes in repo
   push:
-    branches: 
-      [ dev ]
+    branches: [dev]
     paths:
-    - '**'
-    - '.github/workflows/ecourtsapidevcapp-AutoDeployTrigger-f74b8816-844a-4c13-862c-1914ee413c4a.yml'
+      - "**"
+      - ".github/workflows/ecourtsapidevcapp-AutoDeployTrigger-f74b8816-844a-4c13-862c-1914ee413c4a.yml"
 
-  # Allow mannually trigger 
-  workflow_dispatch:      
+  # Allow mannually trigger
+  workflow_dispatch:
 
 jobs:
   build:
@@ -39,22 +38,36 @@ jobs:
           file: ./Dockerfile
           context: ./
 
-
   deploy:
     runs-on: ubuntu-latest
     needs: build
-    
+
     steps:
+      - name: Install jq
+        run: |
+          sudo apt-get install -y jq
+
       - name: Azure Login
         uses: azure/login@v1
         with:
           creds: ${{ secrets.ECOURTSAPIDEVCAPP_AZURE_CREDENTIALS }}
-
 
       - name: Deploy to containerapp
         uses: azure/CLI@v1
         with:
           inlineScript: |
             az config set extension.use_dynamic_install=yes_without_prompt
-            az containerapp registry set -n ecourtsapidevcapp -g ecourts_api --server ecourtsscrapper.azurecr.io --username  ${{ secrets.ECOURTSAPIDEVCAPP_REGISTRY_USERNAME }} --password ${{ secrets.ECOURTSAPIDEVCAPP_REGISTRY_PASSWORD }}
-            az containerapp update -n ecourtsapidevcapp -g ecourts_api --image ecourtsscrapper.azurecr.io/ecourtsapidockerimagecontainer:${{ github.sha }}
+            az containerapp registry set \
+              -n ecourtsapidevcapp -g ecourts_api \
+              --server ecourtsscrapper.azurecr.io \
+              --username  ${{ secrets.ECOURTSAPIDEVCAPP_REGISTRY_USERNAME }} \
+              --password ${{ secrets.ECOURTSAPIDEVCAPP_REGISTRY_PASSWORD }}
+            az containerapp update \
+              -n ecourtsapidevcapp -g ecourts_api \
+              --image ecourtsscrapper.azurecr.io/ecourtsapidockerimagecontainer:${{ github.sha }}
+            OLD_REVISION=$(az containerapp revision list --name ecourtsapidevcapp --resource-group ecourts_api | jq -r '.[0].name')
+            az containerapp ingress traffic set -n ecourtsapidevcapp \
+              -g ecourts_api --revision-weight latest=100
+            az containerapp revision deactivate \
+              --revision $OLD_REVISION \
+              --resource-group ecourts_api
