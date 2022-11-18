@@ -82,8 +82,22 @@ def get_display_board_table_data_as_list(driver, xpath):
         if head.find_elements(by="xpath", value=".//th"):
             rows.append(
                 [th.text for th in head.find_elements(by="xpath", value=".//th")[0:3]])
+        if head.find_elements(by="xpath", value=".//td"):
+            rows.append(
+                [td.text for td in head.find_elements(by="xpath", value=".//td")[0:3]])
 
     for body in driver.find_elements(by="xpath", value="//table[@id='table1']/tbody/tr[@bgcolor='#e4e6b7']"):
+        if body.find_elements(by="xpath", value=".//td"):
+            rows.append(
+                [td.text for td in body.find_elements(by="xpath", value=".//td")[0:3]])
+            rows.append(
+                [td.text for td in body.find_elements(by="xpath", value=".//td")[3:6]])
+            rows.append(
+                [td.text for td in body.find_elements(by="xpath", value=".//td")[6:9]])
+            rows.append(
+                [td.text for td in body.find_elements(by="xpath", value=".//td")[9:12]])
+
+    for body in driver.find_elements(by="xpath", value="//table[@id='table1']/tbody/tr[@bgcolor='#FFFFCC']"):
         if body.find_elements(by="xpath", value=".//td"):
             rows.append(
                 [td.text for td in body.find_elements(by="xpath", value=".//td")[0:3]])
