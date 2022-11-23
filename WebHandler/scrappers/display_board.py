@@ -15,11 +15,15 @@ def get_display_board(driver, highCourtId):
         try:
             data = get_display_board_table_data_as_list(
                 driver, "//table[@id='table1']")
+            return data
         except Exception as e:
-            capture_exception(e)
-            if "SESSION ENDED" in selenium_get_text_xpath(driver, '/html/body/div[2]/form/center/table/tbody/tr/td/h1/font'):
-                return {"message": "SESSION ENDED"}
-        return data
+            try:
+                if "SESSION ENDED" in selenium_get_text_xpath(driver, '/html/body/div[2]/form/center/table/tbody/tr/td/h1/font'):
+                    return {"message": "SESSION ENDED", "code": "DB-1"}
+                else:
+                    return {"message": "Somthing is wrong. Try again", "code": "DB-2"}
+            except:
+                return {"message": "Something is wrong. Try again", "code": "DB-3"}
     except Exception as e:
         capture_exception(e)
-        return {"message": "No Data Found", "error": str(e), "datetime": datetime.now().isoformat()}
+        return {"message": "No Data Found", "error": str(e), "datetime": datetime.now().isoformat(), "code": "DB-4"}

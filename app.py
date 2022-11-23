@@ -36,7 +36,7 @@ sentry_sdk.init(
     traces_sample_rate=1.0
 )
 
-version = "3.1.4"
+version = "3.1.5"
 
 
 def create_driver(__location__):

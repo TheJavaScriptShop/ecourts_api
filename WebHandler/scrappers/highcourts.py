@@ -201,6 +201,8 @@ def get_highcourt_cases_by_name(props):
         while True:
             try:
                 time.sleep(int(os.environ.get('MIN_WAIT_TIME')))
+                cur_url = driver.current_url
+                logger.info({"current_url": cur_url})
                 case_details_title = selenium_get_text_xpath(
                     driver, '//table[contains(@class, "case_details_table")]/tbody/tr[1]/td[2]')
                 break
