@@ -28,12 +28,15 @@ def get_cause_list_data(driver, advocateName, highCourtId):
 
         try:
             data = get_cause_list_table_data_as_list(driver, "//table")
+            return data
         except Exception as e:
-            capture_exception(e)
-            if 'No list available' in selenium_get_text_xpath(driver, 'html/body'):
-                return {"message": "No list available"}
-
-        return data
+            try:
+                if 'No list available' in selenium_get_text_xpath(driver, 'html/body'):
+                    return {"message": "No list available"}
+                else:
+                    return {"message": "Somthing is wrong. Try again"}
+            except:
+                return {"message": "Somthing is wrong. Try again"}
     except Exception as e:
         capture_exception(e)
         return {"message": "No Data Found", "error": str(e), "datetime": datetime.now().isoformat()}
