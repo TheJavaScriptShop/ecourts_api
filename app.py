@@ -316,11 +316,33 @@ def main():
                         "stop": None,
                     }
                 case_details = get_no_of_cases(get_no_of_cases_props)
+                if case_details["status"] == False:
+                    logger.info("slow network")
+                    try:
+                        requests.post(url=body["callBackUrl"], timeout=10, json={
+                            "message": "Slow Network", "request": {"body": body, "params": params,  'version': version}})
+                    except Exception as e_exception:
+                        capture_exception(e_exception)
+
+                        logger.info(
+                            {"err_msg": "callback request failed", 'version': version, 'code': '5'})
+                    return
                 total_cases = int(case_details["number_of_cases"][23:])
                 logger.info({"total_cases": total_cases})
 
                 if total_cases <= cases_per_iteration:
                     data = get_cases_by_name(get_cases_by_name_props)
+                    if data["status"] == False:
+                        logger.info("Error")
+                        try:
+                            requests.post(url=body["callBackUrl"], timeout=10, json={
+                                "message": "Slow Network", "request": {"body": body, "params": params,  'version': version}})
+                        except Exception as e_exception:
+                            capture_exception(e_exception)
+
+                            logger.info(
+                                {"err_msg": "callback request failed", 'version': version, 'code': '5'})
+                        return
                     data["number_of_establishments_in_court_complex"] = case_details["number_of_establishments_in_court_complex"]
                     data["number_of_cases"] = case_details["number_of_cases"]
                     end_time = datetime.datetime.now()
@@ -466,7 +488,29 @@ def main():
 
                 case_details = get_no_of_cases(
                     get_no_of_cases_props)
+                if case_details["status"] == False:
+                    logger.info("slow network")
+                    try:
+                        requests.post(url=body["callBackUrl"], timeout=10, json={
+                            "message": "Slow Network", "request": {"body": body, "params": params,  'version': version}})
+                    except Exception as e_exception:
+                        capture_exception(e_exception)
+
+                        logger.info(
+                            {"err_msg": "callback request failed", 'version': version, 'code': '5'})
+                    return
                 cases = get_cases_by_name(get_cases_by_name_props)
+                if cases["status"] == False:
+                    logger.info("slow network")
+                    try:
+                        requests.post(url=body["callBackUrl"], timeout=10, json={
+                            "message": "Slow Network", "request": {"body": body, "params": params,  'version': version}})
+                    except Exception as e_exception:
+                        capture_exception(e_exception)
+
+                        logger.info(
+                            {"err_msg": "callback request failed", 'version': version, 'code': '5'})
+                    return
                 cases["number_of_establishments_in_court_complex"] = case_details["number_of_establishments_in_court_complex"]
                 cases["number_of_cases"] = case_details["number_of_cases"]
                 cases_data = {"start": body["start"],
