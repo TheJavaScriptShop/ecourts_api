@@ -235,9 +235,7 @@ def get_highcourt_cases_by_name(props):
                     driver.save_screenshot(
                         f'{__location__}/error_image')
                     try:
-                        name = "".join(
-                            ch for ch in advoc_name if ch.isalnum()).lower()
-                        blob_path_container = f"{name}/{date.today().month}/{date.today().day}/error_img.png"
+                        blob_path_container = f"{name}/highcourts/{date.today().month}/{date.today().day}/error_img.png"
                         file_name = 'error_image.png'
                         status = wait_for_download_and_rename(
                             blob_path_container, __location__, file_name)

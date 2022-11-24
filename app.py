@@ -314,6 +314,8 @@ def main():
                         "logger": logger,
                         "start": None,
                         "stop": None,
+                        "location": __location__,
+                        "advocate_name": body["advocateName"],
                     }
                 case_details = get_no_of_cases(get_no_of_cases_props)
                 if case_details["status"] == False:
@@ -483,7 +485,9 @@ def main():
                         "driver": chrome_driver,
                         "logger": logger,
                         "start": body["start"],
-                        "stop": body["stop"]
+                        "stop": body["stop"],
+                        "location": __location__,
+                        "advocate_name": body["advocateName"],
                     }
 
                 case_details = get_no_of_cases(
