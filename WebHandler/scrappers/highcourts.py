@@ -38,7 +38,7 @@ def get_highcourt_no_of_cases(props):
     advoc_name = props["advocate_name"]
     state_code = props["highcourt_id"]
     bench_code = props["bench_code"]
-    name = "".join(ch for ch in advoc_name if ch.isalnum())
+    name = advoc_name.replace(" ", "_").lower()
 
     if props.get("iteration"):
         img_path = f'dc-{name}-img-{props["iteration"]}.png'
@@ -219,11 +219,11 @@ def get_highcourt_cases_by_name(props):
                 case_details_title = selenium_get_text_xpath(
                     driver, '//table[contains(@class, "case_details_table")]/tbody/tr[1]/td[2]')
                 break
-            except:
+            except Exception as e_exception:
+                logger.info(e_exception)
                 if case_detail_trail >= 10:
                     logger.info("max tries exceeded")
-                    name = "".join(
-                        ch for ch in advoc_name if ch.isalnum()).lower()
+                    name = advoc_name.replace(" ", "_").lower()
                     driver.save_screenshot(
                         f'{__location__}/error_image.png')
                     try:
@@ -233,7 +233,15 @@ def get_highcourt_cases_by_name(props):
                             blob_path_container, __location__, file_name)
                     except Exception as e:
                         pass
-                    return {"message": "Something is wrong", "status": False,  "code": "hc-6"}
+                    try:
+                        back_button = selenium_get_element_xpath(
+                            driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[48]/input')
+                        driver.execute_script(
+                            "arguments[0].click();", back_button)
+                    except:
+                        pass
+                    case_sl_no = case_sl_no + 1
+                    continue
                 case_detail_trail = case_detail_trail + 1
 
         case_details_cnr_no = selenium_get_text_xpath(
@@ -362,8 +370,7 @@ def get_highcourt_cases_by_name(props):
                     logger.info('downloading file')
                     case_no = case_details_title.replace("/", "-")
                     try:
-                        name = "".join(
-                            ch for ch in advoc_name if ch.isalnum()).lower()
+                        name = advoc_name.replace(" ", "_").lower()
                         blob_path_container = f"{name}/{case_no}/{date.today().month}/{date.today().day}/orders/{order_no}.pdf"
                         file_name = 'display_pdf.pdf'
                         status = wait_for_download_and_rename(

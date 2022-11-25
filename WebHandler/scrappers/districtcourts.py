@@ -37,7 +37,7 @@ def get_districtcourt_no_of_cases(props):
     district_id = props["district_id"]
     state_id = props["state_id"]
     court_complex_id = props["court_complex_id"]
-    name = "".join(ch for ch in advoc_name if ch.isalnum())
+    name = advoc_name.replace(" ", "_").lower()
     start_time = datetime.now()
 
     if props.get("iteration"):
@@ -233,8 +233,7 @@ def get_districtcourt_cases_by_name(props):
                 break
             except:
                 if case_detail_trail >= 10:
-                    name = "".join(
-                        ch for ch in advoc_name if ch.isalnum()).lower()
+                    name = advoc_name.replace(" ", "_").lower()
                     driver.save_screenshot(
                         f'{__location__}/error_image')
                     try:
