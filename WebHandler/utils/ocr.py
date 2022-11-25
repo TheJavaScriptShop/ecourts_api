@@ -25,23 +25,28 @@ def remove_noise(image):
     return cv2.medianBlur(image, 5)
 
 
-def get_text_from_captcha(driver, img_path, retry_path, captcha_path, logger):
+def get_text_from_captcha(driver, img_path, retry_path, captcha_path, logger, trail):
     logger.info("decoding captcha")
     reader = easyocr.Reader(
         ["en"], gpu=False, model_storage_directory=__location__, download_enabled=False)
     result = reader.readtext(img_path)
     match = re.search(r'\(?([0-9A-Za-z]+)\)?', result[0][1])
+    logger.info({"match": match})
+    if trail > 10:
+        return False
     if match is None:
         logger.info("retry decoding")
+        trail = trail + 1
         selenium_click_xpath(driver, retry_path)
         get_captcha(driver, img_path, captcha_path)
-        return get_text_from_captcha(driver, img_path, retry_path, captcha_path, logger)
+        return get_text_from_captcha(driver, img_path, retry_path, captcha_path, logger, trail)
     else:
         if (len(match.group(1)) != 6):
-            logger.info("retry decoding")
+            logger.info("retry decoding 1")
+            trail = trail + 1
             selenium_click_xpath(driver, retry_path)
             get_captcha(driver, img_path, captcha_path)
-            return get_text_from_captcha(driver, img_path, retry_path, captcha_path, logger)
+            return get_text_from_captcha(driver, img_path, retry_path, captcha_path, logger, trail)
     logger.info("captcha decoded")
     return match.group(1)
 

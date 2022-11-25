@@ -361,7 +361,7 @@ def main():
                     try:
                         requests.post(url=body["callBackUrl"], timeout=10, json={
                             "data": data, "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version}})
-                        logger.info({"data": data, "request": {"body": body, "params": params, "start_time": start_time.isoformat(
+                        logger.info({"data": data, "request": {"body": body, "params": params.to_dict(flat=False), "start_time": start_time.isoformat(
                         ), "time": total_time.seconds, 'version': version}})
                         logger.info("callback request made")
                     except Exception as e_exception:
