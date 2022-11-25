@@ -94,7 +94,7 @@ def get_highcourt_no_of_cases(props):
             captcha_xpath = '//*[@id="captcha_image"]'
             get_captcha(driver, img_path, captcha_xpath)
             text = get_text_from_captcha(
-                driver, img_path, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/span/div/div[1]/div[1]/img', captcha_xpath)
+                driver, img_path, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/span/div/div[1]/div[1]/img', captcha_xpath, logger)
 
             driver.execute_script("arguments[0].click();", selenium_get_element_xpath(
                 driver, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/span/div/div[2]/label"))
