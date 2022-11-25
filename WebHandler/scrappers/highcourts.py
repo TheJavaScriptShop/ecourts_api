@@ -73,15 +73,6 @@ def get_highcourt_no_of_cases(props):
             except:
                 pass
 
-            # def alarm_handler(signum, frame):
-            #     return {
-            #         "status": False,
-            #         "messsage": "Slow Network"
-            #     }
-            # signal.signal(signal.SIGALRM, alarm_handler)
-
-            # signal.alarm(30)
-
             state_select = Select(
                 driver.find_element(By.ID, 'sess_state_code'))
             state_select.select_by_value(state_code)
@@ -155,7 +146,7 @@ def get_highcourt_no_of_cases(props):
 
             if counter_retry > 10:
                 is_failed_with_captach = False
-                return {'status': False, "message": ''.join(tb.format()), 'data': {}, "debugMessage": "Maximun retries reached", "code": "hc-3"}
+                return {'status': False, "message": ''.join(tb.format()), 'data': {}, "debugMessage": "Maximun retries reached", "code": "hc-4"}
     get_cases_trail = 1
     while get_cases_trail <= 11:
         try:
@@ -174,7 +165,7 @@ def get_highcourt_no_of_cases(props):
             break
         except:
             if get_cases_trail > 10:
-                return {"message": "Somthing is wrong", "status": False}
+                return {"message": "Somthing is wrong", "status": False,  "code": "hc-5"}
 
 
 def get_highcourt_cases_by_name(props):
@@ -241,7 +232,7 @@ def get_highcourt_cases_by_name(props):
                             blob_path_container, __location__, file_name)
                     except Exception as e:
                         pass
-                    return {"message": "Something is wrong", "status": False}
+                    return {"message": "Something is wrong", "status": False,  "code": "hc-6"}
 
         case_details_cnr_no = selenium_get_text_xpath(
             driver, '//*[@id="caseBusinessDiv4"]/div/table/tbody/tr[3]/td[2]/strong')

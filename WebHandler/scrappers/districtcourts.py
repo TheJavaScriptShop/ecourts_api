@@ -142,17 +142,16 @@ def get_districtcourt_no_of_cases(props):
             is_failed_with_captach = True
             logger.info("Website is slow. Retrying")
             capture_exception(e_exception)
-            tb = traceback.TracebackException.from_exception(
-                e_exception)
+            tb = traceback.TracebackException.from_exception(e_exception)
             end_time = datetime.now()
             total_time = end_time - start_time
             print(total_time.seconds)
             if total_time.seconds > 300:
                 is_failed_with_captach = False
-                return {'status': False, "message": ''.join(tb.format()), 'data': {}, "debugMessage": "Maximun Time reached", "code": "hc-3"}
+                return {'status': False, "message": ''.join(tb.format()), 'data': {}, "debugMessage": "Maximun Time reached", "code": "dc-2"}
 
             if counter_retry > 10:
-                return {'status': False, 'data': {}, "message": ''.join(tb.format()), "debugMessage": "Maximun retries reached", "code": "dc-2"}
+                return {'status': False, 'data': {}, "message": ''.join(tb.format()), "debugMessage": "Maximun retries reached", "code": "dc-3"}
 
     get_cases_trail = 1
     while get_cases_trail <= 11:
@@ -174,7 +173,7 @@ def get_districtcourt_no_of_cases(props):
             break
         except:
             if get_cases_trail > 10:
-                return {"message": "Somthing is wrong", "status": False}
+                return {"message": "Somthing is wrong", "status": False, "code": "dc-4"}
 
 
 def get_districtcourt_cases_by_name(props):
@@ -245,7 +244,7 @@ def get_districtcourt_cases_by_name(props):
                             blob_path_container, __location__, file_name)
                     except Exception as e:
                         pass
-                    return {"message": "Something is wrong", "status": False}
+                    return {"message": "Something is wrong", "status": False, "code": "dc-5"}
         case_type = selenium_get_text_xpath(
             case_details_element, './/tr[1]/td[2]')
         filing_number = selenium_get_text_xpath(

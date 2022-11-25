@@ -343,7 +343,7 @@ def main():
                             capture_exception(e_exception)
 
                             logger.info(
-                                {"err_msg": "callback request failed", 'version': version, 'code': '5'})
+                                {"err_msg": "callback request failed", 'version': version, 'code': '6'})
                         return
                     data["number_of_establishments_in_court_complex"] = case_details["number_of_establishments_in_court_complex"]
                     data["number_of_cases"] = case_details["number_of_cases"]
@@ -359,7 +359,7 @@ def main():
                         tb = traceback.TracebackException.from_exception(
                             e_exception)
                         logger.info(
-                            {"err_msg": "callback request failed", "error": ''.join(tb.format()), 'version': version, 'code': '5'})
+                            {"err_msg": "callback request failed", "error": ''.join(tb.format()), 'version': version, 'code': '7'})
                 else:
                     n = total_cases/cases_per_iteration
                     start = 0
@@ -386,13 +386,13 @@ def main():
                                 e_exception)
                             try:
                                 requests.post(url=body["callBackUrl"], timeout=10, json={
-                                    "error": ''.join(tb.format()), "message": "Request Failed", "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, 'code': '6'}})
+                                    "error": ''.join(tb.format()), "message": "Request Failed", "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, 'code': '8'}})
                             except Exception as e_exc:
                                 capture_exception(e_exc)
                                 tb = traceback.TracebackException.from_exception(
                                     e_exception)
                                 logger.info(
-                                    {"err_msg": "callback request failed", "message": ''.join(tb.format()), 'version': version, 'code': '7'})
+                                    {"err_msg": "callback request failed", "message": ''.join(tb.format()), 'version': version, 'code': '9'})
                         start = start + cases_per_iteration
                         stop = stop + cases_per_iteration
                         n = n - 1
@@ -408,13 +408,13 @@ def main():
                 tb = traceback.TracebackException.from_exception(e_exception)
                 try:
                     requests.post(url=body["callBackUrl"], timeout=10, json={
-                        "error": ''.join(tb.format()), "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, "code": "8"}})
+                        "error": ''.join(tb.format()), "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, "code": "10"}})
                 except Exception as e_exc:
                     capture_exception(e_exc)
                     tb = traceback.TracebackException.from_exception(
                         e_exception)
                     logger.info({"err_msg": "callback request failed", "message": ''.join(tb.format()),
-                                'version': version, 'code': '9'})
+                                'version': version, 'code': '11'})
         get_total_no_of_cases_wrapper()
         data = {
             "status": True,
@@ -501,7 +501,7 @@ def main():
                         capture_exception(e_exception)
 
                         logger.info(
-                            {"err_msg": "callback request failed", 'version': version, 'code': '5'})
+                            {"err_msg": "callback request failed", 'version': version, 'code': '12'})
                     return
                 cases = get_cases_by_name(get_cases_by_name_props)
                 if cases["status"] == False:
@@ -513,7 +513,7 @@ def main():
                         capture_exception(e_exception)
 
                         logger.info(
-                            {"err_msg": "callback request failed", 'version': version, 'code': '5'})
+                            {"err_msg": "callback request failed", 'version': version, 'code': '13'})
                     return
                 cases["number_of_establishments_in_court_complex"] = case_details["number_of_establishments_in_court_complex"]
                 cases["number_of_cases"] = case_details["number_of_cases"]
@@ -533,7 +533,7 @@ def main():
                     tb = traceback.TracebackException.from_exception(
                         e_exception)
                     logger.info(
-                        {"err_msg": "callback request failed", "message": ''.join(tb.format()), 'version': version, 'code': '10'})
+                        {"err_msg": "callback request failed", "message": ''.join(tb.format()), 'version': version, 'code': '14'})
             except Exception as e_exception:
                 logger.info(str(e_exception))
                 end_time = datetime.datetime.now()
@@ -542,13 +542,13 @@ def main():
                 tb = traceback.TracebackException.from_exception(e_exception)
                 try:
                     requests.post(url=body["callBackUrl"], timeout=10, json={
-                        "error": ''.join(tb.format()), "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, 'code': '11'}})
+                        "error": ''.join(tb.format()), "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, 'code': '15'}})
                 except Exception as e_exc:
                     capture_exception(e_exc)
                     tb = traceback.TracebackException.from_exception(
                         e_exception)
                     logger.info(
-                        {"err_msg": "callback request failed", "message": ''.join(tb.format()), 'version': version, 'code': '12'})
+                        {"err_msg": "callback request failed", "message": ''.join(tb.format()), 'version': version, 'code': '16'})
         get_highcourt_cases_by_name_wrapper()
         data = {
             "status": True,
