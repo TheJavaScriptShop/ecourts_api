@@ -38,7 +38,7 @@ def get_highcourt_no_of_cases(props):
     advoc_name = props["advocate_name"]
     state_code = props["highcourt_id"]
     bench_code = props["bench_code"]
-    name = "".join(ch for ch in advoc_name if ch.isalnum())
+    name = advoc_name.replace(" ", "_").lower()
 
     if props.get("iteration"):
         img_path = f'dc-{name}-img-{props["iteration"]}.png'
@@ -94,7 +94,7 @@ def get_highcourt_no_of_cases(props):
             captcha_xpath = '//*[@id="captcha_image"]'
             get_captcha(driver, img_path, captcha_xpath)
             text = get_text_from_captcha(
-                driver, img_path, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/span/div/div[1]/div[1]/img', captcha_xpath)
+                driver, img_path, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/span/div/div[1]/div[1]/img', captcha_xpath, logger)
 
             driver.execute_script("arguments[0].click();", selenium_get_element_xpath(
                 driver, "/html/body/div[1]/div/div[1]/div[2]/div/div[2]/span/div/div[2]/label"))
@@ -211,7 +211,8 @@ def get_highcourt_cases_by_name(props):
         # details behind the hyperlink
         # case details
         case_detail_trail = 1
-        while case_detail_trail <= 11:
+        skip_this_case = False
+        while case_detail_trail <= 6:
             try:
                 time.sleep(int(os.environ.get('MIN_WAIT_TIME')))
                 cur_url = driver.current_url
@@ -219,11 +220,11 @@ def get_highcourt_cases_by_name(props):
                 case_details_title = selenium_get_text_xpath(
                     driver, '//table[contains(@class, "case_details_table")]/tbody/tr[1]/td[2]')
                 break
-            except:
-                if case_detail_trail >= 10:
+            except Exception as e_exception:
+                logger.info(e_exception)
+                if case_detail_trail >= 5:
                     logger.info("max tries exceeded")
-                    name = "".join(
-                        ch for ch in advoc_name if ch.isalnum()).lower()
+                    name = advoc_name.replace(" ", "_").lower()
                     driver.save_screenshot(
                         f'{__location__}/error_image.png')
                     try:
@@ -233,8 +234,20 @@ def get_highcourt_cases_by_name(props):
                             blob_path_container, __location__, file_name)
                     except Exception as e:
                         pass
-                    return {"message": "Something is wrong", "status": False,  "code": "hc-6"}
+                    try:
+                        back_button = selenium_get_element_xpath(
+                            driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[48]/input')
+                        driver.execute_script(
+                            "arguments[0].click();", back_button)
+                    except:
+                        pass
+                    case_sl_no = case_sl_no + 1
+                    skip_this_case = True
+                    break
                 case_detail_trail = case_detail_trail + 1
+
+        if skip_this_case:
+            continue
 
         case_details_cnr_no = selenium_get_text_xpath(
             driver, '//*[@id="caseBusinessDiv4"]/div/table/tbody/tr[3]/td[2]/strong')
@@ -362,8 +375,7 @@ def get_highcourt_cases_by_name(props):
                     logger.info('downloading file')
                     case_no = case_details_title.replace("/", "-")
                     try:
-                        name = "".join(
-                            ch for ch in advoc_name if ch.isalnum()).lower()
+                        name = advoc_name.replace(" ", "_").lower()
                         blob_path_container = f"{name}/{case_no}/{date.today().month}/{date.today().day}/orders/{order_no}.pdf"
                         file_name = 'display_pdf.pdf'
                         status = wait_for_download_and_rename(
