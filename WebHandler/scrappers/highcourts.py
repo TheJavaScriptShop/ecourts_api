@@ -221,10 +221,11 @@ def get_highcourt_cases_by_name(props):
                 break
             except:
                 if case_detail_trail >= 10:
+                    logger.info("max tries exceeded")
                     name = "".join(
                         ch for ch in advoc_name if ch.isalnum()).lower()
                     driver.save_screenshot(
-                        f'{__location__}/error_image')
+                        f'{__location__}/error_image.png')
                     try:
                         blob_path_container = f"{name}/highcourts/{date.today().month}/{date.today().day}/error_img.png"
                         file_name = 'error_image.png'
@@ -233,6 +234,7 @@ def get_highcourt_cases_by_name(props):
                     except Exception as e:
                         pass
                     return {"message": "Something is wrong", "status": False,  "code": "hc-6"}
+                case_detail_trail = case_detail_trail + 1
 
         case_details_cnr_no = selenium_get_text_xpath(
             driver, '//*[@id="caseBusinessDiv4"]/div/table/tbody/tr[3]/td[2]/strong')

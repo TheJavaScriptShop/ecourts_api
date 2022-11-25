@@ -329,7 +329,7 @@ def main():
                         logger.info(
                             {"err_msg": "callback request failed", 'version': version, 'code': '5'})
                     return
-                total_cases = int(case_details["number_of_cases"][23:])
+                total_cases = int(case_details["data"]["number_of_cases"][23:])
                 logger.info({"total_cases": total_cases})
 
                 if total_cases <= cases_per_iteration:
@@ -338,15 +338,15 @@ def main():
                         logger.info("Error")
                         try:
                             requests.post(url=body["callBackUrl"], timeout=10, json={
-                                "message": "Slow Network", "request": {"body": body, "params": params,  'version': version}})
+                                "message": "Something is wrong", "request": {"body": body, "params": params,  'version': version}})
                         except Exception as e_exception:
                             capture_exception(e_exception)
 
                             logger.info(
                                 {"err_msg": "callback request failed", 'version': version, 'code': '6'})
                         return
-                    data["number_of_establishments_in_court_complex"] = case_details["number_of_establishments_in_court_complex"]
-                    data["number_of_cases"] = case_details["number_of_cases"]
+                    data["number_of_establishments_in_court_complex"] = case_details["data"]["number_of_establishments_in_court_complex"]
+                    data["number_of_cases"] = case_details["data"]["number_of_cases"]
                     end_time = datetime.datetime.now()
                     total_time = end_time - start_time
                     logger.info(
@@ -505,18 +505,18 @@ def main():
                     return
                 cases = get_cases_by_name(get_cases_by_name_props)
                 if cases["status"] == False:
-                    logger.info("slow network")
+                    logger.info("Something is wrong")
                     try:
                         requests.post(url=body["callBackUrl"], timeout=10, json={
-                            "message": "Slow Network", "request": {"body": body, "params": params,  'version': version}})
+                            "message": "Something is wrong", "request": {"body": body, "params": params,  'version': version}})
                     except Exception as e_exception:
                         capture_exception(e_exception)
 
                         logger.info(
                             {"err_msg": "callback request failed", 'version': version, 'code': '13'})
                     return
-                cases["number_of_establishments_in_court_complex"] = case_details["number_of_establishments_in_court_complex"]
-                cases["number_of_cases"] = case_details["number_of_cases"]
+                cases["number_of_establishments_in_court_complex"] = case_details["data"]["number_of_establishments_in_court_complex"]
+                cases["number_of_cases"] = case_details["data"]["number_of_cases"]
                 cases_data = {"start": body["start"],
                               "stop": body["stop"], "data": cases}
                 chrome_driver.close()
