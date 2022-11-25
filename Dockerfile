@@ -50,6 +50,6 @@ RUN pip install -r /requirements.txt
 COPY . /home/site/wwwroot
 
 WORKDIR /home/site/wwwroot
-EXPOSE 3000 80 443 22
+EXPOSE 3000 80 443 22 9222
 
 CMD ["gunicorn", "--workers", "4", "--timeout", "3600", "--capture-output", "--bind", "0.0.0.0:8080", "-m", "007", "wsgi:application", "--reload"]
