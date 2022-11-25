@@ -3,7 +3,7 @@ import os
 
 import traceback
 from sentry_sdk import capture_exception
-
+from datetime import datetime, date
 
 from selenium.webdriver.support.ui import Select
 from dotenv import load_dotenv
@@ -22,6 +22,8 @@ from ..utils.ocr import (
     get_text_from_captcha,
     get_captcha
 )
+from ..utils.blob_storage import wait_for_download_and_rename
+
 
 if os.environ.get("APP_ENV") == "local":
     load_dotenv()
@@ -36,6 +38,7 @@ def get_districtcourt_no_of_cases(props):
     state_id = props["state_id"]
     court_complex_id = props["court_complex_id"]
     name = "".join(ch for ch in advoc_name if ch.isalnum())
+    start_time = datetime.now()
 
     if props.get("iteration"):
         img_path = f'dc-{name}-img-{props["iteration"]}.png'
@@ -55,8 +58,8 @@ def get_districtcourt_no_of_cases(props):
                 tb = traceback.TracebackException.from_exception(e_exception)
                 return {'status': False, "message": ''.join(tb.format()), 'data': {}, "debugMessage": "Maximun retries reached", "code": "dc-1"}
             url_trial = url_trial + 1
-    try:
-        while is_failed_with_captach:
+    while is_failed_with_captach:
+        try:
             counter_retry += 1
             try:
                 if "Invalid Request" in selenium_get_text_xpath(driver, "/html/body/div[7]/div/div/div[2]/div/div[1]"):
@@ -132,16 +135,26 @@ def get_districtcourt_no_of_cases(props):
                     is_failed_with_captach = True
             except:
                 pass
-        if os.path.isfile(img_path):
-            os.remove(img_path)
+            if os.path.isfile(img_path):
+                os.remove(img_path)
 
-    except Exception as e_exception:
-        capture_exception(e_exception)
-        tb = traceback.TracebackException.from_exception(e_exception)
-        if counter_retry > 10:
-            return {'status': False, 'data': {}, "message": ''.join(tb.format()), "debugMessage": "Maximun retries reached", "code": "dc-2"}
+        except Exception as e_exception:
+            is_failed_with_captach = True
+            logger.info("Website is slow. Retrying")
+            capture_exception(e_exception)
+            tb = traceback.TracebackException.from_exception(e_exception)
+            end_time = datetime.now()
+            total_time = end_time - start_time
+            print(total_time.seconds)
+            if total_time.seconds > 300:
+                is_failed_with_captach = False
+                return {'status': False, "message": ''.join(tb.format()), 'data': {}, "debugMessage": "Maximun Time reached", "code": "dc-2"}
 
-    while True:
+            if counter_retry > 10:
+                return {'status': False, 'data': {}, "message": ''.join(tb.format()), "debugMessage": "Maximun retries reached", "code": "dc-3"}
+
+    get_cases_trail = 1
+    while get_cases_trail <= 11:
         try:
             time.sleep(int(os.environ.get('MIN_WAIT_TIME')))
             courts_info = []
@@ -156,11 +169,11 @@ def get_districtcourt_no_of_cases(props):
                 "number_of_cases": number_of_cases,
                 "courts_info": courts_info
             }
+            return {"data": data, "status": True}
             break
         except:
-            pass
-
-    return data
+            if get_cases_trail > 10:
+                return {"message": "Somthing is wrong", "status": False, "code": "dc-4"}
 
 
 def get_districtcourt_cases_by_name(props):
@@ -168,6 +181,8 @@ def get_districtcourt_cases_by_name(props):
     logger = props["logger"]
     start = props["start"]
     stop = props["stop"]
+    __location__ = props["location"]
+    advoc_name = props["advocate_name"]
 
     # case details
     table_element = selenium_get_element_id(driver, 'dispTable')
@@ -209,14 +224,27 @@ def get_districtcourt_cases_by_name(props):
             pass
         # details behind the hyperlink
         # case details
-        while True:
+        case_detail_trail = 1
+        while case_detail_trail <= 11:
             try:
                 time.sleep(int(os.environ.get('MIN_WAIT_TIME')))
                 case_details_element = selenium_get_element_xpath(
                     driver, '//table[contains(@class, "case_details_table")]')
                 break
             except:
-                pass
+                if case_detail_trail >= 10:
+                    name = "".join(
+                        ch for ch in advoc_name if ch.isalnum()).lower()
+                    driver.save_screenshot(
+                        f'{__location__}/error_image')
+                    try:
+                        blob_path_container = f"{name}/districtcourts/{date.today().month}/{date.today().day}/error_img.png"
+                        file_name = 'error_image.png'
+                        wait_for_download_and_rename(
+                            blob_path_container, __location__, file_name)
+                    except Exception as e:
+                        pass
+                    return {"message": "Something is wrong", "status": False, "code": "dc-5"}
         case_type = selenium_get_text_xpath(
             case_details_element, './/tr[1]/td[2]')
         filing_number = selenium_get_text_xpath(

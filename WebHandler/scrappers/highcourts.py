@@ -1,6 +1,6 @@
 import time
 import os
-from datetime import date
+from datetime import date, datetime
 import traceback
 
 from selenium.webdriver.support.ui import WebDriverWait
@@ -9,6 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 from dotenv import load_dotenv
 from sentry_sdk import capture_exception
+import signal
 
 from ..utils.sel import (
     selenium_send_keys_xpath,
@@ -44,8 +45,9 @@ def get_highcourt_no_of_cases(props):
     else:
         img_path = f"{name}-image.png"
     counter_retry = 0
-    try:
-        while is_failed_with_captach:
+    start_time = datetime.now()
+    while is_failed_with_captach:
+        try:
             counter_retry += 1
             url_trial = 1
             while url_trial <= 11:
@@ -70,6 +72,7 @@ def get_highcourt_no_of_cases(props):
                 logger.info("ok clicked")
             except:
                 pass
+
             state_select = Select(
                 driver.find_element(By.ID, 'sess_state_code'))
             state_select.select_by_value(state_code)
@@ -126,17 +129,26 @@ def get_highcourt_no_of_cases(props):
 
                 except Exception as e:
                     pass
-        if os.path.isfile(img_path):
-            os.remove(img_path)
-    except Exception as e_exception:
-        is_failed_with_captach = True
-        capture_exception(e_exception)
-        tb = traceback.TracebackException.from_exception(e_exception)
-        if counter_retry > 10:
-            is_failed_with_captach = False
-            return {'status': False, "message": ''.join(tb.format()), 'data': {}, "debugMessage": "Maximun retries reached", "code": "hc-3"}
+            if os.path.isfile(img_path):
+                os.remove(img_path)
+        except Exception as e_exception:
+            is_failed_with_captach = True
+            logger.info("Website is slow. Retrying")
+            capture_exception(e_exception)
+            tb = traceback.TracebackException.from_exception(
+                e_exception)
+            end_time = datetime.now()
+            total_time = end_time - start_time
+            print(total_time.seconds)
+            if total_time.seconds > 300:
+                is_failed_with_captach = False
+                return {'status': False, "message": ''.join(tb.format()), 'data': {}, "debugMessage": "Maximun Time reached", "code": "hc-3"}
 
-    while True:
+            if counter_retry > 10:
+                is_failed_with_captach = False
+                return {'status': False, "message": ''.join(tb.format()), 'data': {}, "debugMessage": "Maximun retries reached", "code": "hc-4"}
+    get_cases_trail = 1
+    while get_cases_trail <= 11:
         try:
             time.sleep(int(os.environ.get('MIN_WAIT_TIME')))
             if not fetched_data:
@@ -145,15 +157,15 @@ def get_highcourt_no_of_cases(props):
                 logger.info(number_of_establishments_in_court_complex)
                 number_of_cases = selenium_get_text_xpath(
                     driver, '//*[@id="showList2"]/div[1]/h4')
-                logger.info(number_of_cases)
                 data = {
                     "number_of_establishments_in_court_complex": number_of_establishments_in_court_complex,
                     "number_of_cases": number_of_cases,
                 }
-                return data
+                return {"data": data, "status": True}
             break
         except:
-            pass
+            if get_cases_trail > 10:
+                return {"message": "Somthing is wrong", "status": False,  "code": "hc-5"}
 
 
 def get_highcourt_cases_by_name(props):
@@ -198,7 +210,8 @@ def get_highcourt_cases_by_name(props):
         logger.info(f"{case_sl_no} view clicked")
         # details behind the hyperlink
         # case details
-        while True:
+        case_detail_trail = 1
+        while case_detail_trail <= 11:
             try:
                 time.sleep(int(os.environ.get('MIN_WAIT_TIME')))
                 cur_url = driver.current_url
@@ -207,7 +220,22 @@ def get_highcourt_cases_by_name(props):
                     driver, '//table[contains(@class, "case_details_table")]/tbody/tr[1]/td[2]')
                 break
             except:
-                pass
+                if case_detail_trail >= 10:
+                    logger.info("max tries exceeded")
+                    name = "".join(
+                        ch for ch in advoc_name if ch.isalnum()).lower()
+                    driver.save_screenshot(
+                        f'{__location__}/error_image.png')
+                    try:
+                        blob_path_container = f"{name}/highcourts/{date.today().month}/{date.today().day}/error_img.png"
+                        file_name = 'error_image.png'
+                        status = wait_for_download_and_rename(
+                            blob_path_container, __location__, file_name)
+                    except Exception as e:
+                        pass
+                    return {"message": "Something is wrong", "status": False,  "code": "hc-6"}
+                case_detail_trail = case_detail_trail + 1
+
         case_details_cnr_no = selenium_get_text_xpath(
             driver, '//*[@id="caseBusinessDiv4"]/div/table/tbody/tr[3]/td[2]/strong')
         case_details_filing_date = selenium_get_text_xpath(
