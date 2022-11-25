@@ -225,17 +225,22 @@ def get_districtcourt_cases_by_name(props):
         # details behind the hyperlink
         # case details
         case_detail_trail = 1
-        while case_detail_trail <= 11:
+        skip_this_case = False
+        while case_detail_trail <= 6:
             try:
                 time.sleep(int(os.environ.get('MIN_WAIT_TIME')))
+                cur_url = driver.current_url
+                logger.info({"current_url": cur_url})
                 case_details_element = selenium_get_element_xpath(
                     driver, '//table[contains(@class, "case_details_table")]')
                 break
-            except:
-                if case_detail_trail >= 10:
+            except Exception as e_exception:
+                logger.info(e_exception)
+                if case_detail_trail >= 5:
+                    logger.info("max tries exceeded")
                     name = advoc_name.replace(" ", "_").lower()
                     driver.save_screenshot(
-                        f'{__location__}/error_image')
+                        f'{__location__}/error_image.png')
                     try:
                         blob_path_container = f"{name}/districtcourts/{date.today().month}/{date.today().day}/error_img.png"
                         file_name = 'error_image.png'
@@ -243,7 +248,20 @@ def get_districtcourt_cases_by_name(props):
                             blob_path_container, __location__, file_name)
                     except Exception as e:
                         pass
-                    return {"message": "Something is wrong", "status": False, "code": "dc-5"}
+                    try:
+                        back_button = selenium_get_element_xpath(
+                            driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[48]/input')
+                        driver.execute_script(
+                            "arguments[0].click();", back_button)
+                    except:
+                        pass
+                    case_sl_no = case_sl_no + 1
+                    skip_this_case = True
+                    break
+                case_detail_trail = case_detail_trail + 1
+
+        if skip_this_case:
+            continue
         case_type = selenium_get_text_xpath(
             case_details_element, './/tr[1]/td[2]')
         filing_number = selenium_get_text_xpath(

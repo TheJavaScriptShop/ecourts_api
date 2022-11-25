@@ -211,7 +211,8 @@ def get_highcourt_cases_by_name(props):
         # details behind the hyperlink
         # case details
         case_detail_trail = 1
-        while case_detail_trail <= 11:
+        skip_this_case = False
+        while case_detail_trail <= 6:
             try:
                 time.sleep(int(os.environ.get('MIN_WAIT_TIME')))
                 cur_url = driver.current_url
@@ -221,7 +222,7 @@ def get_highcourt_cases_by_name(props):
                 break
             except Exception as e_exception:
                 logger.info(e_exception)
-                if case_detail_trail >= 10:
+                if case_detail_trail >= 5:
                     logger.info("max tries exceeded")
                     name = advoc_name.replace(" ", "_").lower()
                     driver.save_screenshot(
@@ -241,8 +242,12 @@ def get_highcourt_cases_by_name(props):
                     except:
                         pass
                     case_sl_no = case_sl_no + 1
-                    continue
+                    skip_this_case = True
+                    break
                 case_detail_trail = case_detail_trail + 1
+
+        if skip_this_case:
+            continue
 
         case_details_cnr_no = selenium_get_text_xpath(
             driver, '//*[@id="caseBusinessDiv4"]/div/table/tbody/tr[3]/td[2]/strong')
