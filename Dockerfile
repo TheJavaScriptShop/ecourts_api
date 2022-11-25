@@ -41,6 +41,7 @@ RUN LATEST=$(wget -q -O - http://chromedriver.storage.googleapis.com/LATEST_RELE
     wget http://chromedriver.storage.googleapis.com/107.0.5304.62/chromedriver_linux64.zip && \
     unzip chromedriver_linux64.zip && ln -s $PWD/chromedriver /usr/local/bin/chromedriver
 
+RUN chmod +x /usr/local/bin/chromedriver
 # 3. Install selenium in Python
 RUN pip install -U selenium
 RUN pip install -r /requirements.txt
