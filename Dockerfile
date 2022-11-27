@@ -8,6 +8,7 @@ ENV AzureWebJobsScriptRoot=/home/site/wwwroot \
 # set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+ENV DISPLAY=:99
 
 RUN pip3 install --upgrade pip
 
