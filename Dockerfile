@@ -40,7 +40,7 @@ RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key
 # 2. Install Chrome driver used by Selenium
 RUN LATEST=$(wget -q -O - http://chromedriver.storage.googleapis.com/LATEST_RELEASE) && \
     wget http://chromedriver.storage.googleapis.com/107.0.5304.62/chromedriver_linux64.zip && \
-    unzip chromedriver_linux64.zip && ln -s $PWD/chromedriver /usr/local/bin/chromedriver
+    unzip chromedriver_linux64.zip chromedriver -d /usr/local/bin/
 
 RUN chmod +x /usr/local/bin/chromedriver
 # 3. Install selenium in Python
