@@ -30,10 +30,12 @@ def get_text_from_captcha(driver, img_path, retry_path, captcha_path, logger, tr
     reader = easyocr.Reader(
         ["en"], gpu=False, model_storage_directory=__location__, download_enabled=False)
     result = reader.readtext(img_path)
-    match = re.search(r'\(?([0-9A-Za-z]+)\)?', result[0][1])
-    logger.info({"match": match})
     if trail > 10:
         return False
+    try:
+        match = re.search(r'\(?([0-9A-Za-z]+)\)?', result[0][1])
+    except:
+        pass
     if match is None:
         logger.info("retry decoding")
         trail = trail + 1
