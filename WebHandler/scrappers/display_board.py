@@ -1,4 +1,5 @@
-from sentry_sdk import capture_exception
+from sentry_sdk import capture_exception, capture_message
+import traceback
 
 from ..utils.sel import get_display_board_table_data_as_list, selenium_get_text_xpath
 import WebHandler.scrappers.constants as constants
@@ -21,9 +22,11 @@ def get_display_board(driver, highCourtId):
                 if "SESSION ENDED" in selenium_get_text_xpath(driver, '/html/body/div[2]/form/center/table/tbody/tr/td/h1/font'):
                     return {"message": "SESSION ENDED", "code": "DB-1"}
                 else:
-                    return {"message": "Somthing is wrong. Try again", "code": "DB-2"}
-            except:
-                return {"message": "Something is wrong. Try again", "code": "DB-3"}
+                    tb = traceback.TracebackException.from_exception(e)
+                    return {"message": "Somthing is wrong. Try again", "error": ''.join(tb.format()), "code": "DB-2"}
+            except Exception as e_exc:
+                tb = traceback.TracebackException.from_exception(e_exc)
+                return {"message": "Something is wrong. Try again", "error": ''.join(tb.format()), "code": "DB-3"}
     except Exception as e:
-        capture_exception(e)
-        return {"message": "No Data Found", "error": str(e), "datetime": datetime.now().isoformat(), "code": "DB-4"}
+        tb = traceback.TracebackException.from_exception(e)
+        return {"message": "No Data Found", "error": ''.join(tb.format()), "datetime": datetime.now().isoformat(), "code": "DB-4"}

@@ -19,7 +19,7 @@ import requests
 import sentry_sdk
 from dotenv import load_dotenv
 
-from sentry_sdk import capture_exception
+from sentry_sdk import capture_exception, capture_message
 from WebHandler.scrappers.highcourts import get_highcourt_no_of_cases, get_highcourt_cases_by_name
 from WebHandler.scrappers.display_board import get_display_board
 from WebHandler.scrappers.cause_list import get_cause_list_data
@@ -167,8 +167,9 @@ def main():
         except Exception as e_exception:
             end_time = datetime.datetime.now()
             total_time = end_time - start_time
-            capture_exception(e_exception)
             tb = traceback.TracebackException.from_exception(e_exception)
+            capture_message("message: causelist failed" + "\n" + "trace_back: " +
+                            ''.join(tb.format()) + "\n" + "reqBody: " + "body")
             return jsonify({"status": False, "debugMessage": "Request Failed", "error": ''.join(tb.format()), "start_time": start_time, "total_time_taken": total_time.seconds, 'version': version, 'code': '1'})
 
     if request.args.get('method') == "displayboard":
@@ -185,8 +186,10 @@ def main():
         except Exception as e_exception:
             end_time = datetime.datetime.now()
             total_time = end_time - start_time
-            capture_exception(e_exception)
-            return jsonify({"status": False, "debugMessage": "Request Failed", "error": str(e_exception), "start_time": start_time, "total_time_taken": total_time.seconds, 'version': version, 'code': '2'})
+            tb = traceback.TracebackException.from_exception(e_exception)
+            capture_message("message: display board failed" + "\n" +
+                            "trace_back: " + ''.join(tb.format()) + "\n" + "reqBody: " + "body")
+            return jsonify({"status": False, "debugMessage": "Request Failed", "error": ''.join(tb.format()), "start_time": start_time, "total_time_taken": total_time.seconds, 'version': version, 'code': '2'})
 
     if request.args.get('method') == "ncltadvocatecasebynumber":
         start_time = datetime.datetime.now()
