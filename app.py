@@ -219,7 +219,9 @@ def main():
                     "case_num": body["caseNumber"],
                     "case_year": body["caseYear"],
                     "location": __location__,
-                    "logger": logger
+                    "logger": logger,
+                    "start_time": start_time,
+                    "req_body": body
                 }
                 data = get_nclt_data(nclt_props)
                 end_time = datetime.datetime.now()
@@ -231,17 +233,19 @@ def main():
                     ), "time": total_time.seconds, 'version': version}})
                     logger.info("callback request made")
                 except Exception as e_exception:
-                    capture_exception(e_exception)
                     tb = traceback.TracebackException.from_exception(
                         e_exception)
+                    capture_message("Message: Callback Request failed" + "\n" + "traceback: " + ''.join(
+                        tb.format()) + "\n" + "req_body: " + body + "\n" + "start_time: " + start_time.isoformat())
                     logger.info(
-                        {"err_msg": "callback request failed", "error": ''.join(tb.format()), 'version': version, 'code': '3'})
+                        {"err_msg": "callback request failed", 'version': version, 'code': '3'})
             except Exception as e_exception:
                 end_time = datetime.datetime.now()
                 total_time = end_time - start_time
-                capture_exception(e_exception)
                 tb = traceback.TracebackException.from_exception(
                     e_exception)
+                capture_message("Message: NCLT Advocate cases by name failed" + "\n" + "traceback: " + ''.join(
+                    tb.format()) + "\n" + "req_body: " + body + "\n" + "start_time: " + start_time.isoformat())
                 try:
                     requests.post(url=body["callBackUrl"], timeout=10, json={
                         "error": ''.join(tb.format()), "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, "code": 4}})
@@ -249,9 +253,10 @@ def main():
                                 "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, "code": 4}})
                     logger.info("callback request made")
                 except Exception as e_exception:
-                    capture_exception(e_exception)
                     tb = traceback.TracebackException.from_exception(
                         e_exception)
+                    capture_message("Message: Callback Request failed" + "\n" + "traceback: " + ''.join(
+                        tb.format()) + "\n" + "req_body: " + body + "\n" + "start_time: " + start_time.isoformat())
                     logger.info(
                         {"err_msg": "callback request failed", "error": ''.join(tb.format()), 'version': version, 'code': '5'})
 
