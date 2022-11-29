@@ -301,7 +301,9 @@ def main():
                         "highcourt_id": body["highCourtId"],
                         "bench_code": body["benchCode"],
                         "logger": logger,
-                        "location": __location__
+                        "location": __location__,
+                        "start_time": start_time,
+                        "body": body
                     }
                     get_cases_by_name_props = {
                         "driver": chrome_driver,
@@ -309,7 +311,9 @@ def main():
                         "__location__": __location__,
                         "start": None,
                         "stop": None,
-                        "logger": logger
+                        "logger": logger,
+                        "start_time": start_time,
+                        "body": body
                     }
                 else:
                     get_no_of_cases = get_districtcourt_no_of_cases
@@ -321,7 +325,9 @@ def main():
                         "state_id": body["stateId"],
                         "court_complex_id": body["courtComplexId"],
                         "logger": logger,
-                        "location": __location__
+                        "location": __location__,
+                        "start_time": start_time,
+                        "body": body
                     }
                     get_cases_by_name_props = {
                         "driver": chrome_driver,
@@ -330,12 +336,12 @@ def main():
                         "stop": None,
                         "location": __location__,
                         "advocate_name": body["advocateName"],
+                        "start_time": start_time,
+                        "body": body
                     }
                 case_details = get_no_of_cases(get_no_of_cases_props)
                 if case_details["status"] == False:
                     try:
-                        capture_message("Message: Slow Network-1" + "\n" + "req_body: " +
-                                        body + "\n" + "start_time: " + start_time.isoformat())
                         requests.post(url=body["callBackUrl"], timeout=10, json={
                             "message": "Slow Network", "request": {"body": body, "params": params,  'version': version}})
                         logger.info({"message": "Slow Network", "request": {
@@ -356,8 +362,6 @@ def main():
                     data = get_cases_by_name(get_cases_by_name_props)
                     if data["status"] == False:
                         try:
-                            capture_message("Message: Slow Network-2" + "\n" + "req_body: " +
-                                            body + "\n" + "start_time: " + start_time.isoformat())
                             requests.post(url=body["callBackUrl"], timeout=10, json={
                                 "message": "Something is wrong", "request": {"body": body, "params": params,  'version': version}})
                             logger.info({"message": "Something is wrong", "request": {
@@ -495,7 +499,9 @@ def main():
                         "bench_code": body["benchCode"],
                         "logger": logger,
                         "iteration": body["iteration"],
-                        "location": __location__
+                        "location": __location__,
+                        "start_time": start_time,
+                        "body": body
                     }
                     get_cases_by_name_props = {
                         "driver": chrome_driver,
@@ -503,7 +509,9 @@ def main():
                         "__location__": __location__,
                         "start": body["start"],
                         "stop": body["stop"],
-                        "logger": logger
+                        "logger": logger,
+                        "start_time": start_time,
+                        "body": body
                     }
                 else:
                     get_no_of_cases = get_districtcourt_no_of_cases
@@ -516,7 +524,9 @@ def main():
                         "court_complex_id": body["courtComplexId"],
                         "logger": logger,
                         "iteration": body["iteration"],
-                        "location": __location__
+                        "location": __location__,
+                        "start_time": start_time,
+                        "body": body
                     }
                     get_cases_by_name_props = {
                         "driver": chrome_driver,
@@ -525,14 +535,14 @@ def main():
                         "stop": body["stop"],
                         "location": __location__,
                         "advocate_name": body["advocateName"],
+                        "start_time": start_time,
+                        "body": body
                     }
 
                 case_details = get_no_of_cases(
                     get_no_of_cases_props)
                 if case_details["status"] == False:
                     try:
-                        capture_message("Message: Slow Network-3" + "\n" + "req_body: " +
-                                        body + "\n" + "start_time: " + start_time.isoformat())
                         requests.post(url=body["callBackUrl"], timeout=10, json={
                             "message": "Slow Network", "request": {"body": body, "params": params,  'version': version}})
                         logger.info({"message": "Slow Network", "request": {
@@ -549,8 +559,6 @@ def main():
                 cases = get_cases_by_name(get_cases_by_name_props)
                 if cases["status"] == False:
                     try:
-                        capture_message("Message: Slow Network-4" + "\n" + "req_body: " +
-                                        body + "\n" + "start_time: " + start_time.isoformat())
                         requests.post(url=body["callBackUrl"], timeout=10, json={
                             "message": "Something is wrong", "request": {"body": body, "params": params,  'version': version}})
                         logger.info({"message": "Something is wrong", "request": {
