@@ -1,5 +1,5 @@
 from selenium.webdriver.support.ui import Select
-from sentry_sdk import capture_exceptio, capture_message
+from sentry_sdk import capture_exception, capture_message
 from datetime import date
 import os
 import traceback
