@@ -59,9 +59,10 @@ def get_highcourt_no_of_cases(props):
                     break
                 except Exception as e_exception:
                     if url_trial >= 10:
-                        capture_exception(e_exception)
                         tb = traceback.TracebackException.from_exception(
                             e_exception)
+                        capture_message("Message: Highcourt-URL failed" + "\n" + "traceback: " + ''.join(
+                            tb.format()) + "\n" + "req_body: " + body + "\n" + "start_time: " + start_time.isoformat())
                         return {'status': False, "message": ''.join(tb.format()), 'data': {}, "debugMessage": "Maximun retries reached", "code": "hc-1"}
                     url_trial = url_trial + 1
             driver.execute_script(
@@ -175,7 +176,7 @@ def get_highcourt_no_of_cases(props):
             if get_cases_trail > 10:
                 tb = traceback.TracebackException.from_exception(
                     e_exc)
-                capture_message("Message: Highcort-max retries to get case details exceeded" + "\n" + "traceback: " + ''.join(
+                capture_message("Message: Highcourt-max retries to get case details exceeded" + "\n" + "traceback: " + ''.join(
                     tb.format()) + "\n" + "req_body: " + body + "\n" + "start_time: " + start_time.isoformat())
                 return {"message": "Somthing is wrong", "status": False,  "code": "hc-5"}
 
