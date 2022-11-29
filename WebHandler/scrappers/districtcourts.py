@@ -257,7 +257,7 @@ def get_districtcourt_cases_by_name(props):
                     name = advoc_name.replace(" ", "_").lower()
                     tb = traceback.TracebackException.from_exception(
                         e_exception)
-                    capture_message(f"Message: districtcourt-Failed to scrape {name/case_number} case" + "\n" + "traceback: " + ''.join(
+                    capture_message(f"Message: districtcourt-Failed to scrape {name/case_number/case_sl_no} case" + "\n" + "traceback: " + ''.join(
                         tb.format()) + "\n" + "req_body: " + body + "\n" + "start_time: " + start_time.isoformat())
                     driver.save_screenshot(
                         f'{__location__}/error_image.png')
