@@ -437,7 +437,6 @@ def main():
                 chrome_driver.close()
                 chrome_driver.quit()
             except Exception as e_exception:
-                logger.info(str(e_exception))
                 end_time = datetime.datetime.now()
                 total_time = end_time - start_time
                 tb = traceback.TracebackException.from_exception(e_exception)
