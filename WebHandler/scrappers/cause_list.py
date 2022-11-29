@@ -1,4 +1,5 @@
-from sentry_sdk import capture_exception
+from sentry_sdk import capture_exception, capture_message
+import traceback
 
 
 from ..utils.sel import (
@@ -16,7 +17,19 @@ def get_cause_list_data(driver, advocateName, highCourtId):
         url = constants.high_courts_codes[highCourtId]["causelist_url"]
         if not url:
             return {"status": False, "message": "invalid request"}
-        driver.get(url)
+        url_trial = 1
+        while url_trial <= 11:
+            try:
+                driver.get(url)
+                break
+            except Exception as e_exception:
+                if url_trial >= 10:
+                    tb = traceback.TracebackException.from_exception(
+                        e_exception)
+                    capture_message("Message: causelist-URL failed" + "\n" + "traceback: " + ''.join(
+                        tb.format()))
+                    return {'status': False, "message": ''.join(tb.format()), 'data': {}, "debugMessage": "Maximun retries reached", "code": "hc-1"}
+                url_trial = url_trial + 1
         time.sleep(3)
         selenium_click_xpath(driver, "//input[@value='DAILY LIST']")
         time.sleep(3)
@@ -34,9 +47,11 @@ def get_cause_list_data(driver, advocateName, highCourtId):
                 if 'No list available' in selenium_get_text_xpath(driver, 'html/body'):
                     return {"message": "No list available", "code": "CL-1"}
                 else:
-                    return {"message": "Somthing is wrong. Try again", 'code': "CL-2"}
-            except:
-                return {"message": "Somthing is wrong. Try again", "code": "CL-3"}
+                    tb = traceback.TracebackException.from_exception(e)
+                    return {"message": "Somthing is wrong. Try again", "error": ''.join(tb.format()), 'code': "CL-2"}
+            except Exception as e_exc:
+                tb = traceback.TracebackException.from_exception(e_exc)
+                return {"message": "Somthing is wrong. Try again", "error": ''.join(tb.format()), "code": "CL-3"}
     except Exception as e:
-        capture_exception(e)
-        return {"message": "No Data Found", "error": str(e), "datetime": datetime.now().isoformat(), 'code': "CL-4"}
+        tb = traceback.TracebackException.from_exception(e)
+        return {"message": "No Data Found", "error": ''.join(tb.format()), "datetime": datetime.now().isoformat(), 'code': "CL-4"}

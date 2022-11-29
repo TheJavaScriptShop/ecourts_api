@@ -2,7 +2,7 @@ import time
 import os
 
 import traceback
-from sentry_sdk import capture_exception
+from sentry_sdk import capture_exception, capture_message
 from datetime import datetime, date
 
 from selenium.webdriver.support.ui import Select
@@ -37,8 +37,10 @@ def get_districtcourt_no_of_cases(props):
     district_id = props["district_id"]
     state_id = props["state_id"]
     court_complex_id = props["court_complex_id"]
+    body = props["body"]
+    start_time = props["start_time"]
     name = advoc_name.replace(" ", "_").lower()
-    start_time = datetime.now()
+    start_time_check = datetime.now()
 
     if props.get("iteration"):
         img_path = f'dc-{name}-img-{props["iteration"]}.png'
@@ -54,8 +56,9 @@ def get_districtcourt_no_of_cases(props):
             break
         except Exception as e_exception:
             if url_trial >= 10:
-                capture_exception(e_exception)
                 tb = traceback.TracebackException.from_exception(e_exception)
+                capture_message("Message: districtcourt-URL failed" + "\n" + "traceback: " + ''.join(
+                    tb.format()) + "\n" + "req_body: " + body + "\n" + "start_time: " + start_time.isoformat())
                 return {'status': False, "message": ''.join(tb.format()), 'data': {}, "debugMessage": "Maximun retries reached", "code": "dc-1"}
             url_trial = url_trial + 1
     while is_failed_with_captach:
@@ -113,7 +116,7 @@ def get_districtcourt_no_of_cases(props):
             captcha_xpath = '//div[@id="div_captcha_adv"]//img[@id="captcha_image"]'
             get_captcha(driver, img_path, captcha_xpath)
             text = get_text_from_captcha(
-                driver, img_path, '/html/body/div[1]/div/main/div[2]/div/div/div[4]/div[1]/form/div[2]/div/div/div/a/img', captcha_xpath)
+                driver, img_path, '/html/body/div[1]/div/main/div[2]/div/div/div[4]/div[1]/form/div[2]/div/div/div/a/img', captcha_xpath, trail=1)
             if text == False:
                 continue
             driver.execute_script("arguments[0].click();", selenium_get_element_xpath(
@@ -143,16 +146,20 @@ def get_districtcourt_no_of_cases(props):
         except Exception as e_exception:
             is_failed_with_captach = True
             logger.info("Website is slow. Retrying")
-            capture_exception(e_exception)
             tb = traceback.TracebackException.from_exception(e_exception)
             end_time = datetime.now()
-            total_time = end_time - start_time
+            total_time = end_time - start_time_check
             print(total_time.seconds)
             if total_time.seconds > 300:
                 is_failed_with_captach = False
+                capture_message("Message: districtcourt-Max time reached" + "\n" + "traceback: " + ''.join(
+                    tb.format()) + "\n" + "req_body: " + body + "\n" + "start_time: " + start_time.isoformat())
                 return {'status': False, "message": ''.join(tb.format()), 'data': {}, "debugMessage": "Maximun Time reached", "code": "dc-2"}
 
             if counter_retry > 10:
+                is_failed_with_captach = False
+                capture_message("Message: districtcourt-max retries reached" + "\n" + "traceback: " + ''.join(
+                    tb.format()) + "\n" + "req_body: " + body + "\n" + "start_time: " + start_time.isoformat())
                 return {'status': False, 'data': {}, "message": ''.join(tb.format()), "debugMessage": "Maximun retries reached", "code": "dc-3"}
 
     get_cases_trail = 1
@@ -172,9 +179,12 @@ def get_districtcourt_no_of_cases(props):
                 "courts_info": courts_info
             }
             return {"data": data, "status": True}
-            break
-        except:
+        except Exception as e_exc:
             if get_cases_trail > 10:
+                tb = traceback.TracebackException.from_exception(
+                    e_exc)
+                capture_message("Message: districtcourt-max retries to get case details exceeded" + "\n" + "traceback: " + ''.join(
+                    tb.format()) + "\n" + "req_body: " + body + "\n" + "start_time: " + start_time.isoformat())
                 return {"message": "Somthing is wrong", "status": False, "code": "dc-4"}
 
 
@@ -185,6 +195,8 @@ def get_districtcourt_cases_by_name(props):
     stop = props["stop"]
     __location__ = props["location"]
     advoc_name = props["advocate_name"]
+    body = props["body"]
+    start_time = props["start_time"]
 
     # case details
     table_element = selenium_get_element_id(driver, 'dispTable')
@@ -204,15 +216,17 @@ def get_districtcourt_cases_by_name(props):
     case_details_list = []
     case_sl_no = 1
     cases = driver.find_elements(
-        by="xpath", value='/html/body/div[1]/div/main/div[2]/div/div/div[4]/div[1]/form/div[4]/table/tbody/tr/td[5]/a')
+        by="xpath", value='/html/body/div[1]/div/main/div[2]/div/div/div[4]/div[1]/form/div[4]/table/tbody/tr')
     if start is not None and stop is not None:
         cases = cases[start:stop]
         case_sl_no = start + 1
     for case in cases:
         logger.info(f'case no: {case_sl_no}')
         time.sleep(int(os.environ.get('MIN_WAIT_TIME')))
+        case_number = selenium_get_text_xpath(case, ".//td[2]")
+        link = selenium_get_element_xpath(case, ".//td[5]/a")
         driver.execute_script(
-            "arguments[0].click();", case)
+            "arguments[0].click();", link)
         logger.info(f"{case_sl_no} view clicked")
         try:
             if "THERE IS AN ERROR" in selenium_get_text_xpath(driver, '/html/body/div[9]/div/div/div[2]/div/div[1]'):
@@ -241,10 +255,14 @@ def get_districtcourt_cases_by_name(props):
                 if case_detail_trail >= 5:
                     logger.info("max tries exceeded")
                     name = advoc_name.replace(" ", "_").lower()
+                    tb = traceback.TracebackException.from_exception(
+                        e_exception)
+                    capture_message(f"Message: districtcourt-Failed to scrape {name/case_number/case_sl_no} case" + "\n" + "traceback: " + ''.join(
+                        tb.format()) + "\n" + "req_body: " + body + "\n" + "start_time: " + start_time.isoformat())
                     driver.save_screenshot(
                         f'{__location__}/error_image.png')
                     try:
-                        blob_path_container = f"{name}/districtcourts/{date.today().month}/{date.today().day}/error_img.png"
+                        blob_path_container = f"districtcourts/{name}/{date.today().month}/{date.today().day}/{case_number}/error_img.png"
                         file_name = 'error_image.png'
                         wait_for_download_and_rename(
                             blob_path_container, __location__, file_name)

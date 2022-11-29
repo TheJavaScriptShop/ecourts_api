@@ -1,7 +1,8 @@
 from selenium.webdriver.support.ui import Select
-from sentry_sdk import capture_exception
+from sentry_sdk import capture_exceptio, capture_message
 from datetime import date
 import os
+import traceback
 import time
 
 from ..utils.blob_storage import wait_for_download_and_rename
@@ -34,6 +35,8 @@ def get_nclt_data(nclt_props):
         case_year = nclt_props["case_year"]
         location = nclt_props["location"]
         logger = nclt_props["logger"]
+        start_time = nclt_props["start_time"]
+        req_body = nclt_props["req_body"]
         url_trial = 1
         while url_trial < 11:
             try:
@@ -42,7 +45,10 @@ def get_nclt_data(nclt_props):
                 break
             except Exception as e_exception:
                 if url_trial >= 10:
-                    capture_exception(e_exception)
+                    tb = traceback.TracebackException.from_exception(
+                        e_exception)
+                    capture_message("message: Max URL tries Exceeded" + "\n" + "traceback: " + ''.join(
+                        tb.format()) + "\n" + "start_time: " + start_time.isoformat() + "\n" + "req_body: " + req_body)
                     return {'status': False, 'data': {}, "debugMessage": "Maximun retries reached", "code": "nclt-1"}
                 url_trial = url_trial + 1
         bench_select = Select(
@@ -113,15 +119,11 @@ def get_nclt_data(nclt_props):
             driver.execute_script(
                 "arguments[0].click();", pdf_element)
             blob_path_container = ""
-            try:
-                case = f"{bench_id}-{case_type_id}-{case_num}-{case_year}"
-                blob_path_container = f"nclt/{case}/{date.today().month}/{date.today().day}/orders/{order_no}.pdf"
-                file_name = 'filename.pdf'
-                status = wait_for_download_and_rename(
-                    blob_path_container, location, file_name)
-            except Exception as e:
-                logger.info(
-                    {'err': str(e)})
+            case = f"{bench_id}-{case_type_id}-{case_num}-{case_year}"
+            blob_path_container = f"nclt/{case}/{date.today().month}/{date.today().day}/orders/{order_no}.pdf"
+            file_name = 'filename.pdf'
+            status = wait_for_download_and_rename(
+                blob_path_container, location, file_name, case)
             if status["upload"] == False:
                 blob_path_container = "File not Available"
             order = orders_data[order_no]
@@ -164,5 +166,7 @@ def get_nclt_data(nclt_props):
         return data
 
     except Exception as e:
-        capture_exception(e)
-        return {"message": "No Data Found", "error": str(e), "datetime": datetime.now().isoformat()}
+        tb = traceback.TracebackException.from_exception(e)
+        capture_message("message: No Data Found in NCLT" + "\n" + "traceback: " +
+                        ''.join(tb.format()) + "\n" + "start_time: " + start_time.isoformat() + "\n" + "req_body: " + req_body)
+        return {"message": "No Data Found", "error": ''.join(tb.format()), "datetime": datetime.now().isoformat()}

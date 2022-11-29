@@ -8,7 +8,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 from dotenv import load_dotenv
-from sentry_sdk import capture_exception
+from sentry_sdk import capture_exception, capture_message
 import signal
 
 from ..utils.sel import (
@@ -38,6 +38,8 @@ def get_highcourt_no_of_cases(props):
     advoc_name = props["advocate_name"]
     state_code = props["highcourt_id"]
     bench_code = props["bench_code"]
+    start_time = props["start_time"]
+    body = props["body"]
     name = advoc_name.replace(" ", "_").lower()
 
     if props.get("iteration"):
@@ -45,7 +47,7 @@ def get_highcourt_no_of_cases(props):
     else:
         img_path = f"{name}-image.png"
     counter_retry = 0
-    start_time = datetime.now()
+    start_time_check = datetime.now()
     while is_failed_with_captach:
         try:
             counter_retry += 1
@@ -57,9 +59,10 @@ def get_highcourt_no_of_cases(props):
                     break
                 except Exception as e_exception:
                     if url_trial >= 10:
-                        capture_exception(e_exception)
                         tb = traceback.TracebackException.from_exception(
                             e_exception)
+                        capture_message("Message: Highcourt-URL failed" + "\n" + "traceback: " + ''.join(
+                            tb.format()) + "\n" + "req_body: " + body + "\n" + "start_time: " + start_time.isoformat())
                         return {'status': False, "message": ''.join(tb.format()), 'data': {}, "debugMessage": "Maximun retries reached", "code": "hc-1"}
                     url_trial = url_trial + 1
             driver.execute_script(
@@ -125,7 +128,10 @@ def get_highcourt_no_of_cases(props):
                         }
                         fetched_data = True
                         is_failed_with_captach = False
-                        capture_exception(e_exception)
+                        tb = traceback.TracebackException.from_exception(
+                            e_exception)
+                        capture_message("Message: No Data Found" + "\n" + "traceback: " + ''.join(
+                            tb.format()) + "\n" + "req_body: " + body + "\n" + "start_time: " + start_time.isoformat())
                         return {'status': False, 'data': {}, "debugMessage": "No data found", "code": "hc-2"}
 
                 except Exception as e:
@@ -135,18 +141,20 @@ def get_highcourt_no_of_cases(props):
         except Exception as e_exception:
             is_failed_with_captach = True
             logger.info("Website is slow. Retrying")
-            capture_exception(e_exception)
             tb = traceback.TracebackException.from_exception(
                 e_exception)
             end_time = datetime.now()
-            total_time = end_time - start_time
-            print(total_time.seconds)
+            total_time = end_time - start_time_check
             if total_time.seconds > 300:
                 is_failed_with_captach = False
+                capture_message("Message: Highcourt-Maximum time reached" + "\n" + "traceback: " + ''.join(
+                    tb.format()) + "\n" + "req_body: " + body + "\n" + "start_time: " + start_time.isoformat())
                 return {'status': False, "message": ''.join(tb.format()), 'data': {}, "debugMessage": "Maximun Time reached", "code": "hc-3"}
 
             if counter_retry > 10:
                 is_failed_with_captach = False
+                capture_message("Message: Highcourt-Maximum retries reached" + "\n" + "traceback: " + ''.join(
+                    tb.format()) + "\n" + "req_body: " + body + "\n" + "start_time: " + start_time.isoformat())
                 return {'status': False, "message": ''.join(tb.format()), 'data': {}, "debugMessage": "Maximun retries reached", "code": "hc-4"}
     get_cases_trail = 1
     while get_cases_trail <= 11:
@@ -164,8 +172,12 @@ def get_highcourt_no_of_cases(props):
                 }
                 return {"data": data, "status": True}
             break
-        except:
+        except Exception as e_exc:
             if get_cases_trail > 10:
+                tb = traceback.TracebackException.from_exception(
+                    e_exc)
+                capture_message("Message: Highcourt-max retries to get case details exceeded" + "\n" + "traceback: " + ''.join(
+                    tb.format()) + "\n" + "req_body: " + body + "\n" + "start_time: " + start_time.isoformat())
                 return {"message": "Somthing is wrong", "status": False,  "code": "hc-5"}
 
 
@@ -176,6 +188,8 @@ def get_highcourt_cases_by_name(props):
     start = props["start"]
     stop = props["stop"]
     logger = props["logger"]
+    body = props["body"]
+    start_time = props["start_time"]
 
     # case details
 
@@ -205,6 +219,7 @@ def get_highcourt_cases_by_name(props):
     total_downloaded_files = 0
     for case in cases:
         logger.info(f'case no: {case_sl_no}')
+        case_number = selenium_get_text_xpath(case, ".//td[2]")
         link = selenium_get_element_xpath(case, ".//td[5]/a")
         driver.execute_script(
             "arguments[0].click();", link)
@@ -222,14 +237,17 @@ def get_highcourt_cases_by_name(props):
                     driver, '//table[contains(@class, "case_details_table")]/tbody/tr[1]/td[2]')
                 break
             except Exception as e_exception:
-                logger.info(e_exception)
                 if case_detail_trail >= 5:
                     logger.info("max tries exceeded")
                     name = advoc_name.replace(" ", "_").lower()
+                    tb = traceback.TracebackException.from_exception(
+                        e_exception)
+                    capture_message(f"Message: Highcourt-Failed to scrape {name/case_number/case_sl_no} case" + "\n" + "traceback: " + ''.join(
+                        tb.format()) + "\n" + "req_body: " + body + "\n" + "start_time: " + start_time.isoformat())
                     driver.save_screenshot(
                         f'{__location__}/error_image.png')
                     try:
-                        blob_path_container = f"{name}/highcourts/{date.today().month}/{date.today().day}/error_img.png"
+                        blob_path_container = f"highcourts/{name}/{date.today().month}/{date.today().day}/{case_number}/error_img.png"
                         file_name = 'error_image.png'
                         status = wait_for_download_and_rename(
                             blob_path_container, __location__, file_name)
@@ -375,16 +393,11 @@ def get_highcourt_cases_by_name(props):
 
                     logger.info('downloading file')
                     case_no = case_details_title.replace("/", "-")
-                    try:
-                        name = advoc_name.replace(" ", "_").lower()
-                        blob_path_container = f"{name}/{case_no}/{date.today().month}/{date.today().day}/orders/{order_no}.pdf"
-                        file_name = 'display_pdf.pdf'
-                        status = wait_for_download_and_rename(
-                            blob_path_container, __location__, file_name)
-                    except Exception as e:
-                        traceback.print_exc()
-                        logger.info(
-                            {'err': str(e), 'case_no': case_sl_no})
+                    name = advoc_name.replace(" ", "_").lower()
+                    blob_path_container = f"{name}/{case_no}/{date.today().month}/{date.today().day}/orders/{order_no}.pdf"
+                    file_name = 'display_pdf.pdf'
+                    status = wait_for_download_and_rename(
+                        blob_path_container, __location__, file_name)
                     if status["upload"] == False:
                         blob_path_container = "File not Available"
                     order = case_orders_data[order_no]
