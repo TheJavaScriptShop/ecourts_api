@@ -9,7 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 from dotenv import load_dotenv
 from sentry_sdk import capture_exception, capture_message
-import signal
+import json
 
 from ..utils.sel import (
     selenium_send_keys_xpath,
@@ -62,7 +62,7 @@ def get_highcourt_no_of_cases(props):
                         tb = traceback.TracebackException.from_exception(
                             e_exception)
                         capture_message("Message: Highcourt-URL failed" + "\n" + "traceback: " + ''.join(
-                            tb.format()) + "\n" + "req_body: " + body + "\n" + "start_time: " + start_time.isoformat())
+                            tb.format()) + "\n" + "req_body: " + json.dumps(body) + "\n" + "start_time: " + start_time.isoformat())
                         return {'status': False, "message": ''.join(tb.format()), 'data': {}, "debugMessage": "Maximun retries reached", "code": "hc-1"}
                     url_trial = url_trial + 1
             driver.execute_script(
@@ -131,7 +131,7 @@ def get_highcourt_no_of_cases(props):
                         tb = traceback.TracebackException.from_exception(
                             e_exception)
                         capture_message("Message: No Data Found" + "\n" + "traceback: " + ''.join(
-                            tb.format()) + "\n" + "req_body: " + body + "\n" + "start_time: " + start_time.isoformat())
+                            tb.format()) + "\n" + "req_body: " + json.dumps(body) + "\n" + "start_time: " + start_time.isoformat())
                         return {'status': False, 'data': {}, "debugMessage": "No data found", "code": "hc-2"}
 
                 except Exception as e:
@@ -148,13 +148,13 @@ def get_highcourt_no_of_cases(props):
             if total_time.seconds > 300:
                 is_failed_with_captach = False
                 capture_message("Message: Highcourt-Maximum time reached" + "\n" + "traceback: " + ''.join(
-                    tb.format()) + "\n" + "req_body: " + body + "\n" + "start_time: " + start_time.isoformat())
+                    tb.format()) + "\n" + "req_body: " + json.dumps(body) + "\n" + "start_time: " + start_time.isoformat())
                 return {'status': False, "message": ''.join(tb.format()), 'data': {}, "debugMessage": "Maximun Time reached", "code": "hc-3"}
 
             if counter_retry > 10:
                 is_failed_with_captach = False
                 capture_message("Message: Highcourt-Maximum retries reached" + "\n" + "traceback: " + ''.join(
-                    tb.format()) + "\n" + "req_body: " + body + "\n" + "start_time: " + start_time.isoformat())
+                    tb.format()) + "\n" + "req_body: " + json.dumps(body) + "\n" + "start_time: " + start_time.isoformat())
                 return {'status': False, "message": ''.join(tb.format()), 'data': {}, "debugMessage": "Maximun retries reached", "code": "hc-4"}
     get_cases_trail = 1
     while get_cases_trail <= 11:
@@ -177,7 +177,7 @@ def get_highcourt_no_of_cases(props):
                 tb = traceback.TracebackException.from_exception(
                     e_exc)
                 capture_message("Message: Highcourt-max retries to get case details exceeded" + "\n" + "traceback: " + ''.join(
-                    tb.format()) + "\n" + "req_body: " + body + "\n" + "start_time: " + start_time.isoformat())
+                    tb.format()) + "\n" + "req_body: " + json.dumps(body) + "\n" + "start_time: " + start_time.isoformat())
                 return {"message": "Somthing is wrong", "status": False,  "code": "hc-5"}
 
 
@@ -242,8 +242,8 @@ def get_highcourt_cases_by_name(props):
                     name = advoc_name.replace(" ", "_").lower()
                     tb = traceback.TracebackException.from_exception(
                         e_exception)
-                    capture_message(f"Message: Highcourt-Failed to scrape {name/case_number/case_sl_no} case" + "\n" + "traceback: " + ''.join(
-                        tb.format()) + "\n" + "req_body: " + body + "\n" + "start_time: " + start_time.isoformat())
+                    capture_message(f"Message: Highcourt-Failed to scrape {name}/{case_number}/{case_sl_no} case" + "\n" + "traceback: " + ''.join(
+                        tb.format()) + "\n" + "req_body: " + json.dumps(body) + "\n" + "start_time: " + start_time.isoformat())
                     driver.save_screenshot(
                         f'{__location__}/error_image.png')
                     try:

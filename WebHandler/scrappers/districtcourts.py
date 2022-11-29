@@ -8,6 +8,7 @@ from datetime import datetime, date
 from selenium.webdriver.support.ui import Select
 from dotenv import load_dotenv
 import WebHandler.scrappers.constants as constants
+import json
 
 
 from ..utils.sel import (
@@ -58,7 +59,7 @@ def get_districtcourt_no_of_cases(props):
             if url_trial >= 10:
                 tb = traceback.TracebackException.from_exception(e_exception)
                 capture_message("Message: districtcourt-URL failed" + "\n" + "traceback: " + ''.join(
-                    tb.format()) + "\n" + "req_body: " + body + "\n" + "start_time: " + start_time.isoformat())
+                    tb.format()) + "\n" + "req_body: " + json.dumps(body) + "\n" + "start_time: " + start_time.isoformat())
                 return {'status': False, "message": ''.join(tb.format()), 'data': {}, "debugMessage": "Maximun retries reached", "code": "dc-1"}
             url_trial = url_trial + 1
     while is_failed_with_captach:
@@ -153,13 +154,13 @@ def get_districtcourt_no_of_cases(props):
             if total_time.seconds > 300:
                 is_failed_with_captach = False
                 capture_message("Message: districtcourt-Max time reached" + "\n" + "traceback: " + ''.join(
-                    tb.format()) + "\n" + "req_body: " + body + "\n" + "start_time: " + start_time.isoformat())
+                    tb.format()) + "\n" + "req_body: " + json.dumps(body) + "\n" + "start_time: " + start_time.isoformat())
                 return {'status': False, "message": ''.join(tb.format()), 'data': {}, "debugMessage": "Maximun Time reached", "code": "dc-2"}
 
             if counter_retry > 10:
                 is_failed_with_captach = False
                 capture_message("Message: districtcourt-max retries reached" + "\n" + "traceback: " + ''.join(
-                    tb.format()) + "\n" + "req_body: " + body + "\n" + "start_time: " + start_time.isoformat())
+                    tb.format()) + "\n" + "req_body: " + json.dumps(body) + "\n" + "start_time: " + start_time.isoformat())
                 return {'status': False, 'data': {}, "message": ''.join(tb.format()), "debugMessage": "Maximun retries reached", "code": "dc-3"}
 
     get_cases_trail = 1
@@ -184,7 +185,7 @@ def get_districtcourt_no_of_cases(props):
                 tb = traceback.TracebackException.from_exception(
                     e_exc)
                 capture_message("Message: districtcourt-max retries to get case details exceeded" + "\n" + "traceback: " + ''.join(
-                    tb.format()) + "\n" + "req_body: " + body + "\n" + "start_time: " + start_time.isoformat())
+                    tb.format()) + "\n" + "req_body: " + json.dumps(body) + "\n" + "start_time: " + start_time.isoformat())
                 return {"message": "Somthing is wrong", "status": False, "code": "dc-4"}
 
 
@@ -257,8 +258,8 @@ def get_districtcourt_cases_by_name(props):
                     name = advoc_name.replace(" ", "_").lower()
                     tb = traceback.TracebackException.from_exception(
                         e_exception)
-                    capture_message(f"Message: districtcourt-Failed to scrape {name/case_number/case_sl_no} case" + "\n" + "traceback: " + ''.join(
-                        tb.format()) + "\n" + "req_body: " + body + "\n" + "start_time: " + start_time.isoformat())
+                    capture_message(f"Message: districtcourt-Failed to scrape {name}/{case_number}/{case_sl_no} case" + "\n" + "traceback: " + ''.join(
+                        tb.format()) + "\n" + "req_body: " + json.dumps(body) + "\n" + "start_time: " + start_time.isoformat())
                     driver.save_screenshot(
                         f'{__location__}/error_image.png')
                     try:

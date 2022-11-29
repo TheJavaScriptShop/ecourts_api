@@ -4,6 +4,7 @@ from datetime import date
 import os
 import traceback
 import time
+import json
 
 from ..utils.blob_storage import wait_for_download_and_rename
 
@@ -48,7 +49,7 @@ def get_nclt_data(nclt_props):
                     tb = traceback.TracebackException.from_exception(
                         e_exception)
                     capture_message("message: Max URL tries Exceeded" + "\n" + "traceback: " + ''.join(
-                        tb.format()) + "\n" + "start_time: " + start_time.isoformat() + "\n" + "req_body: " + req_body)
+                        tb.format()) + "\n" + "start_time: " + start_time.isoformat() + "\n" + "req_body: " + json.dumps(req_body))
                     return {'status': False, 'data': {}, "debugMessage": "Maximun retries reached", "code": "nclt-1"}
                 url_trial = url_trial + 1
         bench_select = Select(
@@ -168,5 +169,5 @@ def get_nclt_data(nclt_props):
     except Exception as e:
         tb = traceback.TracebackException.from_exception(e)
         capture_message("message: No Data Found in NCLT" + "\n" + "traceback: " +
-                        ''.join(tb.format()) + "\n" + "start_time: " + start_time.isoformat() + "\n" + "req_body: " + req_body)
+                        ''.join(tb.format()) + "\n" + "start_time: " + start_time.isoformat() + "\n" + "req_body: " + json.dumps(req_body))
         return {"message": "No Data Found", "error": ''.join(tb.format()), "datetime": datetime.now().isoformat()}
