@@ -244,12 +244,11 @@ def main():
                 total_time = end_time - start_time
                 tb = traceback.TracebackException.from_exception(
                     e_exception)
-                capture_message("Message: NCLT Advocate cases by name failed" + "\n" + "traceback: " + ''.join(
-                    tb.format()) + "\n" + "req_body: " + json.dumps(body) + "\n" + "start_time: " + start_time.isoformat())
+                capture_exception(e_exception)
                 try:
                     requests.post(url=body["callBackUrl"], timeout=10, json={
-                        "error": ''.join(tb.format()), "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, "code": "4"}})
-                    logger.info({"error": ''.join(tb.format()), "request": {"body": body, "params": params,
+                        "error": " NCLT Advocate cases by name failed", "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, "code": "4"}})
+                    logger.info({"error": " NCLT Advocate cases by name failed", "request": {"body": body, "params": params,
                                 "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, "code": "4"}})
                     logger.info("callback request made")
                 except Exception as e_exception:

@@ -27,6 +27,19 @@ if os.environ.get("APP_ENV") == "local":
     load_dotenv()
 
 
+def open_page(driver):
+    url_trial = 1
+    while url_trial < 11:
+        try:
+            url = constants.nclt_court_codes["url"]
+            driver.get(url)
+            break
+        except Exception as exc:
+            if url_trial >= 10:
+                raise Exception("nclt: Max url retries exceeded") from exc
+            url_trial = url_trial + 1
+
+
 def get_nclt_data(nclt_props):
     try:
         driver = nclt_props["driver"]
@@ -38,20 +51,13 @@ def get_nclt_data(nclt_props):
         logger = nclt_props["logger"]
         start_time = nclt_props["start_time"]
         req_body = nclt_props["req_body"]
-        url_trial = 1
-        while url_trial < 11:
-            try:
-                url = constants.nclt_court_codes["url"]
-                driver.get(url)
-                break
-            except Exception as e_exception:
-                if url_trial >= 10:
-                    tb = traceback.TracebackException.from_exception(
-                        e_exception)
-                    capture_message("message: Max URL tries Exceeded" + "\n" + "traceback: " + ''.join(
-                        tb.format()) + "\n" + "start_time: " + start_time.isoformat() + "\n" + "req_body: " + json.dumps(req_body))
-                    return {'status': False, 'data': {}, "debugMessage": "Maximun retries reached", "code": "nclt-1"}
-                url_trial = url_trial + 1
+
+        # try:
+        open_page(driver)
+        # except Exception as exc:
+        #     capture_exception(exc)
+        #     return {'status': False, 'data': {}, "debugMessage": "Maximun retries reached", "code": "nclt-1"}
+
         bench_select = Select(
             selenium_get_element_id(driver, 'bench'))
         bench_select.select_by_value(bench_id)
@@ -73,9 +79,8 @@ def get_nclt_data(nclt_props):
         selenium_get_element_xpath(
             driver, "/html/body/div/div[2]/div/div/div[2]/div/div/div/div/div/div[2]/table")
         if "click here" in selenium_get_text_xpath(driver, "/html/body/div/div[2]/div/div/div[2]/div/div/div/div/div/div[2]/table/tbody/tr/td/a"):
-            data = "No Data"
-            logger.info("No Data")
-            return data
+            raise Exception("No Data Found")
+
         preview_data = get_table_data_as_list(
             driver, "/html/body/div/div[2]/div/div/div[2]/div/div/div/div/div/div[2]/table")
         button = selenium_get_element_xpath(
@@ -167,7 +172,5 @@ def get_nclt_data(nclt_props):
         return data
 
     except Exception as e:
-        tb = traceback.TracebackException.from_exception(e)
-        capture_message("message: No Data Found in NCLT" + "\n" + "traceback: " +
-                        ''.join(tb.format()) + "\n" + "start_time: " + start_time.isoformat() + "\n" + "req_body: " + json.dumps(req_body))
-        return {"message": "No Data Found", "error": ''.join(tb.format()), "datetime": datetime.now().isoformat()}
+        raise Exception("message:  NCLT Advocate cases by name failed" + "\n" + "start_time: " +
+                        start_time.isoformat() + "\n" + "req_body: " + json.dumps(req_body)) from e
