@@ -40,39 +40,41 @@ version = "3.1.9"
 
 
 def create_driver(__location__):
-    options = Options()
-    DRIVER_PATH = os.environ.get('DRIVER_PATH')
-    options.add_argument("--disable-extensions")
-    options.add_argument("--disable-infobars")
-    options.add_argument("--headless")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--window-size=1700x800")
-    prefs = {
-        "browser.helperApps.neverAsk.saveToDisk": "application/octet-stream;application/vnd.ms-excel;text/html;application/pdf",
-        "pdfjs.disabled": True,
-        "print.always_print_silent": True,
-        "print.show_print_progress": False,
-        "browser.download.show_plugins_in_list": False,
-        "browser.download.folderList": 2,
-        # Change default directory for downloads
-        "download.default_directory": __location__,
-        "download.prompt_for_download": False,  # To auto download the file
-        "download.directory_upgrade": True,
-        "plugins.always_open_pdf_externally": True
-    }
+    try:
+        options = Options()
+        DRIVER_PATH = os.environ.get('DRIVER_PATH')
+        options.add_argument("--disable-extensions")
+        options.add_argument("--disable-infobars")
+        # options.add_argument("--headless")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--window-size=1700x800")
+        prefs = {
+            "browser.helperApps.neverAsk.saveToDisk": "application/octet-stream;application/vnd.ms-excel;text/html;application/pdf",
+            "pdfjs.disabled": True,
+            "print.always_print_silent": True,
+            "print.show_print_progress": False,
+            "browser.download.show_plugins_in_list": False,
+            "browser.download.folderList": 2,
+            # Change default directory for downloads
+            "download.default_directory": __location__,
+            "download.prompt_for_download": False,  # To auto download the file
+            "download.directory_upgrade": True,
+            "plugins.always_open_pdf_externally": True
+        }
 
-    options.add_experimental_option("prefs", prefs)
-    driver = webdriver.Chrome(DRIVER_PATH, chrome_options=options)
-    driver.implicitly_wait(30)
-    driver.maximize_window()
-    return driver
+        options.add_experimental_option("prefs", prefs)
+        driver = webdriver.Chrome(DRIVER_PATH, chrome_options=options)
+        driver.implicitly_wait(30)
+        driver.maximize_window()
+        return driver
+    except Exception as exc:
+        raise Exception("Failed to open chrome") from exc
 
 
 def fire_and_forget(f):
     def wrapped():
         threading.Thread(target=f).start()
-
     return wrapped
 
 
@@ -168,8 +170,7 @@ def main():
             end_time = datetime.datetime.now()
             total_time = end_time - start_time
             tb = traceback.TracebackException.from_exception(e_exception)
-            capture_message("message: causelist failed" + "\n" + "trace_back: " +
-                            ''.join(tb.format()) + "\n" + "reqBody: " + json.dumps(body))
+            capture_exception(e_exception)
             return jsonify({"status": False, "debugMessage": "Request Failed", "error": ''.join(tb.format()), "start_time": start_time, "total_time_taken": total_time.seconds, 'version': version, 'code': '1'})
 
     if request.args.get('method') == "displayboard":

@@ -12,24 +12,22 @@ import time
 from datetime import datetime
 
 
+def open_page(driver, highCourtId):
+    url_trial = 1
+    while url_trial < 11:
+        try:
+            url = constants.high_courts_codes[highCourtId]["causelist_url"]
+            driver.get(url)
+            break
+        except Exception as exc:
+            if url_trial >= 10:
+                raise Exception("Causelist: Max url retries exceeded") from exc
+            url_trial = url_trial + 1
+
+
 def get_cause_list_data(driver, advocateName, highCourtId):
     try:
-        url = constants.high_courts_codes[highCourtId]["causelist_url"]
-        if not url:
-            return {"status": False, "message": "invalid request"}
-        url_trial = 1
-        while url_trial <= 11:
-            try:
-                driver.get(url)
-                break
-            except Exception as e_exception:
-                if url_trial >= 10:
-                    tb = traceback.TracebackException.from_exception(
-                        e_exception)
-                    capture_message("Message: causelist-URL failed" + "\n" + "traceback: " + ''.join(
-                        tb.format()))
-                    return {'status': False, "message": ''.join(tb.format()), 'data': {}, "debugMessage": "Maximun retries reached", "code": "hc-1"}
-                url_trial = url_trial + 1
+        open_page(driver, highCourtId)
         time.sleep(3)
         selenium_click_xpath(driver, "//input[@value='DAILY LIST']")
         time.sleep(3)
@@ -47,11 +45,10 @@ def get_cause_list_data(driver, advocateName, highCourtId):
                 if 'No list available' in selenium_get_text_xpath(driver, 'html/body'):
                     return {"message": "No list available", "code": "CL-1"}
                 else:
-                    tb = traceback.TracebackException.from_exception(e)
-                    return {"message": "Somthing is wrong. Try again", "error": ''.join(tb.format()), 'code': "CL-2"}
+                    raise Exception(
+                        "causelist: Somthing is wrong. Try again") from e
             except Exception as e_exc:
-                tb = traceback.TracebackException.from_exception(e_exc)
-                return {"message": "Somthing is wrong. Try again", "error": ''.join(tb.format()), "code": "CL-3"}
+                raise Exception(
+                    "causelist: Something is wrong. Try again") from e_exc
     except Exception as e:
-        tb = traceback.TracebackException.from_exception(e)
-        return {"message": "No Data Found", "error": ''.join(tb.format()), "datetime": datetime.now().isoformat(), 'code': "CL-4"}
+        raise Exception("causelist: Causelist failed") from e
