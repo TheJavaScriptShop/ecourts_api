@@ -52,11 +52,7 @@ def get_nclt_data(nclt_props):
         start_time = nclt_props["start_time"]
         req_body = nclt_props["req_body"]
 
-        # try:
         open_page(driver)
-        # except Exception as exc:
-        #     capture_exception(exc)
-        #     return {'status': False, 'data': {}, "debugMessage": "Maximun retries reached", "code": "nclt-1"}
 
         bench_select = Select(
             selenium_get_element_id(driver, 'bench'))
@@ -79,8 +75,9 @@ def get_nclt_data(nclt_props):
         selenium_get_element_xpath(
             driver, "/html/body/div/div[2]/div/div/div[2]/div/div/div/div/div/div[2]/table")
         if "click here" in selenium_get_text_xpath(driver, "/html/body/div/div[2]/div/div/div[2]/div/div/div/div/div/div[2]/table/tbody/tr/td/a"):
-            raise Exception("No Data Found")
-
+            data = {"mesaage": "No Data Found"}
+            logger.info("No Data")
+            return data
         preview_data = get_table_data_as_list(
             driver, "/html/body/div/div[2]/div/div/div[2]/div/div/div/div/div/div[2]/table")
         button = selenium_get_element_xpath(
