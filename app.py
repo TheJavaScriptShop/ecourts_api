@@ -188,8 +188,7 @@ def main():
             end_time = datetime.datetime.now()
             total_time = end_time - start_time
             tb = traceback.TracebackException.from_exception(e_exception)
-            capture_message("message: display board failed" + "\n" +
-                            "trace_back: " + ''.join(tb.format()) + "\n" + "reqBody: " + json.dumps(body))
+            capture_exception(e_exception)
             return jsonify({"status": False, "debugMessage": "Request Failed", "error": ''.join(tb.format()), "start_time": start_time, "total_time_taken": total_time.seconds, 'version': version, 'code': '2'})
 
     if request.args.get('method') == "ncltadvocatecasebynumber":
