@@ -132,16 +132,28 @@ def get_districtcourt_no_of_cases(props):
 
                 is_failed_with_captach = False
                 try:
+                    if "Record not found" in selenium_get_text_xpath(driver, '//div[@id="nodata"]'):
+                        is_failed_with_captach = False
+                        return {"data": "No Record Found", 'status': False}
+                except:
+                    pass
+                try:
                     if 'Invalid Captcha' in selenium_get_text_xpath(
                             driver, '/html/body/div[9]/div/div/div[2]/div/div[1]'):
                         driver.execute_script("arguments[0].click();", selenium_get_element_xpath(
                             driver, '/html/body/div[9]/div/div/div[1]/button'))
                         is_failed_with_captach = True
+                        raise Exception("Invalid Captcha")
+                except:
+                    pass
 
+                try:
                     if 'Invalid Request' in selenium_get_text_xpath(driver, '//div[@id="msg-danger"]'):
                         driver.execute_script("arguments[0].click();", selenium_get_element_xpath(
                             driver, '/html/body/div/div/a'))
                         is_failed_with_captach = True
+                        raise Exception("Invalid Request")
+
                 except:
                     pass
                 if os.path.isfile(img_path):

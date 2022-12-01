@@ -347,7 +347,25 @@ def main():
                         "body": body
                     }
                 case_details = get_no_of_cases(get_no_of_cases_props)
-
+                if case_details["status"] == False:
+                    end_time = datetime.datetime.now()
+                    total_time = end_time - start_time
+                    try:
+                        requests.post(url=body["callBackUrl"], timeout=10, json={
+                            "data": "No Record Found", "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version}})
+                        logger.info({"data": "no record found", "request": {"body": body, "params": params.to_dict(flat=False), "start_time": start_time.isoformat(
+                        ), "time": total_time.seconds, 'version': version}})
+                        logger.info("callback request made")
+                    except Exception as e_exception:
+                        tb = traceback.TracebackException.from_exception(
+                            e_exception)
+                        capture_message("Message: Callback Request failed" + "\n" + "traceback: " + ''.join(
+                            tb.format()) + "\n" + "req_body: " + json.dumps(body) + "\n" + "start_time: " + start_time.isoformat())
+                        logger.info(
+                            {"err_msg": "callback request failed", "error": ''.join(tb.format()), 'version': version, 'code': '8'})
+                    chrome_driver.close()
+                    chrome_driver.quit()
+                    return
                 total_cases = int(case_details["data"]["number_of_cases"][23:])
                 logger.info({"total_cases": total_cases})
 
@@ -398,8 +416,8 @@ def main():
                                 tb.format()) + "\n" + "req_body: " + json.dumps(body) + "\n" + "start_time: " + start_time.isoformat())
                             try:
                                 requests.post(url=body["callBackUrl"], timeout=10, json={
-                                    "error": ''.join(tb.format()), "message": "Request Failed", "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, 'code': '9'}})
-                                logger.info({"error": ''.join(tb.format()), "message": "Request Failed", "request": {
+                                    "error": 'Failed to spin an instance', "message": "Request Failed", "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, 'code': '9'}})
+                                logger.info({"error": 'Failed to spin an instance', "message": "Request Failed", "request": {
                                             "body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, 'code': '9'}})
                                 logger.info("callback request made")
                             except Exception as e_exc:
@@ -422,7 +440,7 @@ def main():
                 capture_exception(e_exception)
                 try:
                     requests.post(url=body["callBackUrl"], timeout=10, json={
-                        "error": ''.join(tb.format()), "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, "code": "11"}})
+                        "error": "Advocate cases by name failed", "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, "code": "11"}})
                     logger.info({"error": ''.join(tb.format()), "request": {"body": body, "params": params,
                                 "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, "code": "11"}})
                     logger.info("callback request made")
@@ -518,6 +536,25 @@ def main():
 
                 case_details = get_no_of_cases(
                     get_no_of_cases_props)
+                if case_details["status"] == False:
+                    end_time = datetime.datetime.now()
+                    total_time = end_time - start_time
+                    try:
+                        requests.post(url=body["callBackUrl"], timeout=10, json={
+                            "data": "No Record Found", "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version}})
+                        logger.info({"data": "No record found", "request": {"body": body, "params": params.to_dict(flat=False), "start_time": start_time.isoformat(
+                        ), "time": total_time.seconds, 'version': version}})
+                        logger.info("callback request made")
+                    except Exception as e_exception:
+                        tb = traceback.TracebackException.from_exception(
+                            e_exception)
+                        capture_message("Message: Callback Request failed" + "\n" + "traceback: " + ''.join(
+                            tb.format()) + "\n" + "req_body: " + json.dumps(body) + "\n" + "start_time: " + start_time.isoformat())
+                        logger.info(
+                            {"err_msg": "callback request failed", "error": ''.join(tb.format()), 'version': version, 'code': '8'})
+                    chrome_driver.close()
+                    chrome_driver.quit()
+                    return
                 cases = get_cases_by_name(get_cases_by_name_props)
                 cases["number_of_establishments_in_court_complex"] = case_details["data"]["number_of_establishments_in_court_complex"]
                 cases["number_of_cases"] = case_details["data"]["number_of_cases"]
@@ -546,7 +583,7 @@ def main():
                 capture_exception(e_exception)
                 try:
                     requests.post(url=body["callBackUrl"], timeout=10, json={
-                        "error": ''.join(tb.format()), "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, 'code': '16'}})
+                        "error": 'Advocatecases by pagination failed', "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, 'code': '16'}})
                     logger.info({"error": ''.join(tb.format()), "request": {"body": body, "params": params,
                                 "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, 'code': '16'}})
                     logger.info("callback request made")
