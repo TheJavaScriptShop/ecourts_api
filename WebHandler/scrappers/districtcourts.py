@@ -64,9 +64,9 @@ def get_districtcourt_no_of_cases(props):
             img_path = f"{name}-image.png"
 
         counter_retry = 0
+        open_page(driver)
         while is_failed_with_captach:
             try:
-                open_page(driver)
                 counter_retry += 1
                 try:
                     if "Invalid Request" in selenium_get_text_xpath(driver, "/html/body/div[7]/div/div/div[2]/div/div[1]"):
