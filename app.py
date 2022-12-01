@@ -45,7 +45,7 @@ def create_driver(__location__):
         DRIVER_PATH = os.environ.get('DRIVER_PATH')
         options.add_argument("--disable-extensions")
         options.add_argument("--disable-infobars")
-        # options.add_argument("--headless")
+        options.add_argument("--headless")
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--no-sandbox")
         options.add_argument("--window-size=1700x800")
