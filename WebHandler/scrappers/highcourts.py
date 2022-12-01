@@ -231,21 +231,21 @@ def get_highcourt_cases_by_name(props):
                     case_details_title = selenium_get_text_xpath(
                         driver, '//table[contains(@class, "case_details_table")]/tbody/tr[1]/td[2]')
                     break
-                except Exception as e_exception:
+                except Exception as e_exc:
+                    print(e_exc)
                     if case_detail_trail >= 5:
                         logger.info("max tries exceeded")
                         name = advoc_name.replace(" ", "_").lower()
-                        capture_exception(Exception(f"Message: highcourt-Failed to scrape {name}/{case_number}/{case_sl_no} case" + "\n" + "req_body: " + json.dumps(
-                            body) + "\n" + "start_time: " + start_time.isoformat())).with_traceback(e_exception.__traceback__)
+                        capture_exception(Exception(f"Message: highcourt-Failed to scrape {name}-{case_number}-{case_sl_no} case" + "\n" + "req_body: " + json.dumps(
+                            body) + "\n" + "start_time: " + start_time.isoformat()))
                         driver.save_screenshot(
                             f'{__location__}/error_image.png')
-                        try:
-                            blob_path_container = f"highcourts/{name}/{date.today().month}/{date.today().day}/{case_number}/error_img.png"
-                            file_name = 'error_image.png'
-                            status = wait_for_download_and_rename(
-                                blob_path_container, __location__, file_name, f"highcourts/{name}")
-                        except Exception as e:
-                            pass
+                        case_no = case_number.replace("/", "-")
+                        blob_path_container = f"highcourts/{name}/{date.today().month}/{date.today().day}/{case_no}/error_img.png"
+                        file_name = 'error_image.png'
+                        print("upload start")
+                        wait_for_download_and_rename(
+                            blob_path_container, __location__, file_name, f"highcourts/{name}")
                         try:
                             back_button = selenium_get_element_xpath(
                                 driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[48]/input')
