@@ -36,43 +36,45 @@ sentry_sdk.init(
     traces_sample_rate=1.0
 )
 
-version = "3.1.9"
+version = "3.1.10"
 
 
 def create_driver(__location__):
-    options = Options()
-    DRIVER_PATH = os.environ.get('DRIVER_PATH')
-    options.add_argument("--disable-extensions")
-    options.add_argument("--disable-infobars")
-    options.add_argument("--headless")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--window-size=1700x800")
-    prefs = {
-        "browser.helperApps.neverAsk.saveToDisk": "application/octet-stream;application/vnd.ms-excel;text/html;application/pdf",
-        "pdfjs.disabled": True,
-        "print.always_print_silent": True,
-        "print.show_print_progress": False,
-        "browser.download.show_plugins_in_list": False,
-        "browser.download.folderList": 2,
-        # Change default directory for downloads
-        "download.default_directory": __location__,
-        "download.prompt_for_download": False,  # To auto download the file
-        "download.directory_upgrade": True,
-        "plugins.always_open_pdf_externally": True
-    }
+    try:
+        options = Options()
+        DRIVER_PATH = os.environ.get('DRIVER_PATH')
+        options.add_argument("--disable-extensions")
+        options.add_argument("--disable-infobars")
+        # options.add_argument("--headless")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--window-size=1700x800")
+        prefs = {
+            "browser.helperApps.neverAsk.saveToDisk": "application/octet-stream;application/vnd.ms-excel;text/html;application/pdf",
+            "pdfjs.disabled": True,
+            "print.always_print_silent": True,
+            "print.show_print_progress": False,
+            "browser.download.show_plugins_in_list": False,
+            "browser.download.folderList": 2,
+            # Change default directory for downloads
+            "download.default_directory": __location__,
+            "download.prompt_for_download": False,  # To auto download the file
+            "download.directory_upgrade": True,
+            "plugins.always_open_pdf_externally": True
+        }
 
-    options.add_experimental_option("prefs", prefs)
-    driver = webdriver.Chrome(DRIVER_PATH, chrome_options=options)
-    driver.implicitly_wait(30)
-    driver.maximize_window()
-    return driver
+        options.add_experimental_option("prefs", prefs)
+        driver = webdriver.Chrome(DRIVER_PATH, chrome_options=options)
+        driver.implicitly_wait(30)
+        driver.maximize_window()
+        return driver
+    except Exception as exc:
+        raise Exception("Failed to open chrome") from exc
 
 
 def fire_and_forget(f):
     def wrapped():
         threading.Thread(target=f).start()
-
     return wrapped
 
 
@@ -89,6 +91,14 @@ def main():
     sh = logging.StreamHandler()
     sh.setLevel(logging.DEBUG)
     logger.addHandler(sh)
+    approved_methods = ["advocatecasesbyname",
+                        "ncltadvocatecasebynumber", "displayboard", "advocatecauselist"]
+
+    if request.args.get('method') not in approved_methods:
+        data = {"status": False,
+                "debugMessage": "Incorrect query parameter", "version": version}
+        logger.info(data)
+        return jsonify(data)
 
     if request.method != 'POST':
         data = {"status": False,
@@ -168,8 +178,7 @@ def main():
             end_time = datetime.datetime.now()
             total_time = end_time - start_time
             tb = traceback.TracebackException.from_exception(e_exception)
-            capture_message("message: causelist failed" + "\n" + "trace_back: " +
-                            ''.join(tb.format()) + "\n" + "reqBody: " + json.dumps(body))
+            capture_exception(e_exception)
             return jsonify({"status": False, "debugMessage": "Request Failed", "error": ''.join(tb.format()), "start_time": start_time, "total_time_taken": total_time.seconds, 'version': version, 'code': '1'})
 
     if request.args.get('method') == "displayboard":
@@ -187,8 +196,7 @@ def main():
             end_time = datetime.datetime.now()
             total_time = end_time - start_time
             tb = traceback.TracebackException.from_exception(e_exception)
-            capture_message("message: display board failed" + "\n" +
-                            "trace_back: " + ''.join(tb.format()) + "\n" + "reqBody: " + json.dumps(body))
+            capture_exception(e_exception)
             return jsonify({"status": False, "debugMessage": "Request Failed", "error": ''.join(tb.format()), "start_time": start_time, "total_time_taken": total_time.seconds, 'version': version, 'code': '2'})
 
     if request.args.get('method') == "ncltadvocatecasebynumber":
@@ -244,12 +252,11 @@ def main():
                 total_time = end_time - start_time
                 tb = traceback.TracebackException.from_exception(
                     e_exception)
-                capture_message("Message: NCLT Advocate cases by name failed" + "\n" + "traceback: " + ''.join(
-                    tb.format()) + "\n" + "req_body: " + json.dumps(body) + "\n" + "start_time: " + start_time.isoformat())
+                capture_exception(e_exception)
                 try:
                     requests.post(url=body["callBackUrl"], timeout=10, json={
-                        "error": ''.join(tb.format()), "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, "code": "4"}})
-                    logger.info({"error": ''.join(tb.format()), "request": {"body": body, "params": params,
+                        "error": " NCLT Advocate cases by name failed", "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, "code": "4"}})
+                    logger.info({"error": " NCLT Advocate cases by name failed", "request": {"body": body, "params": params,
                                 "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, "code": "4"}})
                     logger.info("callback request made")
                 except Exception as e_exception:
@@ -340,41 +347,13 @@ def main():
                         "body": body
                     }
                 case_details = get_no_of_cases(get_no_of_cases_props)
-                if case_details["status"] == False:
-                    try:
-                        requests.post(url=body["callBackUrl"], timeout=10, json={
-                            "message": "Slow Network", "request": {"body": body, "params": params,  'version': version}})
-                        logger.info({"message": "Slow Network", "request": {
-                                    "body": body, "params": params,  'version': version}})
-                        logger.info("callback request made")
-                    except Exception as e_exception:
-                        tb = traceback.TracebackException.from_exception(
-                            e_exception)
-                        capture_message("Message: Callback Request failed" + "\n" + "traceback: " + ''.join(
-                            tb.format()) + "\n" + "req_body: " + json.dumps(body) + "\n" + "start_time: " + start_time.isoformat())
-                        logger.info(
-                            {"err_msg": "callback request failed", "error": ''.join(tb.format()), 'version': version, 'code': '6'})
-                    return
+
                 total_cases = int(case_details["data"]["number_of_cases"][23:])
                 logger.info({"total_cases": total_cases})
 
                 if total_cases <= cases_per_iteration:
                     data = get_cases_by_name(get_cases_by_name_props)
-                    if data["status"] == False:
-                        try:
-                            requests.post(url=body["callBackUrl"], timeout=10, json={
-                                "message": "Something is wrong", "request": {"body": body, "params": params,  'version': version}})
-                            logger.info({"message": "Something is wrong", "request": {
-                                        "body": body, "params": params,  'version': version}})
-                            logger.info("callback request made")
-                        except Exception as e_exception:
-                            tb = traceback.TracebackException.from_exception(
-                                e_exception)
-                            capture_message("Message: Callback Request failed" + "\n" + "traceback: " + ''.join(
-                                tb.format()) + "\n" + "req_body: " + json.dumps(body) + "\n" + "start_time: " + start_time.isoformat())
-                            logger.info(
-                                {"err_msg": "callback request failed", "error": ''.join(tb.format()), 'version': version, 'code': '7'})
-                        return
+
                     data["number_of_establishments_in_court_complex"] = case_details["data"]["number_of_establishments_in_court_complex"]
                     data["number_of_cases"] = case_details["data"]["number_of_cases"]
                     end_time = datetime.datetime.now()
@@ -440,8 +419,7 @@ def main():
                 end_time = datetime.datetime.now()
                 total_time = end_time - start_time
                 tb = traceback.TracebackException.from_exception(e_exception)
-                capture_message("Message: Advocate cases by name failed" + "\n" + "traceback: " + ''.join(
-                    tb.format()) + "\n" + "req_body: " + json.dumps(body) + "\n" + "start_time: " + start_time.isoformat())
+                capture_exception(e_exception)
                 try:
                     requests.post(url=body["callBackUrl"], timeout=10, json={
                         "error": ''.join(tb.format()), "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, "code": "11"}})
@@ -540,37 +518,7 @@ def main():
 
                 case_details = get_no_of_cases(
                     get_no_of_cases_props)
-                if case_details["status"] == False:
-                    try:
-                        requests.post(url=body["callBackUrl"], timeout=10, json={
-                            "message": "Slow Network", "request": {"body": body, "params": params,  'version': version}})
-                        logger.info({"message": "Slow Network", "request": {
-                                    "body": body, "params": params,  'version': version}})
-                        logger.info("callback request made")
-                    except Exception as e_exception:
-                        tb = traceback.TracebackException.from_exception(
-                            e_exception)
-                        capture_message("Message: Callback Request failed" + "\n" + "traceback: " + ''.join(
-                            tb.format()) + "\n" + "req_body: " + json.dumps(body) + "\n" + "start_time: " + start_time.isoformat())
-                        logger.info(
-                            {"err_msg": "callback request failed", 'version': version, 'code': '13'})
-                    return
                 cases = get_cases_by_name(get_cases_by_name_props)
-                if cases["status"] == False:
-                    try:
-                        requests.post(url=body["callBackUrl"], timeout=10, json={
-                            "message": "Something is wrong", "request": {"body": body, "params": params,  'version': version}})
-                        logger.info({"message": "Something is wrong", "request": {
-                                    "body": body, "params": params,  'version': version}})
-                        logger.info("callback request made")
-                    except Exception as e_exception:
-                        tb = traceback.TracebackException.from_exception(
-                            e_exception)
-                        capture_message("Message: Callback Request failed" + "\n" + "traceback: " + ''.join(
-                            tb.format()) + "\n" + "req_body: " + json.dumps(body) + "\n" + "start_time: " + start_time.isoformat())
-                        logger.info(
-                            {"err_msg": "callback request failed", 'version': version, 'code': '14'})
-                    return
                 cases["number_of_establishments_in_court_complex"] = case_details["data"]["number_of_establishments_in_court_complex"]
                 cases["number_of_cases"] = case_details["data"]["number_of_cases"]
                 cases_data = {"start": body["start"],
@@ -593,12 +541,9 @@ def main():
                     logger.info(
                         {"err_msg": "callback request failed", "message": ''.join(tb.format()), 'version': version, 'code': '15'})
             except Exception as e_exception:
-                logger.info(str(e_exception))
                 end_time = datetime.datetime.now()
                 total_time = end_time - start_time
-                tb = traceback.TracebackException.from_exception(e_exception)
-                capture_message("Message: Advocate cases by name pagination failed" + "\n" + "traceback: " + ''.join(
-                    tb.format()) + "\n" + "req_body: " + json.dumps(body) + "\n" + "start_time: " + start_time.isoformat())
+                capture_exception(e_exception)
                 try:
                     requests.post(url=body["callBackUrl"], timeout=10, json={
                         "error": ''.join(tb.format()), "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, 'code': '16'}})
