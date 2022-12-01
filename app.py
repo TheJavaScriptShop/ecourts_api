@@ -36,7 +36,7 @@ sentry_sdk.init(
     traces_sample_rate=1.0
 )
 
-version = "3.1.10"
+version = "3.1.11"
 
 
 def create_driver(__location__):
@@ -92,7 +92,7 @@ def main():
     sh.setLevel(logging.DEBUG)
     logger.addHandler(sh)
     approved_methods = ["advocatecasesbyname",
-                        "ncltadvocatecasebynumber", "displayboard", "advocatecauselist"]
+                        "ncltadvocatecasebynumber", "displayboard", "advocatecauselist", "advocatecasesbynamepagination"]
 
     if request.args.get('method') not in approved_methods:
         data = {"status": False,
