@@ -91,6 +91,14 @@ def main():
     sh = logging.StreamHandler()
     sh.setLevel(logging.DEBUG)
     logger.addHandler(sh)
+    approved_methods = ["advocatecasesbyname",
+                        "ncltadvocatecasebynumber", "displayboard", "advocatecauselist"]
+
+    if request.args.get('method') not in approved_methods:
+        data = {"status": False,
+                "debugMessage": "Incorrect query parameter", "version": version}
+        logger.info(data)
+        return jsonify(data)
 
     if request.method != 'POST':
         data = {"status": False,
