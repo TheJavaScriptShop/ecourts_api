@@ -120,7 +120,7 @@ def get_districtcourt_no_of_cases(props):
                 captcha_xpath = '//div[@id="div_captcha_adv"]//img[@id="captcha_image"]'
                 get_captcha(driver, img_path, captcha_xpath)
                 text = get_text_from_captcha(
-                    driver, img_path, '/html/body/div[1]/div/main/div[2]/div/div/div[4]/div[1]/form/div[2]/div/div/div/a/img', captcha_xpath, trail=1)
+                    driver, img_path, '/html/body/div[1]/div/main/div[2]/div/div/div[4]/div[1]/form/div[2]/div/div/div/a/img', captcha_xpath, logger, trail=1)
                 if text == False:
                     continue
                 driver.execute_script("arguments[0].click();", selenium_get_element_xpath(

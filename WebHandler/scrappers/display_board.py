@@ -38,4 +38,6 @@ def get_display_board(driver, highCourtId):
                 raise Exception(
                     'displayboard: Somthing is wrong. Try again') from e_exc
     except Exception as e:
-        raise Exception("displayboard: Display Board failed") from e
+        cur_url = driver.current_url
+        raise Exception("displayboard: Display Board failed" +
+                        "\n" + f"currenturl: {cur_url}") from e
