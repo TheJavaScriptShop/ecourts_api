@@ -36,15 +36,21 @@ def get_text_from_captcha(driver, img_path, retry_path, captcha_path, logger, tr
         match = re.search(r'\(?([0-9A-Za-z]+)\)?', result[0][1])
     except:
         pass
-    if match is None:
+    if not match:
         logger.info("retry decoding")
+        trail = trail + 1
+        selenium_click_xpath(driver, retry_path)
+        get_captcha(driver, img_path, captcha_path)
+        return get_text_from_captcha(driver, img_path, retry_path, captcha_path, logger, trail)
+    elif match is None:
+        logger.info("retry decoding1")
         trail = trail + 1
         selenium_click_xpath(driver, retry_path)
         get_captcha(driver, img_path, captcha_path)
         return get_text_from_captcha(driver, img_path, retry_path, captcha_path, logger, trail)
     else:
         if (len(match.group(1)) != 6):
-            logger.info("retry decoding 1")
+            logger.info("retry decoding 2")
             trail = trail + 1
             selenium_click_xpath(driver, retry_path)
             get_captcha(driver, img_path, captcha_path)

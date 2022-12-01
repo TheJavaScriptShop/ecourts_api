@@ -132,16 +132,32 @@ def get_districtcourt_no_of_cases(props):
 
                 is_failed_with_captach = False
                 try:
+                    if "Record not found" in selenium_get_text_xpath(driver, '//div[@id="nodata"]'):
+                        is_failed_with_captach = False
+                        return {"data": "No Record Found", 'status': False}
+                except:
+                    pass
+                try:
                     if 'Invalid Captcha' in selenium_get_text_xpath(
                             driver, '/html/body/div[9]/div/div/div[2]/div/div[1]'):
                         driver.execute_script("arguments[0].click();", selenium_get_element_xpath(
                             driver, '/html/body/div[9]/div/div/div[1]/button'))
                         is_failed_with_captach = True
+                        if counter_retry > 10:
+                            is_failed_with_captach = False
+                            return {"data": "Invalid Captcha. Retry", "status": False}
+                except:
+                    pass
 
+                try:
                     if 'Invalid Request' in selenium_get_text_xpath(driver, '//div[@id="msg-danger"]'):
                         driver.execute_script("arguments[0].click();", selenium_get_element_xpath(
                             driver, '/html/body/div/div/a'))
                         is_failed_with_captach = True
+                        if counter_retry > 10:
+                            is_failed_with_captach = False
+                            return {"data": "Invalid Captcha. Retry", "status": False}
+
                 except:
                     pass
                 if os.path.isfile(img_path):
@@ -256,17 +272,15 @@ def get_districtcourt_cases_by_name(props):
                     if case_detail_trail >= 5:
                         logger.info("max tries exceeded")
                         name = advoc_name.replace(" ", "_").lower()
-                        capture_exception(Exception(f"Message: districtcourt-Failed to scrape {name}/{case_number}/{case_sl_no} case" + "\n" + "req_body: " + json.dumps(
-                            body) + "\n" + "start_time: " + start_time.isoformat())).with_traceback(e_exception.__traceback__)
+                        capture_exception(Exception(f"Message: districtcourt-Failed to scrape {name}-{case_number}-{case_sl_no} case" + "\n" + "req_body: " + json.dumps(
+                            body) + "\n" + "start_time: " + start_time.isoformat()))
                         driver.save_screenshot(
                             f'{__location__}/error_image.png')
-                        try:
-                            blob_path_container = f"districtcourts/{name}/{date.today().month}/{date.today().day}/{case_number}/error_img.png"
-                            file_name = 'error_image.png'
-                            wait_for_download_and_rename(
-                                blob_path_container, __location__, file_name, f"highcourts/{name}")
-                        except:
-                            pass
+                        case_no = case_number.replace("/", "-")
+                        blob_path_container = f"districtcourts/{name}/{date.today().month}/{date.today().day}/{case_no}/error_img.png"
+                        file_name = 'error_image.png'
+                        wait_for_download_and_rename(
+                            blob_path_container, __location__, file_name, f"highcourts/{name}")
                         try:
                             back_button = selenium_get_element_xpath(
                                 driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[48]/input')

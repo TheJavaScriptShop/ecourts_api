@@ -63,10 +63,10 @@ def get_highcourt_no_of_cases(props):
             img_path = f"{name}-image.png"
         counter_retry = 0
         start_time_check = datetime.now()
-        open_page(driver)
         while is_failed_with_captach:
             try:
-                counter_retry += 1
+                open_page(driver)
+                counter_retry = counter_retry + 1
                 driver.execute_script(
                     "arguments[0].click();", selenium_get_element_id(driver, 'leftPaneMenuCS'))
                 logger.info("Successfully clicked case status")
@@ -107,39 +107,33 @@ def get_highcourt_no_of_cases(props):
                 driver.execute_script("arguments[0].click();", selenium_get_element_xpath(
                     driver, '//*[@class="Gobtn"]'))
                 is_failed_with_captach = False
-                try:
-                    failure_text = selenium_get_text_xpath(
-                        driver, '//*[@id="errSpan1"]')
-                    logger.info(failure_text)
-                    if 'THERE IS AN ERROR' in failure_text:
-                        is_failed_with_captach = True
-                except Exception as e_exception:
-                    try:
-                        failure_text_other_page = selenium_get_text_xpath(
-                            driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[26]/p')
-                        logger.info(failure_text_other_page)
-                        is_failed_with_captach = True
-
-                        if 'Record Not Found' in failure_text_other_page:
-                            data = {
-                                "number_of_establishments_in_court_complex": 0,
-                                "number_of_cases": 0,
-                                "case_list": [],
-                                'case_details': [],
-                            }
-                            fetched_data = True
-                            is_failed_with_captach = False
-                            return {"data": "No Record Found", "status": True}
-
-                    except Exception as e:
-                        pass
                 if os.path.isfile(img_path):
                     os.remove(img_path)
+                try:
+                    failure_text = selenium_get_text_xpath(
+                        driver, '//*[@id="errSpan"]/p')
+                    logger.info(failure_text)
+                    if 'Invalid Captcha' in failure_text:
+                        is_failed_with_captach = True
+                        if counter_retry > 10:
+                            is_failed_with_captach = False
+                            return {"data": "Invalid Captcha. Retry", "status": False}
+
+                    if 'THERE IS AN ERROR' in failure_text:
+                        is_failed_with_captach = True
+                        if counter_retry > 10:
+                            is_failed_with_captach = False
+                            return {"data": "Invalid Captcha. Retry", "status": False}
+                    if 'Record Not Found' in failure_text:
+                        fetched_data = True
+                        is_failed_with_captach = False
+                        return {"data": "No Record Found", "status": False}
+                    raise Exception("Something is wrong")
+                except Exception as e_exception:
+                    pass
             except Exception as e_exception:
                 is_failed_with_captach = True
                 logger.info("Website is slow. Retrying")
-                tb = traceback.TracebackException.from_exception(
-                    e_exception)
                 end_time = datetime.now()
                 total_time = end_time - start_time_check
                 if total_time.seconds > 300:
@@ -231,21 +225,21 @@ def get_highcourt_cases_by_name(props):
                     case_details_title = selenium_get_text_xpath(
                         driver, '//table[contains(@class, "case_details_table")]/tbody/tr[1]/td[2]')
                     break
-                except Exception as e_exception:
+                except Exception as e_exc:
+                    print(e_exc)
                     if case_detail_trail >= 5:
                         logger.info("max tries exceeded")
                         name = advoc_name.replace(" ", "_").lower()
-                        capture_exception(Exception(f"Message: highcourt-Failed to scrape {name}/{case_number}/{case_sl_no} case" + "\n" + "req_body: " + json.dumps(
-                            body) + "\n" + "start_time: " + start_time.isoformat())).with_traceback(e_exception.__traceback__)
+                        capture_exception(Exception(f"Message: highcourt-Failed to scrape {name}-{case_number}-{case_sl_no} case" + "\n" + "req_body: " + json.dumps(
+                            body) + "\n" + "start_time: " + start_time.isoformat()))
                         driver.save_screenshot(
                             f'{__location__}/error_image.png')
-                        try:
-                            blob_path_container = f"highcourts/{name}/{date.today().month}/{date.today().day}/{case_number}/error_img.png"
-                            file_name = 'error_image.png'
-                            status = wait_for_download_and_rename(
-                                blob_path_container, __location__, file_name, f"highcourts/{name}")
-                        except Exception as e:
-                            pass
+                        case_no = case_number.replace("/", "-")
+                        blob_path_container = f"highcourts/{name}/{date.today().month}/{date.today().day}/{case_no}/error_img.png"
+                        file_name = 'error_image.png'
+                        print("upload start")
+                        wait_for_download_and_rename(
+                            blob_path_container, __location__, file_name, f"highcourts/{name}")
                         try:
                             back_button = selenium_get_element_xpath(
                                 driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[48]/input')
