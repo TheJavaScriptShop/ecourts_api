@@ -350,10 +350,11 @@ def main():
                 if case_details["status"] == False:
                     end_time = datetime.datetime.now()
                     total_time = end_time - start_time
+                    data = case_details["data"]
                     try:
                         requests.post(url=body["callBackUrl"], timeout=10, json={
-                            "data": "No Record Found", "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version}})
-                        logger.info({"data": "no record found", "request": {"body": body, "params": params.to_dict(flat=False), "start_time": start_time.isoformat(
+                            "data": data, "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version}})
+                        logger.info({"data": data, "request": {"body": body, "params": params.to_dict(flat=False), "start_time": start_time.isoformat(
                         ), "time": total_time.seconds, 'version': version}})
                         logger.info("callback request made")
                     except Exception as e_exception:
@@ -437,11 +438,13 @@ def main():
                 end_time = datetime.datetime.now()
                 total_time = end_time - start_time
                 tb = traceback.TracebackException.from_exception(e_exception)
+                chrome_driver.close()
+                chrome_driver.quit()
                 capture_exception(e_exception)
                 try:
                     requests.post(url=body["callBackUrl"], timeout=10, json={
                         "error": "Advocate cases by name failed", "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, "code": "11"}})
-                    logger.info({"error": ''.join(tb.format()), "request": {"body": body, "params": params,
+                    logger.info({"error": 'Advocate cases by name failed', "request": {"body": body, "params": params,
                                 "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, "code": "11"}})
                     logger.info("callback request made")
                 except Exception as e_exc:
@@ -539,10 +542,11 @@ def main():
                 if case_details["status"] == False:
                     end_time = datetime.datetime.now()
                     total_time = end_time - start_time
+                    data = case_details["data"]
                     try:
                         requests.post(url=body["callBackUrl"], timeout=10, json={
-                            "data": "No Record Found", "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version}})
-                        logger.info({"data": "No record found", "request": {"body": body, "params": params.to_dict(flat=False), "start_time": start_time.isoformat(
+                            "data": data, "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version}})
+                        logger.info({"data": data, "request": {"body": body, "params": params.to_dict(flat=False), "start_time": start_time.isoformat(
                         ), "time": total_time.seconds, 'version': version}})
                         logger.info("callback request made")
                     except Exception as e_exception:
@@ -580,6 +584,8 @@ def main():
             except Exception as e_exception:
                 end_time = datetime.datetime.now()
                 total_time = end_time - start_time
+                chrome_driver.close()
+                chrome_driver.quit()
                 capture_exception(e_exception)
                 try:
                     requests.post(url=body["callBackUrl"], timeout=10, json={

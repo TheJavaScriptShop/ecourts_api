@@ -115,10 +115,15 @@ def get_highcourt_no_of_cases(props):
                     logger.info(failure_text)
                     if 'Invalid Captcha' in failure_text:
                         is_failed_with_captach = True
-                        raise Exception("Captcha failed")
+                        if counter_retry > 10:
+                            is_failed_with_captach = False
+                            return {"data": "Invalid Captcha. Retry", "status": False}
+
                     if 'THERE IS AN ERROR' in failure_text:
                         is_failed_with_captach = True
-                        raise Exception("Captcha failed")
+                        if counter_retry > 10:
+                            is_failed_with_captach = False
+                            return {"data": "Invalid Captcha. Retry", "status": False}
                     if 'Record Not Found' in failure_text:
                         fetched_data = True
                         is_failed_with_captach = False

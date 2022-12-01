@@ -64,9 +64,9 @@ def get_districtcourt_no_of_cases(props):
             img_path = f"{name}-image.png"
 
         counter_retry = 0
-        open_page(driver)
         while is_failed_with_captach:
             try:
+                open_page(driver)
                 counter_retry += 1
                 try:
                     if "Invalid Request" in selenium_get_text_xpath(driver, "/html/body/div[7]/div/div/div[2]/div/div[1]"):
@@ -143,7 +143,9 @@ def get_districtcourt_no_of_cases(props):
                         driver.execute_script("arguments[0].click();", selenium_get_element_xpath(
                             driver, '/html/body/div[9]/div/div/div[1]/button'))
                         is_failed_with_captach = True
-                        raise Exception("Invalid Captcha")
+                        if counter_retry > 10:
+                            is_failed_with_captach = False
+                            return {"data": "Invalid Captcha. Retry", "status": False}
                 except:
                     pass
 
@@ -152,7 +154,9 @@ def get_districtcourt_no_of_cases(props):
                         driver.execute_script("arguments[0].click();", selenium_get_element_xpath(
                             driver, '/html/body/div/div/a'))
                         is_failed_with_captach = True
-                        raise Exception("Invalid Request")
+                        if counter_retry > 10:
+                            is_failed_with_captach = False
+                            return {"data": "Invalid Captcha. Retry", "status": False}
 
                 except:
                     pass
