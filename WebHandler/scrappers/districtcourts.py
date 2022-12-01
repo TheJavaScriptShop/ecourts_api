@@ -264,7 +264,7 @@ def get_districtcourt_cases_by_name(props):
                             blob_path_container = f"districtcourts/{name}/{date.today().month}/{date.today().day}/{case_number}/error_img.png"
                             file_name = 'error_image.png'
                             wait_for_download_and_rename(
-                                blob_path_container, __location__, file_name)
+                                blob_path_container, __location__, file_name, f"highcourts/{name}")
                         except:
                             pass
                         try:

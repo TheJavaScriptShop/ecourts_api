@@ -63,6 +63,7 @@ def get_highcourt_no_of_cases(props):
             img_path = f"{name}-image.png"
         counter_retry = 0
         start_time_check = datetime.now()
+        open_page(driver)
         while is_failed_with_captach:
             try:
                 counter_retry += 1
@@ -242,7 +243,7 @@ def get_highcourt_cases_by_name(props):
                             blob_path_container = f"highcourts/{name}/{date.today().month}/{date.today().day}/{case_number}/error_img.png"
                             file_name = 'error_image.png'
                             status = wait_for_download_and_rename(
-                                blob_path_container, __location__, file_name)
+                                blob_path_container, __location__, file_name, f"highcourts/{name}")
                         except Exception as e:
                             pass
                         try:
@@ -389,7 +390,7 @@ def get_highcourt_cases_by_name(props):
                         blob_path_container = f"{name}/{case_no}/{date.today().month}/{date.today().day}/orders/{order_no}.pdf"
                         file_name = 'display_pdf.pdf'
                         status = wait_for_download_and_rename(
-                            blob_path_container, __location__, file_name)
+                            blob_path_container, __location__, file_name, case_no)
                         if status["upload"] == False:
                             blob_path_container = "File not Available"
                         order = case_orders_data[order_no]
