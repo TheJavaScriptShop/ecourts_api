@@ -36,7 +36,7 @@ sentry_sdk.init(
     traces_sample_rate=1.0
 )
 
-version = "3.1.11"
+version = "3.1.12"
 
 
 def create_driver(__location__):
@@ -363,7 +363,7 @@ def main():
                         capture_message("Message: Callback Request failed" + "\n" + "traceback: " + ''.join(
                             tb.format()) + "\n" + "req_body: " + json.dumps(body) + "\n" + "start_time: " + start_time.isoformat())
                         logger.info(
-                            {"err_msg": "callback request failed", "error": ''.join(tb.format()), 'version': version, 'code': '8'})
+                            {"err_msg": "callback request failed", "error": ''.join(tb.format()), 'version': version, 'code': '6'})
                     chrome_driver.close()
                     chrome_driver.quit()
                     return
@@ -389,7 +389,7 @@ def main():
                         capture_message("Message: Callback Request failed" + "\n" + "traceback: " + ''.join(
                             tb.format()) + "\n" + "req_body: " + json.dumps(body) + "\n" + "start_time: " + start_time.isoformat())
                         logger.info(
-                            {"err_msg": "callback request failed", "error": ''.join(tb.format()), 'version': version, 'code': '8'})
+                            {"err_msg": "callback request failed", "error": ''.join(tb.format()), 'version': version, 'code': '7'})
                 else:
                     n = total_cases/cases_per_iteration
                     start = 0
@@ -419,7 +419,7 @@ def main():
                                 requests.post(url=body["callBackUrl"], timeout=10, json={
                                     "error": 'Failed to spin an instance', "message": "Request Failed", "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, 'code': '9'}})
                                 logger.info({"error": 'Failed to spin an instance', "message": "Request Failed", "request": {
-                                            "body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, 'code': '9'}})
+                                            "body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, 'code': '8'}})
                                 logger.info("callback request made")
                             except Exception as e_exc:
                                 tb = traceback.TracebackException.from_exception(
@@ -427,7 +427,7 @@ def main():
                                 capture_message("Message: Callback Request failed" + "\n" + "traceback: " + ''.join(
                                     tb.format()) + "\n" + "req_body: " + json.dumps(body) + "\n" + "start_time: " + start_time.isoformat())
                                 logger.info(
-                                    {"err_msg": "callback request failed", "message": ''.join(tb.format()), 'version': version, 'code': '10'})
+                                    {"err_msg": "callback request failed", "message": ''.join(tb.format()), 'version': version, 'code': '9'})
                         start = start + cases_per_iteration
                         stop = stop + cases_per_iteration
                         n = n - 1
@@ -443,9 +443,9 @@ def main():
                 capture_exception(e_exception)
                 try:
                     requests.post(url=body["callBackUrl"], timeout=10, json={
-                        "error": "Advocate cases by name failed", "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, "code": "11"}})
+                        "error": "Advocate cases by name failed", "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, "code": "10"}})
                     logger.info({"error": 'Advocate cases by name failed', "request": {"body": body, "params": params,
-                                "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, "code": "11"}})
+                                "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, "code": "10"}})
                     logger.info("callback request made")
                 except Exception as e_exc:
                     tb = traceback.TracebackException.from_exception(
@@ -453,7 +453,7 @@ def main():
                     capture_message("Message: Callback Request failed" + "\n" + "traceback: " + ''.join(
                         tb.format()) + "\n" + "req_body: " + json.dumps(body) + "\n" + "start_time: " + start_time.isoformat())
                     logger.info({"err_msg": "callback request failed", "message": ''.join(tb.format()),
-                                'version': version, 'code': '12'})
+                                'version': version, 'code': '11'})
         get_total_no_of_cases_wrapper()
         data = {
             "status": True,
@@ -555,7 +555,7 @@ def main():
                         capture_message("Message: Callback Request failed" + "\n" + "traceback: " + ''.join(
                             tb.format()) + "\n" + "req_body: " + json.dumps(body) + "\n" + "start_time: " + start_time.isoformat())
                         logger.info(
-                            {"err_msg": "callback request failed", "error": ''.join(tb.format()), 'version': version, 'code': '8'})
+                            {"err_msg": "callback request failed", "error": ''.join(tb.format()), 'version': version, 'code': '12'})
                     chrome_driver.close()
                     chrome_driver.quit()
                     return
@@ -580,7 +580,7 @@ def main():
                     capture_message("Message: Callback Request failed" + "\n" + "traceback: " + ''.join(
                         tb.format()) + "\n" + "req_body: " + json.dumps(body) + "\n" + "start_time: " + start_time.isoformat())
                     logger.info(
-                        {"err_msg": "callback request failed", "message": ''.join(tb.format()), 'version': version, 'code': '15'})
+                        {"err_msg": "callback request failed", "message": ''.join(tb.format()), 'version': version, 'code': '13'})
             except Exception as e_exception:
                 end_time = datetime.datetime.now()
                 total_time = end_time - start_time
@@ -589,9 +589,9 @@ def main():
                 capture_exception(e_exception)
                 try:
                     requests.post(url=body["callBackUrl"], timeout=10, json={
-                        "error": 'Advocatecases by pagination failed', "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, 'code': '16'}})
-                    logger.info({"error": ''.join(tb.format()), "request": {"body": body, "params": params,
-                                "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, 'code': '16'}})
+                        "error": 'Advocatecases by pagination failed', "request": {"body": body, "params": params, "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, 'code': '14'}})
+                    logger.info({"error": 'Advocatecases by pagination failed', "request": {"body": body, "params": params,
+                                "start_time": start_time.isoformat(), "time": total_time.seconds, 'version': version, 'code': '14'}})
                     logger.info("callback request made")
                 except Exception as e_exc:
                     tb = traceback.TracebackException.from_exception(
@@ -599,7 +599,7 @@ def main():
                     capture_message("Message: Callback Request failed" + "\n" + "traceback: " + ''.join(
                         tb.format()) + "\n" + "req_body: " + json.dumps(body) + "\n" + "start_time: " + start_time.isoformat())
                     logger.info(
-                        {"err_msg": "callback request failed", "message": ''.join(tb.format()), 'version': version, 'code': '17'})
+                        {"err_msg": "callback request failed", "message": ''.join(tb.format()), 'version': version, 'code': '15'})
         get_highcourt_cases_by_name_wrapper()
         data = {
             "status": True,
