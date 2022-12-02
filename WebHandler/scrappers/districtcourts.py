@@ -429,8 +429,11 @@ def get_districtcourt_cases_by_name(props):
         success_cases = case_details_data["success_cases"]
         if len(failed_cases) > 1:
             cases = failed_cases
-            failed_case_details = get_case_details(
+            failed_case_details_data = get_case_details(
                 cases, logger, driver, advoc_name, body, start_time, __location__, case_details_list, success_cases, case_sl_no)
+            failed_case_details = failed_case_details_data["case_details"]
+            failed_cases = failed_case_details_data["failed_cases"]
+            success_cases = failed_case_details_data["success_cases"]
             case_details.append(failed_case_details)
 
         # do the logic to filter success cases and failed cases in caselist
