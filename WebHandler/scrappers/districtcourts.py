@@ -240,8 +240,11 @@ def get_districtcourt_cases_by_name(props):
         for case in cases:
             logger.info(f'case no: {case_sl_no}')
             time.sleep(int(os.environ.get('MIN_WAIT_TIME')))
-            case_number = selenium_get_text_xpath(case, ".//td[2]")
-            link = selenium_get_element_xpath(case, ".//td[5]/a")
+            try:
+                case_number = selenium_get_text_xpath(case, ".//td[2]")
+                link = selenium_get_element_xpath(case, ".//td[5]/a")
+            except:
+                continue
             driver.execute_script(
                 "arguments[0].click();", link)
             logger.info(f"{case_sl_no} view clicked")
