@@ -198,7 +198,7 @@ def get_case_details(cases, logger, driver, advoc_name, start_time, body, __loca
                     name = advoc_name.replace(" ", "_").lower()
                     capture_exception(Exception(f"Message: highcourt-Failed to scrape {name}-{case_number}-{case_sl_no} case" + "\n" + "req_body: " + json.dumps(
                         body) + "\n" + "start_time: " + start_time.isoformat()))
-                    failed_cases.append(case)
+
                     try:
                         scrollup_element = selenium_get_element_xpath(
                             driver, '/html/body/div[1]/div/p/a/span')
@@ -228,6 +228,7 @@ def get_case_details(cases, logger, driver, advoc_name, start_time, body, __loca
                 case_detail_trail = case_detail_trail + 1
 
         if skip_this_case:
+            failed_cases.append(case)
             continue
 
         case_details_cnr_no = selenium_get_text_xpath(
