@@ -251,10 +251,10 @@ def get_case_details(cases, logger, driver, advoc_name, body, start_time, __loca
                     blob_path_container = f"districtcourts/{name}/{date.today().month}/{date.today().day}/{case_no}/error_img.png"
                     file_name = 'error_image.png'
                     wait_for_download_and_rename(
-                        blob_path_container, __location__, file_name, f"highcourts/{name}")
+                        blob_path_container, __location__, file_name, f"districtcourt/{name}")
                     try:
                         back_button = selenium_get_element_xpath(
-                            driver, '/html/body/div[1]/div/div[1]/div[2]/div/div[2]/div[48]/input')
+                            driver, '//button[@id="main_back_AdvName"]')
                         driver.execute_script(
                             "arguments[0].click();", back_button)
                     except:
@@ -453,10 +453,6 @@ def get_districtcourt_cases_by_name(props):
             "case_details": case_details
         }
 
-        data = {
-            "case_list": case_list,
-            "case_details": case_details_list
-        }
         logger.info({"status": True, "data": data})
         return {"status": True, "data": data}
     except Exception as e_exc:
